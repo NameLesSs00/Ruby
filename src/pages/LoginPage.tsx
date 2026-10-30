@@ -3,48 +3,48 @@ import type { FormEvent } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import { authApi } from '../modules/auth';
-import { setStoredTokens } from '../lib/axios';
 import { showToast } from '../lib/sonner';
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
 }
 
-const FALLBACK_TOKENS = {
-  accessToken:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoic3VwZXJhZG1pbiIsImp0aSI6IjAyMzUwNWJhLWRlY2EtNDg0MS1hNGU5LTQzY2JjMjY0MmE1MCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlN1cGVyQWRtaW4iLCJuYmYiOjE3OTMzNTM2MjgsImV4cCI6MjA5MzM1NDUyOCwiaXNzIjoiU3dpbW1pbmdBY2FkZW15LkFwaSIsImF1ZCI6IlN3aW1taW5nQWNhZGVteS5DbGllbnQifQ.demo',
-  refreshToken:
-    '+KvUNqYUxzLrrTcE5KotxUjbcLY74FvDMqd0LX3NV+rwoZpOZE/NgI5xBDsGOUtriA5OkH58lkBsJwhBkaKwRg==',
-  accessTokenExpiresAtUtc: '2099-01-01T00:00:00.000Z',
-};
-
 export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
-  const [email, setEmail] = useState('superadmin@gmail.com');
-  const [password, setPassword] = useState('Mohamed@#9');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const targetEmail = email.trim() || 'superadmin@gmail.com';
-    const targetPassword = password || 'Mohamed@#9';
+    if (!email.trim()) {
+      showToast.warning('يرجى إدخال البريد الإلكتروني أو اسم المستخدم');
+      return;
+    }
+
+    if (!password) {
+      showToast.warning('يرجى إدخال كلمة المرور');
+      return;
+    }
 
     setIsLoading(true);
 
     try {
       await authApi.login({
-        email: targetEmail,
-        password: targetPassword,
+        email: email.trim(),
+        password,
       });
 
       showToast.success('تم تسجيل الدخول بنجاح', 'أهلاً بك في أكاديمية روبي للسباحة');
       onLoginSuccess();
-    } catch {
-      // Backend fallback so login works immediately during development/downtime
-      setStoredTokens(FALLBACK_TOKENS);
-      showToast.success('تم تسجيل الدخول بنجاح', 'أهلاً بك في أكاديمية روبي للسباحة');
-      onLoginSuccess();
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const serverMessage = err.response?.data?.message;
+      showToast.error(
+        serverMessage || 'بيانات الدخول غير صحيحة',
+        'يرجى التأكد من صحة البريد الإلكتروني وكلمة المرور والمحاولة مرة أخرى'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +121,7 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
             {isLoading ? (
               <>
                 <div className="spinner" />
-                <span>جاري تسجيل الدخول...</span>
+                <span>جاري التحقق وتسجيل الدخول...</span>
               </>
             ) : (
               <span>دخول النظام</span>

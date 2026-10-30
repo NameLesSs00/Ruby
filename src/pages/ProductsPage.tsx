@@ -161,9 +161,13 @@ export const ProductsPage = () => {
   const statusCategoryMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       productCategoriesApi.updateStatus(id, isActive),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
-      showToast.success('تم تحديث حالة التصنيف');
+      showToast.success(
+        variables.isActive
+          ? 'تم تفعيل التصنيف بنجاح'
+          : 'تم تعطيل التصنيف بنجاح'
+      );
     },
     onError: () => {
       showToast.error('فشل في تعديل حالة التصنيف');
@@ -655,10 +659,16 @@ export const ProductsPage = () => {
                         borderRadius: 'var(--radius-sm)',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                         <Tag size={16} color="#0284c7" />
                         <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0d1527' }}>
                           {cat.name}
+                        </span>
+                        <span
+                          className={`status-badge ${cat.isActive ? 'active' : 'inactive'}`}
+                          style={{ padding: '0.15rem 0.55rem', fontSize: '0.7rem' }}
+                        >
+                          {cat.isActive ? 'نشط' : 'غير نشط'}
                         </span>
                       </div>
 
