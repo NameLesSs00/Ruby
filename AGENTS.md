@@ -13,7 +13,9 @@ This document specifies coding standards, scalable architecture, and design guid
   - Use `margin-inline-start` / `margin-inline-end` instead of `margin-left` / `margin-right`.
   - Use `padding-inline-start` / `padding-inline-end` instead of `padding-left` / `padding-right`.
   - Use `text-start` and `text-end` for text alignment.
-- **Code & Documentation Language**: All code, comments, commit messages, and documentation (`AGENTS.md`, technical docs) must be written in **English**. Only the user-facing interface text, labels, and notifications are in **Arabic**.
+- **Code, Communication & Documentation Language**:
+  - All chat communications with the user, plans, explanations, code, comments, commit messages, and documentation (`AGENTS.md`, technical docs) must be written in **English**.
+  - Only the user-facing interface text, labels, placeholders, and notifications in the application are in **Arabic** (`dir="rtl"`).
 
 ### Brand Palette (Ruby Swimming Academy Logo)
 - **Dark Navy**: `#0D1527` (primary text, dark headers, sidebar backgrounds)
@@ -39,14 +41,21 @@ src/
 │   ├── coaches.ts                # Coach, CreateCoachPayload, UpdateCoachPayload
 │   ├── employees.ts              # Employee, CreateEmployeePayload, UpdateEmployeePayload
 │   ├── suppliers.ts              # Supplier, CreateSupplierPayload, UpdateSupplierPayload
-│   └── products.ts               # Product, ProductCategory, CreateProductPayload
+│   ├── products.ts               # Product, ProductCategory, CreateProductPayload
+│   └── clients.ts                # Client, CreateClientPayload, UpdateClientPayload
+├── layouts/                      # Layout shells
+│   └── AdminLayout.tsx           # Dashboard shell with right sidebar, header & <Outlet />
 ├── pages/                        # Page views
-│   ├── LoginPage.tsx             # Arabic RTL Login screen
-│   ├── AdminDashboardPage.tsx    # Dashboard shell with right sidebar
-│   ├── CoachesPage.tsx           # Coaches table, search, modal dialogs
-│   ├── EmployeesPage.tsx         # Employees table, search, modal dialogs, deletion
-│   ├── SuppliersPage.tsx         # Suppliers table, search, modal dialogs, deletion
-│   └── ProductsPage.tsx          # Products & categories table, filter, modal dialogs
+│   ├── LoginPage.tsx             # Route: /login (Arabic RTL Login screen)
+│   ├── DashboardOverviewPage.tsx # Route: /dashboard (Overview metrics & quick shortcuts)
+│   ├── ClientsPage.tsx           # Route: /clients (Clients table, barcode modal)
+│   ├── CoachesPage.tsx           # Route: /coaches (Coaches table, search, modals)
+│   ├── EmployeesPage.tsx         # Route: /employees (Employees table, search, modals)
+│   ├── SuppliersPage.tsx         # Route: /suppliers (Suppliers table, search, modals)
+│   ├── ProductsPage.tsx          # Route: /products (Products & categories table, filter, modals)
+│   └── PlaceholderPage.tsx       # Reusable view for tabs under development
+├── components/                   # Shared UI & navigation guards
+│   └── ProtectedRoute.tsx        # Route authentication guard
 ├── App.tsx                       # Root component
 └── main.tsx                      # App entry point
 ```

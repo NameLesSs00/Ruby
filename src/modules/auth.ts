@@ -24,7 +24,7 @@ export interface LogoutPayload {
   refreshToken: string;
 }
 
-export type UserRole = 'SuperAdmin' | 'Admin' | 'Coach' | 'Receptionist';
+export type UserRole = 'SuperAdmin' | 'ReceptionAdmin' | 'ShopAdmin' | 'Admin' | 'Coach' | 'Receptionist';
 
 export interface DecodedUser {
   id: string;

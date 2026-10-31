@@ -1,37 +1,22 @@
-import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { queryClient } from './lib/query-client';
-import { getStoredTokens, setStoredTokens } from './lib/axios';
+import { ProtectedRoute, PublicOnlyRoute, RoleRoute } from './components/ProtectedRoute';
+import { AdminLayout } from './layouts/AdminLayout';
 import { LoginPage } from './pages/LoginPage';
-import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { DashboardOverviewPage } from './pages/DashboardOverviewPage';
+import { AdminsPage } from './pages/AdminsPage';
+import { ClientsPage } from './pages/ClientsPage';
+import { CoachesPage } from './pages/CoachesPage';
+import { EmployeesPage } from './pages/EmployeesPage';
+import { SuppliersPage } from './pages/SuppliersPage';
+import { ProductsPage } from './pages/ProductsPage';
+import { InventoryPage } from './pages/InventoryPage';
+import { PayrollPage } from './pages/PayrollPage';
+import { SubscriptionsPage } from './pages/SubscriptionsPage';
 
 export function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const tokens = getStoredTokens();
-    return !!tokens?.accessToken;
-  });
-
-  useEffect(() => {
-    // Sync authentication state across browser storage events
-    const handleStorageChange = () => {
-      const tokens = getStoredTokens();
-      setIsAuthenticated(!!tokens?.accessToken);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setStoredTokens(null);
-    setIsAuthenticated(false);
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster
@@ -41,11 +26,38 @@ export function App() {
         closeButton
       />
 
-      {isAuthenticated ? (
-        <AdminDashboardPage onLogout={handleLogout} />
-      ) : (
-        <LoginPage onLoginSuccess={handleLoginSuccess} />
-      )}
+      <BrowserRouter>
+        <Routes>
+          {/* Public Login Route (Guest Only) */}
+          <Route element={<PublicOnlyRoute />}>
+            <Route path="/login" element={<LoginPage />} />
+          </Route>
+
+          {/* Protected Admin Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<DashboardOverviewPage />} />
+              <Route element={<RoleRoute allowedRoles={['SuperAdmin']} />}>
+                <Route path="/admins" element={<AdminsPage />} />
+              </Route>
+              <Route path="/clients" element={<ClientsPage />} />
+              <Route path="/subscriptions" element={<SubscriptionsPage />} />
+              <Route path="/coaches" element={<CoachesPage />} />
+              <Route path="/employees" element={<EmployeesPage />} />
+              <Route path="/suppliers" element={<SuppliersPage />} />
+              <Route path="/products" element={<ProductsPage />} />
+              <Route element={<RoleRoute allowedRoles={['SuperAdmin', 'ShopAdmin']} />}>
+                <Route path="/inventory" element={<InventoryPage />} />
+              </Route>
+              <Route path="/payroll" element={<PayrollPage />} />
+            </Route>
+          </Route>
+
+          {/* Fallback Catch-All Route */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }

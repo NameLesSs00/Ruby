@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import { authApi } from '../modules/auth';
 import { showToast } from '../lib/sonner';
 
 interface LoginPageProps {
-  onLoginSuccess: () => void;
+  onLoginSuccess?: () => void;
 }
 
 export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
@@ -14,6 +15,7 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -37,7 +39,10 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
       });
 
       showToast.success('تم تسجيل الدخول بنجاح', 'أهلاً بك في أكاديمية روبي للسباحة');
-      onLoginSuccess();
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      }
+      navigate('/dashboard', { replace: true });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       const serverMessage = err.response?.data?.message;
