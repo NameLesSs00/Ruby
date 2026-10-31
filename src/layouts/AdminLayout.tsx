@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -15,6 +15,7 @@ import {
   Banknote,
   ShieldCheck,
   Ticket,
+  ShoppingCart,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import { authApi, decodeJwt } from '../modules/auth';
@@ -33,6 +34,12 @@ const NAV_ITEMS: NavItem[] = [
     path: '/dashboard',
     label: 'لوحة التحكم',
     icon: <LayoutDashboard size={20} className="nav-icon" />,
+  },
+  {
+    path: '/pos',
+    label: 'نقطة البيع POS',
+    icon: <ShoppingCart size={20} className="nav-icon" />,
+    allowedRoles: ['SuperAdmin', 'ShopAdmin'],
   },
   {
     path: '/admins',
@@ -125,6 +132,8 @@ export const AdminLayout = () => {
     }
   };
 
+  const canAccessPos = ['SuperAdmin', 'ShopAdmin'].includes(userRole);
+
   return (
     <div className="dashboard-container">
       {/* Mobile Backdrop Overlay */}
@@ -200,7 +209,33 @@ export const AdminLayout = () => {
             <h2 className="dashboard-header-title">{currentNavItem.label}</h2>
           </div>
 
-          <div className="dashboard-header-actions">
+          <div className="dashboard-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {canAccessPos && (
+              <Link
+                to="/pos"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.45rem 0.85rem',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: '#ff6b22',
+                  color: '#ffffff',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'background-color 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e05612')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ff6b22')}
+                title="فتح شاشة نقطة البيع POS"
+              >
+                <ShoppingCart size={16} />
+                <span>شاشة الـ POS</span>
+              </Link>
+            )}
+
             <div className="user-badge">
               <div className="user-avatar">
                 {userName.charAt(0).toUpperCase()}

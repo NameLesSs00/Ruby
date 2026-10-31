@@ -1,4 +1,12 @@
-import { Edit2, Trash2, AlertCircle, Ticket, Award } from 'lucide-react';
+import {
+  Edit2,
+  Trash2,
+  AlertCircle,
+  Ticket,
+  Award,
+  CreditCard,
+  UserCheck,
+} from 'lucide-react';
 import {
   type Subscription,
   clientTypeLabel,
@@ -15,9 +23,13 @@ interface SubscriptionsTableProps {
   isError: boolean;
   onEdit: (subscription: Subscription) => void;
   onDelete: (subscription: Subscription) => void;
+  onRecordPayment?: (subscription: Subscription) => void;
+  onManageAssignments?: (subscription: Subscription) => void;
 }
 
-function fmt(val: number) { return val.toLocaleString('ar-EG'); }
+function fmt(val: number) {
+  return val.toLocaleString('ar-EG');
+}
 
 export const SubscriptionsTable = ({
   subscriptions,
@@ -25,6 +37,8 @@ export const SubscriptionsTable = ({
   isError,
   onEdit,
   onDelete,
+  onRecordPayment,
+  onManageAssignments,
 }: SubscriptionsTableProps) => {
   return (
     <div className="data-table-wrapper">
@@ -72,7 +86,6 @@ export const SubscriptionsTable = ({
           ) : (
             subscriptions.map((sub) => {
               const hasRemaining = sub.remainingAmount > 0;
-              const isDuration = sub.subscriptionType === 'Duration';
 
               return (
                 <tr key={sub.id}>
@@ -80,20 +93,28 @@ export const SubscriptionsTable = ({
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                       <strong style={{ color: '#0D1527' }}>{sub.clientName}</strong>
-                      <span style={{
-                        fontSize: '0.72rem',
-                        color: sub.clientType === 'Academy' ? '#0284C7' : '#F37023',
-                        fontWeight: 600
-                      }}>
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          color: sub.clientType === 'Academy' ? '#0284C7' : '#F37023',
+                          fontWeight: 600,
+                        }}
+                      >
                         {clientTypeLabel(sub.clientType)}
                       </span>
                     </div>
                   </td>
                   <td>
-                    <span style={{
-                      padding: '2px 8px', borderRadius: '4px',
-                      backgroundColor: '#F1F5F9', fontSize: '0.8rem', color: '#334155', fontWeight: 500
-                    }}>
+                    <span
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        backgroundColor: '#F1F5F9',
+                        fontSize: '0.8rem',
+                        color: '#334155',
+                        fontWeight: 500,
+                      }}
+                    >
                       {subscriptionTypeLabel(sub.subscriptionType)}
                     </span>
                   </td>
@@ -114,27 +135,33 @@ export const SubscriptionsTable = ({
                     </div>
                   </td>
                   <td>
-                    {isDuration ? (
-                      <span style={{ fontSize: '0.8rem', color: '#64748B' }}>بالمدة الزمنية</span>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0D1527' }}>
-                          {sub.usedSessions} / {sub.totalSessions} حصة
-                        </span>
-                        <div style={{
-                          width: '65px', height: '5px', backgroundColor: '#E2E8F0', borderRadius: '3px', overflow: 'hidden'
-                        }}>
-                          <div style={{
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0D1527' }}>
+                        {sub.usedSessions} / {sub.totalSessions} حصة
+                      </span>
+                      <div
+                        style={{
+                          width: '65px',
+                          height: '5px',
+                          backgroundColor: '#E2E8F0',
+                          borderRadius: '3px',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
                             width: `${Math.min(100, sub.totalSessions > 0 ? (sub.usedSessions / sub.totalSessions) * 100 : 0)}%`,
                             height: '100%',
-                            backgroundColor: '#36C5F0'
-                          }} />
-                        </div>
+                            backgroundColor: '#36C5F0',
+                          }}
+                        />
                       </div>
-                    )}
+                    </div>
                   </td>
                   <td>
-                    <strong style={{ color: '#0D1527' }}>{fmt(sub.finalAmount)} <span className="currency-unit">ج.م</span></strong>
+                    <strong style={{ color: '#0D1527' }}>
+                      {fmt(sub.finalAmount)} <span className="currency-unit">ج.م</span>
+                    </strong>
                   </td>
                   <td>
                     <span style={{ color: '#0284C7', fontWeight: 600 }}>{fmt(sub.paidAmount)}</span>
@@ -155,14 +182,38 @@ export const SubscriptionsTable = ({
                     </span>
                   </td>
                   <td>
-                    <div className="table-actions" style={{ justifyContent: 'center' }}>
+                    <div className="table-actions" style={{ justifyContent: 'center', gap: '0.35rem' }}>
+                      {onRecordPayment && hasRemaining && (
+                        <button
+                          type="button"
+                          className="btn-icon-action"
+                          title="سداد دفعة من المبلغ المتبقي"
+                          onClick={() => onRecordPayment(sub)}
+                          style={{ color: '#ff6b22', backgroundColor: '#fff7ed', border: '1px solid #fed7aa' }}
+                        >
+                          <CreditCard size={15} />
+                        </button>
+                      )}
+
+                      {onManageAssignments && (
+                        <button
+                          type="button"
+                          className="btn-icon-action"
+                          title="تعيين مدربين أو موظفين للاشتراك"
+                          onClick={() => onManageAssignments(sub)}
+                          style={{ color: '#0284c7', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd' }}
+                        >
+                          <UserCheck size={15} />
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         className="btn-icon-action"
-                        title="تعديل الاشتراك"
+                        title="تعديل بيانات الاشتراك"
                         onClick={() => onEdit(sub)}
                       >
-                        <Edit2 size={16} />
+                        <Edit2 size={15} />
                       </button>
                       <button
                         type="button"
@@ -170,7 +221,7 @@ export const SubscriptionsTable = ({
                         title="حذف الاشتراك"
                         onClick={() => onDelete(sub)}
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
                     </div>
                   </td>
@@ -183,4 +234,3 @@ export const SubscriptionsTable = ({
     </div>
   );
 };
-

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { X, Ticket } from 'lucide-react';
 import {
   subscriptionsApi,
@@ -11,11 +11,10 @@ import {
   type CreateSubscriptionPayload,
   type UpdateSubscriptionPayload,
 } from '../../modules/subscriptions';
-import { clientsApi } from '../../modules/clients';
-import { coachesApi } from '../../modules/coaches';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { SubscriptionFormFields } from './SubscriptionFormFields';
+import type { SelectOption } from '../ui/AsyncSearchableSelect';
 
 interface SubscriptionFormModalProps {
   isOpen: boolean;
@@ -27,6 +26,7 @@ interface SubscriptionFormModalProps {
 function getTodayString(): string {
   return new Date().toISOString().slice(0, 10);
 }
+
 function getOneMonthLaterString(): string {
   const d = new Date();
   d.setMonth(d.getMonth() + 1);
@@ -39,9 +39,9 @@ export const SubscriptionFormModal = ({
   onClose,
   onSuccess,
 }: SubscriptionFormModalProps) => {
-  const [clientId, setClientId] = useState<number | ''>('');
+  const [selectedClient, setSelectedClient] = useState<SelectOption | null>(null);
   const [clientType, setClientType] = useState<ClientType>('Academy');
-  const [commissionCoachId, setCommissionCoachId] = useState<number | ''>('');
+  const [selectedCoach, setSelectedCoach] = useState<SelectOption | null>(null);
   const [subscriptionType, setSubscriptionType] = useState<SubscriptionType>('Sessions');
   const [startDate, setStartDate] = useState(getTodayString());
   const [endDate, setEndDate] = useState(getOneMonthLaterString());
@@ -51,25 +51,21 @@ export const SubscriptionFormModal = ({
   const [paidAmount, setPaidAmount] = useState<number | ''>(0);
   const [notes, setNotes] = useState('');
 
-  const { data: clientsData } = useQuery({
-    queryKey: ['clients', 'dropdown-list'],
-    queryFn: () => clientsApi.getAll({ page: 1, pageSize: 100 }),
-    enabled: isOpen,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: coachesData } = useQuery({
-    queryKey: ['coaches', 'dropdown-list'],
-    queryFn: () => coachesApi.getAll({ page: 1, pageSize: 100 }),
-    enabled: isOpen,
-    staleTime: 5 * 60 * 1000,
-  });
-
   useEffect(() => {
     if (editingSubscription) {
-      setClientId(editingSubscription.clientId);
+      setSelectedClient({
+        id: editingSubscription.clientId,
+        label: editingSubscription.clientName,
+      });
       setClientType(editingSubscription.clientType);
-      setCommissionCoachId(editingSubscription.commissionCoachId || '');
+      if (editingSubscription.commissionCoachId) {
+        setSelectedCoach({
+          id: editingSubscription.commissionCoachId,
+          label: editingSubscription.commissionCoachName || `مدرب #${editingSubscription.commissionCoachId}`,
+        });
+      } else {
+        setSelectedCoach(null);
+      }
       setSubscriptionType(editingSubscription.subscriptionType);
       setStartDate(editingSubscription.startDate.slice(0, 10));
       setEndDate(editingSubscription.endDate.slice(0, 10));
@@ -79,10 +75,17 @@ export const SubscriptionFormModal = ({
       setPaidAmount(editingSubscription.paidAmount);
       setNotes(editingSubscription.notes || '');
     } else {
-      setClientId(''); setClientType('Academy'); setCommissionCoachId('');
-      setSubscriptionType('Sessions'); setStartDate(getTodayString());
-      setEndDate(getOneMonthLaterString()); setTotalSessions(8);
-      setAmount(''); setDiscountAmount(0); setPaidAmount(0); setNotes('');
+      setSelectedClient(null);
+      setClientType('Academy');
+      setSelectedCoach(null);
+      setSubscriptionType('Sessions');
+      setStartDate(getTodayString());
+      setEndDate(getOneMonthLaterString());
+      setTotalSessions(8);
+      setAmount('');
+      setDiscountAmount(0);
+      setPaidAmount(0);
+      setNotes('');
     }
   }, [editingSubscription, isOpen]);
 
@@ -93,7 +96,10 @@ export const SubscriptionFormModal = ({
       showToast.success('تم إنشاء الاشتراك بنجاح');
       onSuccess();
     },
-    onError: (err: any) => showToast.error(err.response?.data?.message || err.response?.data?.error || 'فشل في إنشاء الاشتراك'),
+    onError: (err: any) =>
+      showToast.error(
+        err.response?.data?.message || err.response?.data?.error || 'فشل في إنشاء الاشتراك'
+      ),
   });
 
   const updateMutation = useMutation({
@@ -104,7 +110,10 @@ export const SubscriptionFormModal = ({
       showToast.success('تم تحديث بيانات الاشتراك بنجاح');
       onSuccess();
     },
-    onError: (err: any) => showToast.error(err.response?.data?.message || err.response?.data?.error || 'فشل في تحديث الاشتراك'),
+    onError: (err: any) =>
+      showToast.error(
+        err.response?.data?.message || err.response?.data?.error || 'فشل في تحديث الاشتراك'
+      ),
   });
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -116,70 +125,137 @@ export const SubscriptionFormModal = ({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!editingSubscription && !clientId) { showToast.warning('يرجى اختيار العميل'); return; }
-    if (clientType === 'External' && !commissionCoachId) { showToast.warning('يرجى اختيار مدرب العمولة للعميل الخارجي'); return; }
-    if (numAmount <= 0) { showToast.warning('يرجى إدخال مبلغ اشتراك صحيح'); return; }
+
+    if (!editingSubscription && !selectedClient) {
+      showToast.warning('يرجى اختيار العميل أولاً');
+      return;
+    }
+
+    if (clientType === 'External' && !selectedCoach) {
+      showToast.warning('يرجى اختيار مدرب العمولة للعميل الخارجي');
+      return;
+    }
+
+    if (numAmount <= 0) {
+      showToast.warning('يرجى إدخال مبلغ اشتراك صحيح');
+      return;
+    }
+
     const finalAmount = Math.max(0, numAmount - numDiscount);
-    if (numPaid > finalAmount) { showToast.warning('المبلغ المدفوع لا يمكن أن يتجاوز صافي قيمة الاشتراك'); return; }
+    if (numPaid > finalAmount) {
+      showToast.warning('المبلغ المدفوع لا يمكن أن يتجاوز صافي قيمة الاشتراك');
+      return;
+    }
 
     const payload = {
-      clientType, subscriptionType,
-      commissionCoachId: commissionCoachId ? Number(commissionCoachId) : null,
-      startDate, endDate,
-      totalSessions: subscriptionType === 'Duration' ? 0 : Number(totalSessions),
-      amount: numAmount, discountAmount: numDiscount, paidAmount: numPaid,
+      clientType,
+      subscriptionType,
+      commissionCoachId: selectedCoach ? selectedCoach.id : null,
+      startDate,
+      endDate,
+      totalSessions: Number(totalSessions),
+      amount: numAmount,
+      discountAmount: numDiscount,
+      paidAmount: numPaid,
       notes: notes.trim() || null,
     };
 
     if (editingSubscription) {
       updateMutation.mutate({ id: editingSubscription.id, payload });
     } else {
-      createMutation.mutate({ ...payload, clientId: Number(clientId) });
+      createMutation.mutate({ ...payload, clientId: selectedClient!.id });
     }
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-card"
+        style={{ maxWidth: '640px', width: '95%' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{
-              width: 38, height: 38, borderRadius: '8px', backgroundColor: '#F3702315',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F37023',
-            }}>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: '8px',
+                backgroundColor: 'rgba(255, 107, 34, 0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ff6b22',
+              }}
+            >
               <Ticket size={20} />
             </div>
-            <h3 className="modal-title" style={{ margin: 0 }}>
-              {editingSubscription ? 'تعديل بيانات الاشتراك' : 'تسجيل اشتراك جديد'}
-            </h3>
+            <div>
+              <h3 className="modal-title" style={{ margin: 0, fontSize: '1.15rem' }}>
+                {editingSubscription ? 'تعديل بيانات الاشتراك' : 'تسجيل اشتراك جديد'}
+              </h3>
+              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                تحديد العميل، نوع الخطة، الحصص، والمبالغ المالية
+              </span>
+            </div>
           </div>
-          <button type="button" className="modal-close-btn" onClick={onClose}><X size={20} /></button>
+          <button type="button" className="modal-close-btn" onClick={onClose}>
+            <X size={20} />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+          <div className="modal-body" style={{ maxHeight: '74vh', overflowY: 'auto', padding: '1.1rem' }}>
             <SubscriptionFormFields
               editingSubscription={editingSubscription}
-              clients={clientsData?.items || []}
-              coaches={coachesData?.items || []}
-              clientId={clientId} setClientId={setClientId}
-              clientType={clientType} setClientType={setClientType}
-              commissionCoachId={commissionCoachId} setCommissionCoachId={setCommissionCoachId}
-              subscriptionType={subscriptionType} setSubscriptionType={setSubscriptionType}
-              startDate={startDate} setStartDate={setStartDate}
-              endDate={endDate} setEndDate={setEndDate}
-              totalSessions={totalSessions} setTotalSessions={setTotalSessions}
-              amount={amount} setAmount={setAmount}
-              discountAmount={discountAmount} setDiscountAmount={setDiscountAmount}
-              paidAmount={paidAmount} setPaidAmount={setPaidAmount}
-              notes={notes} setNotes={setNotes}
+              selectedClient={selectedClient}
+              setSelectedClient={setSelectedClient}
+              clientType={clientType}
+              setClientType={setClientType}
+              selectedCoach={selectedCoach}
+              setSelectedCoach={setSelectedCoach}
+              subscriptionType={subscriptionType}
+              setSubscriptionType={setSubscriptionType}
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
+              totalSessions={totalSessions}
+              setTotalSessions={setTotalSessions}
+              amount={amount}
+              setAmount={setAmount}
+              discountAmount={discountAmount}
+              setDiscountAmount={setDiscountAmount}
+              paidAmount={paidAmount}
+              setPaidAmount={setPaidAmount}
+              notes={notes}
+              setNotes={setNotes}
               isSaving={isSaving}
             />
           </div>
+
           <div className="modal-footer">
-            <button type="button" className="btn-secondary" onClick={onClose} disabled={isSaving}>إلغاء</button>
-            <button type="submit" className="btn-add" disabled={isSaving}>
-              {isSaving ? <><div className="spinner" /><span>جاري الحفظ...</span></> : <span>{editingSubscription ? 'حفظ التعديلات' : 'تسجيل الاشتراك'}</span>}
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={onClose}
+              disabled={isSaving}
+            >
+              إلغاء
+            </button>
+            <button
+              type="submit"
+              className="btn-add"
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <div className="spinner" />
+                  <span>جاري الحفظ...</span>
+                </>
+              ) : (
+                <span>{editingSubscription ? 'حفظ التعديلات' : 'تسجيل الاشتراك'}</span>
+              )}
             </button>
           </div>
         </form>

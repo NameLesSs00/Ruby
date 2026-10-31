@@ -16,6 +16,8 @@ This document specifies coding standards, scalable architecture, and design guid
 - **Code, Communication & Documentation Language**:
   - All chat communications with the user, plans, explanations, code, comments, commit messages, and documentation (`AGENTS.md`, technical docs) must be written in **English**.
   - Only the user-facing interface text, labels, placeholders, and notifications in the application are in **Arabic** (`dir="rtl"`).
+- **Strict Zero-Emoji Policy**:
+  - **NEVER** use emojis anywhere in user interfaces, code, comments, documentation, or chat communications. Always use clean vector icons from `lucide-react`.
 
 ### Brand Palette (Ruby Swimming Academy Logo)
 - **Dark Navy**: `#0D1527` (primary text, dark headers, sidebar backgrounds)
@@ -42,20 +44,18 @@ src/
 │   ├── employees.ts              # Employee, CreateEmployeePayload, UpdateEmployeePayload
 │   ├── suppliers.ts              # Supplier, CreateSupplierPayload, UpdateSupplierPayload
 │   ├── products.ts               # Product, ProductCategory, CreateProductPayload
+│   ├── subscriptions.ts          # Subscription, CoachAssignments, DuePayments
+│   ├── pos.ts                    # POS Sales, Returns, DuePayments
 │   └── clients.ts                # Client, CreateClientPayload, UpdateClientPayload
 ├── layouts/                      # Layout shells
-│   └── AdminLayout.tsx           # Dashboard shell with right sidebar, header & <Outlet />
-├── pages/                        # Page views
-│   ├── LoginPage.tsx             # Route: /login (Arabic RTL Login screen)
-│   ├── DashboardOverviewPage.tsx # Route: /dashboard (Overview metrics & quick shortcuts)
-│   ├── ClientsPage.tsx           # Route: /clients (Clients table, barcode modal)
-│   ├── CoachesPage.tsx           # Route: /coaches (Coaches table, search, modals)
-│   ├── EmployeesPage.tsx         # Route: /employees (Employees table, search, modals)
-│   ├── SuppliersPage.tsx         # Route: /suppliers (Suppliers table, search, modals)
-│   ├── ProductsPage.tsx          # Route: /products (Products & categories table, filter, modals)
-│   └── PlaceholderPage.tsx       # Reusable view for tabs under development
-├── components/                   # Shared UI & navigation guards
-│   └── ProtectedRoute.tsx        # Route authentication guard
+│   ├── AdminLayout.tsx           # Dashboard shell with right sidebar, header & <Outlet />
+│   └── PosLayout.tsx             # Dedicated POS workspace shell
+├── pages/                        # Thin page view orchestrators (~100-180 lines max)
+├── components/                   # Focused domain UI components (<350 lines max per file)
+│   ├── ui/                       # Shared primitives (PaginationBar, AsyncSearchableSelect)
+│   ├── subscriptions/            # Subscription tabs, tables, forms, modals
+│   ├── pos/                      # POS register catalog, cart drawer, tables, modals
+│   └── ...                       # Domain-specific subcomponents
 ├── App.tsx                       # Root component
 └── main.tsx                      # App entry point
 ```
@@ -74,3 +74,11 @@ src/
 
 ### C. Strict Scope Rule
 - Never generate unrequested modules, files, or placeholder folders in advance. Only create or modify what the user explicitly directs.
+
+### D. File Size & Modularity Standard (No Monolithic Files)
+- **Maximum File Size**: No `.ts` or `.tsx` file may exceed **350 lines** of code (target **100–250 lines**).
+- **Thin Page Orchestrators**: Files in `src/pages/**` must act strictly as lightweight layout and tab orchestrators (**80–180 lines**). Never inline full data tables, complex multi-section forms, or modals directly inside a page file.
+- **Single Responsibility Decomposition**:
+  - Multi-tab views must extract each tab into `src/components/<domain>/<TabName>Tab.tsx`.
+  - Data tables must live in `src/components/<domain>/<Entity>Table.tsx`.
+  - Modals and forms must live in `src/components/<domain>/<Action>Modal.tsx` and sub-section components if a form exceeds 250 lines.

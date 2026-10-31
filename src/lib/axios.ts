@@ -2,7 +2,21 @@ import axios from 'axios';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import type { AuthTokens } from '../modules/auth';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://swimming1academy.runasp.net';
+export const BASE_URL = import.meta.env.VITE_API_URL || 'https://swimming1academy.runasp.net';
+
+/**
+ * Normalizes media/image URLs returned from the API.
+ * If the path is relative (e.g. "/uploads/products/..."), prefixes it with the API base URL.
+ */
+export const getApiMediaUrl = (urlPath?: string | null): string | null => {
+  if (!urlPath) return null;
+  if (urlPath.startsWith('http://') || urlPath.startsWith('https://')) {
+    return urlPath;
+  }
+  const cleanBase = BASE_URL.replace(/\/+$/, '');
+  const cleanPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`;
+  return `${cleanBase}${cleanPath}`;
+};
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -36,6 +50,12 @@ apiClient.interceptors.request.use(
     if (tokens?.accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
+
+    // When sending FormData, delete Content-Type so Axios/browser sets multipart/form-data with the correct boundary
+    if (config.data instanceof FormData && config.headers) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

@@ -1170,3 +1170,30 @@ input, button, select, textarea {
   color: #0284c7;
   border-color: #38bdf8;
 }
+
+
+/* POS Thermal Receipt Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-paper, .receipt-paper * {
+    visibility: visible;
+  }
+  .receipt-paper {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 80mm !important;
+    margin: 0 auto;
+    padding: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  @page {
+    size: auto;
+    margin: 5mm;
+  }
+}

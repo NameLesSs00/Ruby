@@ -1,8 +1,8 @@
-import { apiClient } from '../lib/axios';
+import { apiClient, getApiMediaUrl } from '../lib/axios';
 
 /**
  * Product Categories & Products Domain Models & API Services
- * Based on backendMD/Suppliers+products.md
+ * Based on backendMD/Suppliers+products.md and backendMD/prodcutimage.md
  */
 
 // ==========================================
@@ -47,6 +47,7 @@ export interface Product {
   productCategoryName: string;
   name: string;
   salePrice: number;
+  imageUrl?: string | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -62,9 +63,16 @@ export interface CreateProductPayload {
   productCategoryId: number;
   name: string;
   salePrice: number;
+  imageFile?: File | null;
 }
 
-export interface UpdateProductPayload extends CreateProductPayload {}
+export interface UpdateProductPayload {
+  productCategoryId: number;
+  name: string;
+  salePrice: number;
+  imageFile?: File | null;
+  removeImage?: boolean;
+}
 
 export interface ProductQueryParams {
   page?: number;
@@ -77,6 +85,13 @@ export interface ApiResponse<T> {
   message?: string;
   data: T;
 }
+
+/**
+ * Normalizes product image URLs for display
+ */
+export const getProductImageUrl = (imageUrl?: string | null): string | null => {
+  return getApiMediaUrl(imageUrl);
+};
 
 // ==========================================
 // TanStack Query Keys
@@ -156,12 +171,29 @@ export const productsApi = {
   },
 
   create: async (payload: CreateProductPayload): Promise<ApiResponse<Product>> => {
-    const response = await apiClient.post<ApiResponse<Product>>('/api/products', payload);
+    const formData = new FormData();
+    formData.append('ProductCategoryId', String(payload.productCategoryId));
+    formData.append('Name', payload.name);
+    formData.append('SalePrice', String(payload.salePrice));
+    if (payload.imageFile) {
+      formData.append('ImageFile', payload.imageFile);
+    }
+
+    const response = await apiClient.post<ApiResponse<Product>>('/api/products', formData);
     return response.data;
   },
 
   update: async (id: number, payload: UpdateProductPayload): Promise<ApiResponse<Product>> => {
-    const response = await apiClient.put<ApiResponse<Product>>(`/api/products/${id}`, payload);
+    const formData = new FormData();
+    formData.append('ProductCategoryId', String(payload.productCategoryId));
+    formData.append('Name', payload.name);
+    formData.append('SalePrice', String(payload.salePrice));
+    if (payload.imageFile) {
+      formData.append('ImageFile', payload.imageFile);
+    }
+    formData.append('RemoveImage', String(Boolean(payload.removeImage)));
+
+    const response = await apiClient.put<ApiResponse<Product>>(`/api/products/${id}`, formData);
     return response.data;
   },
 
@@ -177,4 +209,3 @@ export const productsApi = {
     return response.data;
   },
 };
-
