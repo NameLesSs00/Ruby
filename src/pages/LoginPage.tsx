@@ -76,7 +76,7 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
                 id="email-input"
                 type="text"
                 className="form-input"
-                placeholder="superadmin@gmail.com"
+                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="username"
@@ -94,7 +94,7 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
                 id="password-input"
                 type={showPassword ? 'text' : 'password'}
                 className="form-input has-icon-end"
-                placeholder="••••••••"
+                placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
