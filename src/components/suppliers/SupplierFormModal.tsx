@@ -8,6 +8,7 @@ import {
 } from '../../modules/suppliers';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface SupplierFormModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ interface SupplierFormModalProps {
 }
 
 export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess }: SupplierFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -38,13 +41,17 @@ export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess 
   const createMutation = useMutation({
     mutationFn: (payload: CreateSupplierPayload) => suppliersApi.create(payload),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: supplierKeys.lists() }); showToast.success('تمت إضافة المورد بنجاح'); onSuccess(); },
-    onError: (err: unknown) => { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message; showToast.error(msg || 'فشل في إضافة المورد'); },
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في إضافة المورد');
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateSupplierPayload }) => suppliersApi.update(id, payload),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: supplierKeys.lists() }); showToast.success('تم تحديث بيانات المورد بنجاح'); onSuccess(); },
-    onError: (err: unknown) => { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message; showToast.error(msg || 'فشل في تحديث بيانات المورد'); },
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في تحديث بيانات المورد');
+    },
   });
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -62,8 +69,8 @@ export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card">
         <div className="modal-header">
           <h3 className="modal-title">{editingSupplier ? 'تعديل بيانات المورد' : 'إضافة مورد جديد'}</h3>
           <button type="button" className="modal-close-btn" onClick={onClose}><X size={20} /></button>

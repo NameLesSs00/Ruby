@@ -246,7 +246,7 @@ input, button, select, textarea {
   background-color: var(--color-bg);
 }
 
-/* Right-Docked RTL Sidebar */
+/* Right-Docked RTL Sidebar (Sticky to Viewport) */
 .dashboard-sidebar {
   width: 270px;
   background-color: var(--color-navy);
@@ -256,6 +256,10 @@ input, button, select, textarea {
   flex-shrink: 0;
   border-inline-end: 1px solid var(--color-navy-dark);
   z-index: 50;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
 }
 
 .sidebar-header {
@@ -265,6 +269,7 @@ input, button, select, textarea {
   justify-content: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   background-color: var(--color-navy-dark);
+  flex-shrink: 0;
 }
 
 .sidebar-logo-img {
@@ -285,6 +290,24 @@ input, button, select, textarea {
   flex-direction: column;
   gap: 0.35rem;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .nav-item {
@@ -327,6 +350,8 @@ input, button, select, textarea {
 .sidebar-footer {
   padding: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--color-navy);
+  flex-shrink: 0;
 }
 
 .btn-logout {
@@ -1123,6 +1148,7 @@ input, button, select, textarea {
   background-color: var(--color-surface);
   color: var(--color-text);
   font-size: 0.9rem;
+  line-height: 1.5;
   outline: none;
   cursor: pointer;
   transition: border-color 0.15s ease;

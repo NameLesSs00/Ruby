@@ -16,6 +16,7 @@ import {
 } from '../ui/AsyncSearchableSelect';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface RecordCoachPaymentModalProps {
   isOpen: boolean;
@@ -36,6 +37,8 @@ export const RecordCoachPaymentModal = ({
   onClose,
   onSuccess,
 }: RecordCoachPaymentModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [paymentType, setPaymentType] = useState<CoachPaymentType>(initialPaymentType);
   const [selectedCoach, setSelectedCoach] = useState<SelectOption | null>(null);
   const [selectedDueId, setSelectedDueId] = useState<number | null>(null);
@@ -86,8 +89,7 @@ export const RecordCoachPaymentModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل عملية الصرف للمدرب');
+      showToast.apiError(err, 'فشل في تسجيل عملية الصرف للمدرب');
     },
   });
 
@@ -146,8 +148,8 @@ export const RecordCoachPaymentModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 500 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 500 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div style={{ width: 34, height: 34, borderRadius: '8px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

@@ -9,6 +9,7 @@ import {
 import type { Employee } from '../../modules/employees';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 import { EmployeeNameCell } from './EmployeeNameCell';
 import { CreatePayrollModal } from './CreatePayrollModal';
 import { DeletePayrollModal } from './DeletePayrollModal';
@@ -27,6 +28,7 @@ export const PayrollsTab = ({ employees }: { employees: Employee[] }) => {
   const [payingRecord, setPayingRecord] = useState<PayrollRecord | null>(null);
   const [historyRecord, setHistoryRecord] = useState<PayrollRecord | null>(null);
   const [editNotes, setEditNotes] = useState('');
+  useModalEscape(() => setEditingRecord(null), Boolean(editingRecord));
 
   const { data: payrolls = [], isLoading, isError } = useQuery({
     queryKey: payrollKeys.lists(),
@@ -48,7 +50,7 @@ export const PayrollsTab = ({ employees }: { employees: Employee[] }) => {
       showToast.success('تم تحديث ملاحظات المسيرة بنجاح');
       setEditingRecord(null);
     },
-    onError: () => showToast.error('فشل في تحديث الملاحظات'),
+    onError: (err: unknown) => showToast.apiError(err, ''),
   });
 
   const handleEditSubmit = (e: FormEvent) => {
@@ -219,8 +221,8 @@ export const PayrollsTab = ({ employees }: { employees: Employee[] }) => {
 
       {/* Edit Notes Modal */}
       {editingRecord && (
-        <div className="modal-backdrop" onClick={() => setEditingRecord(null)}>
-          <div className="modal-card" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ maxWidth: '480px' }}>
             <div className="modal-header">
               <h3 className="modal-title">تعديل ملاحظات المسيرة</h3>
               <button type="button" className="modal-close-btn" onClick={() => setEditingRecord(null)}><X size={20} /></button>

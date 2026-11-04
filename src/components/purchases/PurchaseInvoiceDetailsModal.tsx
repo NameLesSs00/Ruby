@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { X, FileText, Calendar, User, Package, Coins, CreditCard, AlertCircle } from 'lucide-react';
+import { useModalEscape } from '../../lib/useModalEscape';
 import {
   purchaseInvoicesApi,
   purchasePaymentsApi,
@@ -21,6 +22,8 @@ export const PurchaseInvoiceDetailsModal = ({
   onClose,
   onOpenRecordPayment,
 }: PurchaseInvoiceDetailsModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const { data: invoice, isLoading, isError } = useQuery({
     queryKey: purchaseInvoiceKeys.detail(invoiceId || 0),
     queryFn: () => purchaseInvoicesApi.getById(invoiceId!),
@@ -39,8 +42,8 @@ export const PurchaseInvoiceDetailsModal = ({
   const payments = paymentsData?.items || [];
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 640 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 640 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <FileText size={20} color="#ff6b22" />

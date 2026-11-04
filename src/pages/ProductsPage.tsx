@@ -68,8 +68,8 @@ export const ProductsPage = () => {
         variables.isActive ? 'تم تفعيل المنتج بنجاح' : 'تم تعطيل المنتج بنجاح'
       );
     },
-    onError: () => {
-      showToast.error('فشل في تعديل حالة المنتج');
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في تعديل حالة المنتج');
     },
   });
 
@@ -81,8 +81,7 @@ export const ProductsPage = () => {
       setDeletingProduct(null);
     },
     onError: (err: unknown) => {
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(errorMsg || 'فشل في حذف المنتج');
+      showToast.apiError(err, 'فشل في حذف المنتج');
     },
   });
 

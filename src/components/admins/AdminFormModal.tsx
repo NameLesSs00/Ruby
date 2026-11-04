@@ -12,6 +12,7 @@ import {
 } from '../../modules/admins';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface AdminFormModalProps {
   isOpen: boolean;
@@ -26,6 +27,8 @@ export const AdminFormModal = ({
   onClose,
   onSuccess,
 }: AdminFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -52,8 +55,7 @@ export const AdminFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في إضافة المسؤول');
+      showToast.apiError(err, 'فشل في إضافة المسؤول');
     },
   });
 
@@ -66,8 +68,7 @@ export const AdminFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تحديث بيانات المسؤول');
+      showToast.apiError(err, 'فشل في تحديث بيانات المسؤول');
     },
   });
 
@@ -109,8 +110,8 @@ export const AdminFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card">
         <div className="modal-header">
           <h3 className="modal-title">
             {editingAdmin ? 'تعديل بيانات المسؤول' : 'إضافة مسؤول جديد'}

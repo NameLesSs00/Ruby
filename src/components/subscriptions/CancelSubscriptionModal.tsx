@@ -9,6 +9,7 @@ import {
 import { subscriptionKeys } from '../../modules/subscriptions';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface CancelSubscriptionModalProps {
   isOpen: boolean;
@@ -23,6 +24,8 @@ export const CancelSubscriptionModal = ({
   onClose,
   onSuccess,
 }: CancelSubscriptionModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [reason, setReason] = useState('');
   const [refundAmount, setRefundAmount] = useState('');
   const [notes, setNotes] = useState('');
@@ -44,8 +47,7 @@ export const CancelSubscriptionModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل إلغاء الاشتراك');
+      showToast.apiError(err, 'فشل في تسجيل إلغاء الاشتراك');
     },
   });
 
@@ -80,11 +82,10 @@ export const CancelSubscriptionModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div
         className="modal-card"
         style={{ maxWidth: 500 }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

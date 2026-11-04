@@ -13,6 +13,7 @@ import {
 } from '../../modules/duePayments';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface RecordDuePaymentModalProps {
   duePayment: DuePayment | null;
@@ -27,6 +28,8 @@ export const RecordDuePaymentModal = ({
   onClose,
   onSuccess,
 }: RecordDuePaymentModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [amountPaid, setAmountPaid] = useState('');
 
   useEffect(() => {
@@ -49,8 +52,7 @@ export const RecordDuePaymentModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل عملية السداد');
+      showToast.apiError(err, 'فشل في تسجيل عملية السداد');
     },
   });
 
@@ -83,8 +85,8 @@ export const RecordDuePaymentModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 460 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CreditCard size={20} color="#ff6b22" />

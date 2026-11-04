@@ -57,7 +57,7 @@ export const InventoryCategoriesTab = () => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
       showToast.success(variables.isActive ? 'تم تفعيل تصنيف المخزون' : 'تم تعطيل تصنيف المخزون');
     },
-    onError: () => showToast.error('فشل في تعديل حالة التصنيف'),
+    onError: (err: unknown) => showToast.apiError(err, 'فشل في تعديل حالة التصنيف'),
   });
 
   const deleteMutation = useMutation({
@@ -68,8 +68,7 @@ export const InventoryCategoriesTab = () => {
       setDeletingCategory(null);
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في حذف تصنيف المخزون');
+      showToast.apiError(err, 'فشل في حذف تصنيف المخزون');
     },
   });
 

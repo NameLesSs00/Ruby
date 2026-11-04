@@ -60,8 +60,8 @@ export const EmployeesPage = () => {
         variables.isActive ? 'تم تفعيل حساب الموظف بنجاح' : 'تم تعطيل حساب الموظف بنجاح'
       );
     },
-    onError: () => {
-      showToast.error('فشل في تعديل حالة الموظف');
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في تعديل حالة الموظف');
     },
   });
 
@@ -73,8 +73,7 @@ export const EmployeesPage = () => {
       setDeletingEmployee(null);
     },
     onError: (err: unknown) => {
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(errorMsg || 'فشل في حذف الموظف');
+      showToast.apiError(err, 'فشل في حذف الموظف');
     },
   });
 

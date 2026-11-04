@@ -1,3 +1,4 @@
+import { useModalEscape } from '../../lib/useModalEscape';
 import { useState } from 'react';
 import {
   Edit2,
@@ -42,6 +43,7 @@ export const ProductsTable = ({
   onPageChange,
 }: ProductsTableProps) => {
   const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
+  useModalEscape(() => setPreviewProduct(null), Boolean(previewProduct));
   const [imageErrorMap, setImageErrorMap] = useState<Record<number, boolean>>({});
 
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
@@ -269,7 +271,6 @@ export const ProductsTable = ({
         <div
           className="modal-backdrop"
           style={{ zIndex: 1100, backgroundColor: 'rgba(13, 21, 39, 0.75)' }}
-          onClick={() => setPreviewProduct(null)}
         >
           <div
             className="modal-card"
@@ -280,7 +281,7 @@ export const ProductsTable = ({
               borderRadius: 'var(--radius-lg)',
               textAlign: 'center',
             }}
-            onClick={(e) => e.stopPropagation()}
+            
           >
             <div
               style={{

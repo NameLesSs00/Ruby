@@ -11,6 +11,7 @@ import {
 } from '../../modules/purchases';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface RecordPurchasePaymentModalProps {
   invoice: PurchaseInvoice | null;
@@ -25,6 +26,8 @@ export const RecordPurchasePaymentModal = ({
   onClose,
   onSuccess,
 }: RecordPurchasePaymentModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [amountPaid, setAmountPaid] = useState('');
   const [paymentDate, setPaymentDate] = useState('');
 
@@ -49,8 +52,7 @@ export const RecordPurchasePaymentModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل الدفعة');
+      showToast.apiError(err, 'فشل في تسجيل الدفعة');
     },
   });
 
@@ -85,8 +87,8 @@ export const RecordPurchasePaymentModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 460 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CreditCard size={20} color="#ff6b22" />

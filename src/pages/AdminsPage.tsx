@@ -36,8 +36,8 @@ export const AdminsPage = () => {
         variables.isDeactivated ? 'تم تعطيل حساب المسؤول بنجاح' : 'تم تفعيل حساب المسؤول بنجاح'
       );
     },
-    onError: () => {
-      showToast.error('فشل في تعديل حالة المسؤول');
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في تعديل حالة المسؤول');
     },
   });
 

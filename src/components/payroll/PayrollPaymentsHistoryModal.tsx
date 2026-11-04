@@ -4,6 +4,7 @@ import { X, History, Receipt } from 'lucide-react';
 import { payrollPaymentsApi, payrollKeys, paymentStatusLabel, paymentStatusClass } from '../../modules/payrolls';
 import type { PayrollRecord } from '../../modules/payrolls';
 import type { Employee } from '../../modules/employees';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface PayrollPaymentsHistoryModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const PayrollPaymentsHistoryModal: React.FC<PayrollPaymentsHistoryModalPr
   employees,
   onClose,
 }) => {
+  useModalEscape(onClose, isOpen);
   const { data: payments = [], isLoading } = useQuery({
     queryKey: payrollKeys.paymentsByPayroll(payroll?.id ?? 0),
     queryFn: () => payrollPaymentsApi.getByPayrollId(payroll!.id),
@@ -41,8 +43,8 @@ export const PayrollPaymentsHistoryModal: React.FC<PayrollPaymentsHistoryModalPr
   const totalDisbursed = payments.reduce((sum, p) => sum + p.amountPaid, 0);
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '620px' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: '620px' }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{

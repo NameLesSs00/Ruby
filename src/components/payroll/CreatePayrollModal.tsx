@@ -6,6 +6,7 @@ import { payrollsApi, payrollKeys, monthInputToApiDate, type CreatePayrollPayloa
 import type { Employee } from '../../modules/employees';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface CreatePayrollModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ function extractErr(err: unknown): string | undefined {
 }
 
 export const CreatePayrollModal = ({ isOpen, employees, onClose }: CreatePayrollModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [employeeId, setEmployeeId] = useState('');
   const [month, setMonth] = useState('');
   const [notes, setNotes] = useState('');
@@ -53,8 +56,8 @@ export const CreatePayrollModal = ({ isOpen, employees, onClose }: CreatePayroll
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card">
         <div className="modal-header">
           <h3 className="modal-title">إنشاء مسيرة راتب جديدة</h3>
           <button type="button" className="modal-close-btn" onClick={onClose}><X size={20} /></button>

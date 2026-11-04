@@ -66,7 +66,7 @@ export const InventoryItemsTab = ({ categories }: InventoryItemsTabProps) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
       showToast.success(variables.isActive ? 'تم تفعيل الصنف المخزني' : 'تم تعطيل الصنف المخزني');
     },
-    onError: () => showToast.error('فشل في تعديل حالة الصنف المخزني'),
+    onError: (err: unknown) => showToast.apiError(err, 'فشل في تعديل حالة الصنف المخزني'),
   });
 
   const deleteMutation = useMutation({
@@ -77,8 +77,7 @@ export const InventoryItemsTab = ({ categories }: InventoryItemsTabProps) => {
       setDeletingItem(null);
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في حذف الصنف المخزني');
+      showToast.apiError(err, 'فشل في حذف الصنف المخزني');
     },
   });
 

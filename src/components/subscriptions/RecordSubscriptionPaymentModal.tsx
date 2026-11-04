@@ -12,6 +12,7 @@ import {
 } from '../../modules/subscriptions';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface RecordSubscriptionPaymentModalProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export const RecordSubscriptionPaymentModal = ({
   onClose,
   onSuccess,
 }: RecordSubscriptionPaymentModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [paymentAmount, setPaymentAmount] = useState<string>('');
 
   // If opened with just a subscription, fetch its due payment record
@@ -59,8 +62,7 @@ export const RecordSubscriptionPaymentModal = ({
       onSuccess?.();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل عملية السداد للاشتراك');
+      showToast.apiError(err, 'فشل في تسجيل عملية السداد للاشتراك');
     },
   });
 
@@ -94,11 +96,10 @@ export const RecordSubscriptionPaymentModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div
         className="modal-card"
         style={{ maxWidth: 460, width: '95%' }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

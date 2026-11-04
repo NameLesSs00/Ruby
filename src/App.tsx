@@ -19,6 +19,8 @@ import { PayrollPage } from './pages/PayrollPage';
 import { ExpensesPage } from './pages/ExpensesPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { DuePaymentsPage } from './pages/DuePaymentsPage';
+import { AttendancePage } from './pages/AttendancePage';
+import { CashTransactionsPage } from './pages/CashTransactionsPage';
 import { PosRegisterPage } from './pages/pos/PosRegisterPage';
 import { PosSalesPage } from './pages/pos/PosSalesPage';
 import { PosReturnsPage } from './pages/pos/PosReturnsPage';
@@ -61,6 +63,7 @@ export function App() {
                 <Route path="/admins" element={<AdminsPage />} />
               </Route>
               <Route path="/clients" element={<ClientsPage />} />
+              <Route path="/attendance" element={<AttendancePage />} />
               <Route path="/subscriptions" element={<SubscriptionsPage />} />
               <Route path="/coaches" element={<CoachesPage />} />
               <Route path="/employees" element={<EmployeesPage />} />
@@ -76,6 +79,7 @@ export function App() {
               <Route element={<RoleRoute allowedRoles={['SuperAdmin']} />}>
                 <Route path="/payroll" element={<PayrollPage />} />
                 <Route path="/expenses" element={<ExpensesPage />} />
+                <Route path="/cash-transactions" element={<CashTransactionsPage />} />
               </Route>
             </Route>
           </Route>

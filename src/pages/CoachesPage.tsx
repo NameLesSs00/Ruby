@@ -45,8 +45,8 @@ export const CoachesPage = () => {
         variables.isActive ? 'تم تفعيل حساب المدرب بنجاح' : 'تم تعطيل حساب المدرب بنجاح'
       );
     },
-    onError: () => {
-      showToast.error('فشل في تعديل حالة المدرب');
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في تعديل حالة المدرب');
     },
   });
 

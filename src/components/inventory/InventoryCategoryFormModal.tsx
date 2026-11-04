@@ -11,6 +11,7 @@ import {
 } from '../../modules/inventory';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface InventoryCategoryFormModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export const InventoryCategoryFormModal = ({
   onClose,
   onSuccess,
 }: InventoryCategoryFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [name, setName] = useState('');
 
   useEffect(() => {
@@ -43,8 +46,7 @@ export const InventoryCategoryFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في إضافة التصنيف');
+      showToast.apiError(err, 'فشل في إضافة التصنيف');
     },
   });
 
@@ -57,8 +59,7 @@ export const InventoryCategoryFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تحديث التصنيف');
+      showToast.apiError(err, 'فشل في تحديث التصنيف');
     },
   });
 
@@ -82,8 +83,8 @@ export const InventoryCategoryFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: '440px' }}>
         <div className="modal-header">
           <h3 className="modal-title">
             {editingCategory ? 'تعديل تصنيف المخزون' : 'إضافة تصنيف مخزون جديد'}

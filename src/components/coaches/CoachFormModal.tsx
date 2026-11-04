@@ -9,6 +9,7 @@ import {
 import type { Coach, CreateCoachPayload, UpdateCoachPayload } from '../../modules/coaches';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 export interface CoachFormModalProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ export interface CoachFormModalProps {
 }
 
 export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: CoachFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [hireDate, setHireDate] = useState('');
@@ -46,8 +49,7 @@ export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: Coa
       onSuccess();
     },
     onError: (err: unknown) => {
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(errorMsg || 'فشل في إضافة المدرب، يرجى المحاولة لاحقاً');
+      showToast.apiError(err, 'فشل في إضافة المدرب، يرجى المحاولة لاحقاً');
     },
   });
 
@@ -60,8 +62,7 @@ export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: Coa
       onSuccess();
     },
     onError: (err: unknown) => {
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(errorMsg || 'فشل في تحديث بيانات المدرب');
+      showToast.apiError(err, 'فشل في تحديث بيانات المدرب');
     },
   });
 
@@ -91,8 +92,8 @@ export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: Coa
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card">
         <div className="modal-header">
           <h3 className="modal-title">
             {editingCoach ? 'تعديل بيانات المدرب' : 'إضافة مدرب جديد'}

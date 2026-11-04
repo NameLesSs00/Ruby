@@ -12,6 +12,7 @@ import {
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { ReturnInvoicePicker } from './ReturnInvoicePicker';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface ProcessReturnModalProps {
   isOpen: boolean;
@@ -26,6 +27,8 @@ export const ProcessReturnModal = ({
   onClose,
   onSuccess,
 }: ProcessReturnModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [selectedSale, setSelectedSale] = useState<SaleRecord | null>(null);
   const [invoiceSearchTerm, setInvoiceSearchTerm] = useState('');
   const [returnItemsMap, setReturnItemsMap] = useState<Record<number, number>>({});
@@ -78,8 +81,7 @@ export const ProcessReturnModal = ({
       onClose();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في معالجة طلب المرتجع');
+      showToast.apiError(err, 'فشل في معالجة طلب المرتجع');
     },
   });
 
@@ -131,8 +133,8 @@ export const ProcessReturnModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 1200 }}>
-      <div className="modal-card" style={{ maxWidth: 650 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop" style={{ zIndex: 1200 }}>
+      <div className="modal-card" style={{ maxWidth: 650 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <RotateCcw size={18} color="#ff6b22" />

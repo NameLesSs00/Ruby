@@ -45,8 +45,8 @@ export const SuppliersPage = () => {
         variables.isActive ? 'تم تفعيل حساب المورد بنجاح' : 'تم تعطيل حساب المورد بنجاح'
       );
     },
-    onError: () => {
-      showToast.error('فشل في تعديل حالة المورد');
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في تعديل حالة المورد');
     },
   });
 
@@ -58,8 +58,7 @@ export const SuppliersPage = () => {
       setDeletingSupplier(null);
     },
     onError: (err: unknown) => {
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(errorMsg || 'فشل في حذف المورد');
+      showToast.apiError(err, 'فشل في حذف المورد');
     },
   });
 

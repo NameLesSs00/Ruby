@@ -9,6 +9,7 @@ import {
 } from '../../modules/duePayments';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface CreateExternalDebtModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export const CreateExternalDebtModal = ({
   onClose,
   onSuccess,
 }: CreateExternalDebtModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [payerName, setPayerName] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -43,8 +46,7 @@ export const CreateExternalDebtModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل الدين الخارجي');
+      showToast.apiError(err, 'فشل في تسجيل الدين الخارجي');
     },
   });
 
@@ -78,8 +80,8 @@ export const CreateExternalDebtModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 480 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <UserPlus size={20} color="#ff6b22" />

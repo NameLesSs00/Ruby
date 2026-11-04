@@ -78,8 +78,7 @@ export const SubscriptionAssignmentsTab = () => {
       setDeletingAssignment(null);
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في حذف التعيين');
+      showToast.apiError(err, 'فشل في حذف التعيين');
     },
   });
 

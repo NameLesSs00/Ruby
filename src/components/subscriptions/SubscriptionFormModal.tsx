@@ -15,6 +15,7 @@ import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { SubscriptionFormFields } from './SubscriptionFormFields';
 import type { SelectOption } from '../ui/AsyncSearchableSelect';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface SubscriptionFormModalProps {
   isOpen: boolean;
@@ -39,6 +40,8 @@ export const SubscriptionFormModal = ({
   onClose,
   onSuccess,
 }: SubscriptionFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [selectedClient, setSelectedClient] = useState<SelectOption | null>(null);
   const [clientType, setClientType] = useState<ClientType>('Academy');
   const [selectedCoach, setSelectedCoach] = useState<SelectOption | null>(null);
@@ -96,10 +99,8 @@ export const SubscriptionFormModal = ({
       showToast.success('تم إنشاء الاشتراك بنجاح');
       onSuccess();
     },
-    onError: (err: any) =>
-      showToast.error(
-        err.response?.data?.message || err.response?.data?.error || 'فشل في إنشاء الاشتراك'
-      ),
+    onError: (err: unknown) =>
+      showToast.apiError(err, 'فشل في إنشاء الاشتراك'),
   });
 
   const updateMutation = useMutation({
@@ -110,10 +111,8 @@ export const SubscriptionFormModal = ({
       showToast.success('تم تحديث بيانات الاشتراك بنجاح');
       onSuccess();
     },
-    onError: (err: any) =>
-      showToast.error(
-        err.response?.data?.message || err.response?.data?.error || 'فشل في تحديث الاشتراك'
-      ),
+    onError: (err: unknown) =>
+      showToast.apiError(err, 'فشل في تحديث الاشتراك'),
   });
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -168,11 +167,10 @@ export const SubscriptionFormModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div
         className="modal-card"
         style={{ maxWidth: '640px', width: '95%' }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>

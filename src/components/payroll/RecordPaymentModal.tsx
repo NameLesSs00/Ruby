@@ -5,6 +5,7 @@ import { payrollPaymentsApi, payrollKeys } from '../../modules/payrolls';
 import type { PayrollRecord } from '../../modules/payrolls';
 import type { Employee } from '../../modules/employees';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface RecordPaymentModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   employees,
   onClose,
 }) => {
+  useModalEscape(onClose, isOpen);
   const queryClient = useQueryClient();
   const [amountPaid, setAmountPaid] = useState<number | ''>('');
 
@@ -45,9 +47,8 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       showToast.success(res.message || 'تم تسجيل صرف الراتب بنجاح');
       onClose();
     },
-    onError: (err: any) => {
-      const msg = err.response?.data?.message || err.response?.data || 'تعذر تسجيل صرف الدفعة';
-      showToast.error(typeof msg === 'string' ? msg : 'تعذر تسجيل صرف الدفعة');
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'تعذر تسجيل صرف الدفعة');
     },
   });
 
@@ -65,8 +66,8 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: '500px' }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{

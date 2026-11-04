@@ -57,9 +57,8 @@ export const ExpensesTab = () => {
       queryClient.invalidateQueries({ queryKey: expenseKeys.all });
       setDeletingExpense(null);
     },
-    onError: (err: any) => {
-      const msg = err.response?.data?.message || err.message || 'حدث خطأ أثناء حذف المصروف';
-      showToast.error(msg);
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في حذف قيد المصروف');
     },
   });
 

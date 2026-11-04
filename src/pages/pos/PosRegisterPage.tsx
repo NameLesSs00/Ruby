@@ -118,8 +118,7 @@ export const PosRegisterPage = () => {
       clearCart();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في إتمام عملية البيع');
+      showToast.apiError(err, 'فشل في إتمام عملية البيع');
     },
   });
 

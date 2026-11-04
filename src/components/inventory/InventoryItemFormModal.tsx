@@ -13,6 +13,7 @@ import {
 } from '../../modules/inventory';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface InventoryItemFormModalProps {
   isOpen: boolean;
@@ -29,6 +30,8 @@ export const InventoryItemFormModal = ({
   onClose,
   onSuccess,
 }: InventoryItemFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [name, setName] = useState('');
   const [inventoryCategoryId, setInventoryCategoryId] = useState<number | ''>('');
   const [unit, setUnit] = useState('Piece');
@@ -53,8 +56,7 @@ export const InventoryItemFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في إضافة الصنف المخزني');
+      showToast.apiError(err, 'فشل في إضافة الصنف المخزني');
     },
   });
 
@@ -67,8 +69,7 @@ export const InventoryItemFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تحديث بيانات الصنف المخزني');
+      showToast.apiError(err, 'فشل في تحديث بيانات الصنف المخزني');
     },
   });
 
@@ -108,8 +109,8 @@ export const InventoryItemFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card">
         <div className="modal-header">
           <h3 className="modal-title">
             {editingItem ? 'تعديل صنف مخزني' : 'إضافة صنف مخزني جديد'}

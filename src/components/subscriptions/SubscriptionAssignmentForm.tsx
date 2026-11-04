@@ -43,8 +43,7 @@ export const SubscriptionAssignmentForm = ({
       setNotes('');
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تعيين الكادر للاشتراك');
+      showToast.apiError(err, 'فشل في تعيين الكادر للاشتراك');
     },
   });
 

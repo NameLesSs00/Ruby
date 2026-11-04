@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Copy } from 'lucide-react';
 import { clientsApi, type Client, type ClientBarcodeResponse } from '../../modules/clients';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 const BASE_URL = 'https://swimming1academy.runasp.net';
 
@@ -24,6 +25,8 @@ export interface ClientBarcodeModalProps {
 }
 
 export const ClientBarcodeModal = ({ client, onClose }: ClientBarcodeModalProps) => {
+  useModalEscape(onClose);
+
   const [barcodeData, setBarcodeData] = useState<ClientBarcodeResponse | null>(null);
   const [isLoadingBarcode, setIsLoadingBarcode] = useState(false);
 
@@ -71,11 +74,10 @@ export const ClientBarcodeModal = ({ client, onClose }: ClientBarcodeModalProps)
   const age = calculateAge(client.dateOfBirth);
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div
         className="modal-card"
         style={{ maxWidth: '440px' }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <h3 className="modal-title">بطاقة باركود العميل</h3>

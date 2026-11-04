@@ -40,6 +40,24 @@ export interface ClientBarcodeResponse {
   barcodeUrl: string;
 }
 
+export interface EligibleSubscription {
+  subscriptionId: number;
+  subscriptionType: string;
+  startDate: string;
+  endDate: string;
+  totalSessions: number;
+  usedSessions: number;
+  remainingSessions: number;
+  status: string;
+}
+
+export interface ClientWithEligibleSubscriptions {
+  clientId: number;
+  clientCode: string;
+  fullName: string;
+  eligibleSubscriptions: EligibleSubscription[];
+}
+
 export interface ClientQueryParams {
   page?: number;
   pageSize?: number;
@@ -58,6 +76,7 @@ export const clientKeys = {
   details: () => [...clientKeys.all, 'detail'] as const,
   detail: (id: number) => [...clientKeys.details(), id] as const,
   barcode: (id: number) => [...clientKeys.all, 'barcode', id] as const,
+  byBarcode: (code: string) => [...clientKeys.all, 'by-barcode', code] as const,
 };
 
 export const clientsApi = {
@@ -99,7 +118,7 @@ export const clientsApi = {
     return response.data;
   },
 
-  getByBarcode: async (clientCode: string) => {
+  getByBarcode: async (clientCode: string): Promise<ClientWithEligibleSubscriptions> => {
     const response = await apiClient.get(`/api/clients/by-barcode/${clientCode}`);
     return response.data;
   },

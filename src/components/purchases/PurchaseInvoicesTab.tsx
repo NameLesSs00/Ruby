@@ -81,8 +81,7 @@ export const PurchaseInvoicesTab = () => {
       setDeletingInvoice(null);
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في حذف الفاتورة');
+      showToast.apiError(err, 'فشل في حذف الفاتورة');
     },
   });
 

@@ -9,6 +9,7 @@ import {
 } from '../../modules/pos';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface RecordPosPaymentModalProps {
   duePayment: PosDuePayment | null;
@@ -19,6 +20,8 @@ export const RecordPosPaymentModal = ({
   duePayment,
   onClose,
 }: RecordPosPaymentModalProps) => {
+  useModalEscape(onClose);
+
   const [paymentAmount, setPaymentAmount] = useState<string>('');
 
   useEffect(() => {
@@ -37,8 +40,7 @@ export const RecordPosPaymentModal = ({
       onClose();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل عملية السداد');
+      showToast.apiError(err, 'فشل في تسجيل عملية السداد');
     },
   });
 
@@ -64,8 +66,8 @@ export const RecordPosPaymentModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 440 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 440 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CreditCard size={18} color="#ff6b22" />

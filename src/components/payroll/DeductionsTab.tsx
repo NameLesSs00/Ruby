@@ -10,11 +10,7 @@ import type { Employee } from '../../modules/employees';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { EmployeeNameCell } from './EmployeeNameCell';
-
-function extractErr(err: unknown): string | undefined {
-  return (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data?.error
-    ?? (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-}
+import { useModalEscape } from '../../lib/useModalEscape';
 
 function fmtMonth(iso: string): string {
   return iso ? iso.slice(0, 7) : '—';
@@ -46,8 +42,10 @@ export const DeductionsTab = ({ employees }: { employees: Employee[] }) => {
       showToast.success('تمت إضافة الخصم بنجاح');
       setIsAddOpen(false); setAddEmployeeId(''); setAddMonth(''); setAddAmount(''); setAddDescription('');
     },
-    onError: (err: unknown) => showToast.error(extractErr(err) || 'فشل في إضافة الخصم'),
+    onError: (err: unknown) => showToast.apiError(err, ''),
   });
+
+  useModalEscape(() => setIsAddOpen(false), isAddOpen);
 
   const handleReset = () => { setFilterEmployeeId(''); setFilterMonth(''); };
 
@@ -121,8 +119,8 @@ export const DeductionsTab = ({ employees }: { employees: Employee[] }) => {
       </div>
 
       {isAddOpen && (
-        <div className="modal-backdrop" onClick={() => setIsAddOpen(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop">
+          <div className="modal-card">
             <div className="modal-header">
               <h3 className="modal-title">إضافة خصم جديد</h3>
               <button type="button" className="modal-close-btn" onClick={() => setIsAddOpen(false)}><X size={20} /></button>

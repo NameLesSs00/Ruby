@@ -11,6 +11,7 @@ import {
 } from '../../modules/expenses';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface ExpenseFormModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export const ExpenseFormModal = ({
   onClose,
   onSuccess,
 }: ExpenseFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [amount, setAmount] = useState('');
   const [expenseDate, setExpenseDate] = useState('');
   const [description, setDescription] = useState('');
@@ -54,8 +57,7 @@ export const ExpenseFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل المصروف');
+      showToast.apiError(err, 'فشل في تسجيل المصروف');
     },
   });
 
@@ -68,8 +70,7 @@ export const ExpenseFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تحديث بيانات المصروف');
+      showToast.apiError(err, 'فشل في تحديث بيانات المصروف');
     },
   });
 
@@ -119,8 +120,8 @@ export const ExpenseFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 460 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Receipt size={20} color="#ff6b22" />

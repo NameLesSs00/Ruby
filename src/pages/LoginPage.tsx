@@ -44,12 +44,7 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
       }
       navigate('/dashboard', { replace: true });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      const serverMessage = err.response?.data?.message;
-      showToast.error(
-        serverMessage || 'بيانات الدخول غير صحيحة',
-        'يرجى التأكد من صحة البريد الإلكتروني وكلمة المرور والمحاولة مرة أخرى'
-      );
+      showToast.apiError(error, 'بيانات الدخول غير صحيحة');
     } finally {
       setIsLoading(false);
     }

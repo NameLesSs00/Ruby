@@ -16,10 +16,12 @@ import {
 import { ProcessReturnModal } from '../../components/pos/ProcessReturnModal';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 export const PosReturnsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReturnGroup, setSelectedReturnGroup] = useState<SaleReturnGroup | null>(null);
+  useModalEscape(() => setSelectedReturnGroup(null), Boolean(selectedReturnGroup));
 
   // 1. Fetch Return Groups
   const { data: returnGroups = [], isLoading, isError } = useQuery({
@@ -36,8 +38,7 @@ export const PosReturnsPage = () => {
       showToast.success('تم حذف سجل المرتجع بنجاح');
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في حذف المرتجع');
+      showToast.apiError(err, 'فشل في حذف المرتجع');
     },
   });
 
@@ -191,11 +192,11 @@ export const PosReturnsPage = () => {
 
       {/* Return Group Details Modal */}
       {selectedReturnGroup && (
-        <div className="modal-backdrop" onClick={() => setSelectedReturnGroup(null)}>
+        <div className="modal-backdrop">
           <div
             className="modal-card"
             style={{ maxWidth: 500 }}
-            onClick={(e) => e.stopPropagation()}
+            
           >
             <div className="modal-header">
               <h3 className="modal-title">

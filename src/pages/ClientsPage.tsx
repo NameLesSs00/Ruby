@@ -41,8 +41,8 @@ export const ClientsPage = () => {
         variables.isActive ? 'تم تفعيل حساب العميل بنجاح' : 'تم تعطيل حساب العميل بنجاح'
       );
     },
-    onError: () => {
-      showToast.error('فشل في تعديل حالة العميل');
+    onError: (err: unknown) => {
+      showToast.apiError(err, 'فشل في تعديل حالة العميل');
     },
   });
 

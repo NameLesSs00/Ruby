@@ -8,6 +8,7 @@ import {
   Clock,
   Layers,
 } from 'lucide-react';
+import { useModalEscape } from '../../lib/useModalEscape';
 import {
   dueTypeLabel,
   dueStatusLabel,
@@ -41,6 +42,8 @@ export const DuePaymentDetailsModal = ({
   onClose,
   onRecordPayment,
 }: DuePaymentDetailsModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   if (!isOpen || !duePayment) return null;
 
   const typeStyle = TYPE_STYLES[duePayment.dueType] || TYPE_STYLES.ExternalEntity;
@@ -51,11 +54,10 @@ export const DuePaymentDetailsModal = ({
       : 100;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div
         className="modal-card"
         style={{ maxWidth: 560 }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="modal-header">

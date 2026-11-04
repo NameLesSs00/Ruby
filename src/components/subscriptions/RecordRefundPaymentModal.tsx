@@ -8,6 +8,7 @@ import {
 } from '../../modules/subscriptionCancellations';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface RecordRefundPaymentModalProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ export const RecordRefundPaymentModal = ({
   onClose,
   onSuccess,
 }: RecordRefundPaymentModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [paymentAmount, setPaymentAmount] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -51,8 +54,7 @@ export const RecordRefundPaymentModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل عملية صرف الاسترداد');
+      showToast.apiError(err, 'فشل في تسجيل عملية صرف الاسترداد');
     },
   });
 
@@ -81,11 +83,10 @@ export const RecordRefundPaymentModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div
         className="modal-card"
         style={{ maxWidth: 460 }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

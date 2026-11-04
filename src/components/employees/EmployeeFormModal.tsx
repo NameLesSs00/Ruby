@@ -11,6 +11,7 @@ import {
 } from '../../modules/employees';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface EmployeeFormModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export const EmployeeFormModal = ({
   onClose,
   onSuccess,
 }: EmployeeFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [jobTitle, setJobTitle] = useState('');
@@ -57,8 +60,7 @@ export const EmployeeFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(errorMsg || 'فشل في إضافة الموظف، يرجى المحاولة لاحقاً');
+      showToast.apiError(err, 'فشل في إضافة الموظف، يرجى المحاولة لاحقاً');
     },
   });
 
@@ -71,8 +73,7 @@ export const EmployeeFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(errorMsg || 'فشل في تحديث بيانات الموظف');
+      showToast.apiError(err, 'فشل في تحديث بيانات الموظف');
     },
   });
 
@@ -122,8 +123,8 @@ export const EmployeeFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card">
         <div className="modal-header">
           <h3 className="modal-title">
             {editingEmployee ? 'تعديل بيانات الموظف' : 'إضافة موظف جديد'}

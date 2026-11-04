@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { X, KeyRound } from 'lucide-react';
 import { adminsApi, type AdminUser, type ResetAdminPasswordPayload } from '../../modules/admins';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface AdminPasswordModalProps {
   admin: AdminUser | null;
@@ -16,6 +17,8 @@ export const AdminPasswordModal = ({
   onClose,
   onSuccess,
 }: AdminPasswordModalProps) => {
+  useModalEscape(onClose);
+
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -34,8 +37,7 @@ export const AdminPasswordModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تغيير كلمة المرور');
+      showToast.apiError(err, 'فشل في تغيير كلمة المرور');
     },
   });
 
@@ -63,8 +65,8 @@ export const AdminPasswordModal = ({
   if (!admin) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: '440px' }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <KeyRound size={20} color="#ff6b22" />

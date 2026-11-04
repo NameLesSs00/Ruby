@@ -19,6 +19,8 @@ import {
   Ticket,
   ReceiptText,
   ShoppingCart,
+  UserCheck,
+  Landmark,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import { authApi, decodeJwt } from '../modules/auth';
@@ -54,6 +56,12 @@ const NAV_ITEMS: NavItem[] = [
     path: '/clients',
     label: 'العملاء',
     icon: <Users size={20} className="nav-icon" />,
+    allowedRoles: ['SuperAdmin', 'ReceptionAdmin'],
+  },
+  {
+    path: '/attendance',
+    label: 'تسجيل الحضور',
+    icon: <UserCheck size={20} className="nav-icon" />,
     allowedRoles: ['SuperAdmin', 'ReceptionAdmin'],
   },
   {
@@ -108,6 +116,12 @@ const NAV_ITEMS: NavItem[] = [
     path: '/expenses',
     label: 'المصروفات',
     icon: <Wallet size={20} className="nav-icon" />,
+    allowedRoles: ['SuperAdmin'],
+  },
+  {
+    path: '/cash-transactions',
+    label: 'حسابات الخزينة',
+    icon: <Landmark size={20} className="nav-icon" />,
     allowedRoles: ['SuperAdmin'],
   },
   {

@@ -4,6 +4,7 @@ import { payrollsApi, payrollKeys, type PayrollRecord } from '../../modules/payr
 import type { Employee } from '../../modules/employees';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface DeletePayrollModalProps {
   record: PayrollRecord | null;
@@ -17,6 +18,8 @@ function extractErr(err: unknown): string | undefined {
 }
 
 export const DeletePayrollModal = ({ record, employees, onClose }: DeletePayrollModalProps) => {
+  useModalEscape(onClose);
+
   const deleteMutation = useMutation({
     mutationFn: (id: number) => payrollsApi.delete(id),
     onSuccess: () => {
@@ -36,8 +39,8 @@ export const DeletePayrollModal = ({ record, employees, onClose }: DeletePayroll
   const monthStr = record.payrollMonth ? record.payrollMonth.slice(0, 7) : '—';
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: '440px' }}>
         <div className="modal-header">
           <h3 className="modal-title" style={{ color: '#ef4444' }}>تأكيد حذف المسيرة</h3>
           <button type="button" className="modal-close-btn" onClick={onClose}><X size={20} /></button>

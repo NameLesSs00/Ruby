@@ -11,6 +11,7 @@ import {
 } from '../../modules/clients';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface ClientFormModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ interface ClientFormModalProps {
 }
 
 export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('2000-01-01');
@@ -43,8 +46,7 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
       onClose();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل العميل، يرجى المحاولة لاحقاً');
+      showToast.apiError(err, 'فشل في تسجيل العميل، يرجى المحاولة لاحقاً');
     },
   });
 
@@ -57,8 +59,7 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
       onClose();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تحديث بيانات العميل');
+      showToast.apiError(err, 'فشل في تحديث بيانات العميل');
     },
   });
 
@@ -80,8 +81,8 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card">
         <div className="modal-header">
           <h3 className="modal-title">{editingClient ? 'تعديل بيانات العميل' : 'إضافة عميل جديد'}</h3>
           <button type="button" className="modal-close-btn" onClick={onClose}><X size={20} /></button>

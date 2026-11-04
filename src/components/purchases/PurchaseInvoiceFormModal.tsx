@@ -14,6 +14,7 @@ import { inventoryItemsApi, inventoryKeys } from '../../modules/inventory';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { PurchaseInvoiceLineItems, type FormItemLine } from './PurchaseInvoiceLineItems';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface PurchaseInvoiceFormModalProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export const PurchaseInvoiceFormModal = ({
   onClose,
   onSuccess,
 }: PurchaseInvoiceFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [supplierId, setSupplierId] = useState<number | ''>('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState('');
@@ -93,8 +96,7 @@ export const PurchaseInvoiceFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في إنشاء فاتورة المشتريات');
+      showToast.apiError(err, 'فشل في إنشاء فاتورة المشتريات');
     },
   });
 
@@ -107,8 +109,7 @@ export const PurchaseInvoiceFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تحديث فاتورة المشتريات');
+      showToast.apiError(err, 'فشل في تحديث فاتورة المشتريات');
     },
   });
 
@@ -192,8 +193,8 @@ export const PurchaseInvoiceFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 680 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 680 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <ShoppingCart size={20} color="#ff6b22" />

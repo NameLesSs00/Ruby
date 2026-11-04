@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { AlertTriangle } from 'lucide-react';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface DeleteModalProps {
   isOpen: boolean;
@@ -20,11 +21,13 @@ export const DeleteModal = ({
   onClose,
   onConfirm,
 }: DeleteModalProps) => {
+  useModalEscape(onClose, isOpen && !isPending);
+
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: '440px' }}>
         <div className="modal-header">
           <h3 className="modal-title" style={{ color: '#ef4444' }}>{title}</h3>
           <button type="button" className="modal-close-btn" onClick={onClose}>

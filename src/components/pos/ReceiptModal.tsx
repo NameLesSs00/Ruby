@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { Printer, X, CheckCircle, Receipt as ReceiptIcon } from 'lucide-react';
 import logoImg from '../../assets/logo.png';
 import type { SaleRecord } from '../../modules/pos';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface ReceiptModalProps {
   sale: SaleRecord | null;
@@ -10,6 +11,8 @@ interface ReceiptModalProps {
 }
 
 export const ReceiptModal = ({ sale, isOpen, onClose }: ReceiptModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const receiptPrintRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen || !sale) return null;
@@ -24,11 +27,10 @@ export const ReceiptModal = ({ sale, isOpen, onClose }: ReceiptModalProps) => {
   });
 
   return (
-    <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 1200 }}>
+    <div className="modal-backdrop" style={{ zIndex: 1200 }}>
       <div
         className="modal-card"
         style={{ maxWidth: 440, padding: 0, overflow: 'hidden' }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Action Header */}
         <div

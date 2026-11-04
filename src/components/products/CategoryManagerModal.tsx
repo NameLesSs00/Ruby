@@ -7,6 +7,7 @@ import {
 } from '../../modules/products';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface CategoryManagerModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ interface CategoryManagerModalProps {
 }
 
 export const CategoryManagerModal = ({ isOpen, categories, onClose }: CategoryManagerModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [newCategoryName, setNewCategoryName] = useState('');
 
   const createCategoryMutation = useMutation({
@@ -25,8 +28,7 @@ export const CategoryManagerModal = ({ isOpen, categories, onClose }: CategoryMa
       setNewCategoryName('');
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في إضافة التصنيف');
+      showToast.apiError(err, 'فشل في إضافة التصنيف');
     },
   });
 
@@ -37,7 +39,7 @@ export const CategoryManagerModal = ({ isOpen, categories, onClose }: CategoryMa
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
       showToast.success(variables.isActive ? 'تم تفعيل التصنيف بنجاح' : 'تم تعطيل التصنيف بنجاح');
     },
-    onError: () => showToast.error('فشل في تعديل حالة التصنيف'),
+    onError: (err: unknown) => showToast.apiError(err, 'فشل في تعديل حالة التصنيف'),
   });
 
   const handleAddCategory = (e: FormEvent) => {
@@ -49,8 +51,8 @@ export const CategoryManagerModal = ({ isOpen, categories, onClose }: CategoryMa
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: '480px' }}>
         <div className="modal-header">
           <h3 className="modal-title">إدارة تصنيفات المنتجات</h3>
           <button type="button" className="modal-close-btn" onClick={onClose}><X size={20} /></button>

@@ -58,8 +58,7 @@ export const PurchasePaymentsTab = () => {
       setDeletingPayment(null);
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في حذف دفعة السداد');
+      showToast.apiError(err, 'فشل في حذف دفعة السداد');
     },
   });
 

@@ -15,6 +15,7 @@ import {
 } from '../ui/AsyncSearchableSelect';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface AssignmentFormModalProps {
   isOpen: boolean;
@@ -31,6 +32,8 @@ export const AssignmentFormModal = ({
   onClose,
   onSuccess,
 }: AssignmentFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const isEditing = Boolean(editingAssignment);
 
   const [subscriptionIdInput, setSubscriptionIdInput] = useState<string>('');
@@ -88,8 +91,7 @@ export const AssignmentFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في حفظ التعيين');
+      showToast.apiError(err, 'فشل في حفظ التعيين');
     },
   });
 
@@ -157,8 +159,8 @@ export const AssignmentFormModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 520 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div

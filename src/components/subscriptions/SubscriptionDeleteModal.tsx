@@ -4,6 +4,7 @@ import { subscriptionsApi, subscriptionKeys } from '../../modules/subscriptions'
 import type { Subscription } from '../../modules/subscriptions';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface SubscriptionDeleteModalProps {
   subscription: Subscription | null;
@@ -11,16 +12,13 @@ interface SubscriptionDeleteModalProps {
   onSuccess: () => void;
 }
 
-function extractErr(err: unknown): string | undefined {
-  return (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data?.error
-    ?? (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-}
-
 export const SubscriptionDeleteModal = ({
   subscription,
   onClose,
   onSuccess,
 }: SubscriptionDeleteModalProps) => {
+  useModalEscape(onClose);
+
   const deleteMutation = useMutation({
     mutationFn: (id: number) => subscriptionsApi.delete(id),
     onSuccess: () => {
@@ -29,20 +27,15 @@ export const SubscriptionDeleteModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = extractErr(err);
-      if (msg?.includes('due payment records')) {
-        showToast.error('لا يمكن حذف الاشتراك لوجود سجلات دفعات مالية مرتبطة به');
-      } else {
-        showToast.error(msg || 'تعذر حذف الاشتراك');
-      }
+      showToast.apiError(err, 'تعذر حذف الاشتراك');
     },
   });
 
   if (!subscription) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: '440px' }}>
         <div className="modal-header">
           <h3 className="modal-title" style={{ color: '#ef4444' }}>تأكيد حذف الاشتراك</h3>
           <button type="button" className="modal-close-btn" onClick={onClose}><X size={20} /></button>

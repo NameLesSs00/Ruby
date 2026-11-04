@@ -11,6 +11,7 @@ import {
 } from '../../modules/expenses';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface OtherIncomeFormModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export const OtherIncomeFormModal = ({
   onClose,
   onSuccess,
 }: OtherIncomeFormModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [amount, setAmount] = useState('');
   const [incomeDate, setIncomeDate] = useState('');
   const [description, setDescription] = useState('');
@@ -54,8 +57,7 @@ export const OtherIncomeFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل الإيراد الإضافي');
+      showToast.apiError(err, 'فشل في تسجيل الإيراد الإضافي');
     },
   });
 
@@ -68,8 +70,7 @@ export const OtherIncomeFormModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تحديث بيانات الإيراد');
+      showToast.apiError(err, 'فشل في تحديث بيانات الإيراد');
     },
   });
 
@@ -117,8 +118,8 @@ export const OtherIncomeFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 460 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <TrendingUp size={20} color="#16a34a" />

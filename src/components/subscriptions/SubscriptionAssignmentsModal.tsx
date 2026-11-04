@@ -19,6 +19,7 @@ import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { SubscriptionAssignmentForm } from './SubscriptionAssignmentForm';
 import { AssignmentFormModal } from './AssignmentFormModal';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface SubscriptionAssignmentsModalProps {
   isOpen: boolean;
@@ -31,6 +32,8 @@ export const SubscriptionAssignmentsModal = ({
   subscription,
   onClose,
 }: SubscriptionAssignmentsModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [editingAssignment, setEditingAssignment] =
     useState<SubscriptionCoachAssignment | null>(null);
 
@@ -54,19 +57,17 @@ export const SubscriptionAssignmentsModal = ({
       showToast.success('تم إزالة التعيين بنجاح');
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في إزالة التعيين');
+      showToast.apiError(err, 'فشل في إزالة التعيين');
     },
   });
 
   if (!isOpen || !subscription) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div
         className="modal-card"
         style={{ maxWidth: 620, width: '95%' }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>

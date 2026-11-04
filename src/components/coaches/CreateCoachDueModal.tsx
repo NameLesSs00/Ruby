@@ -12,6 +12,7 @@ import {
 } from '../ui/AsyncSearchableSelect';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
+import { useModalEscape } from '../../lib/useModalEscape';
 
 interface CreateCoachDueModalProps {
   isOpen: boolean;
@@ -26,6 +27,8 @@ export const CreateCoachDueModal = ({
   onClose,
   onSuccess,
 }: CreateCoachDueModalProps) => {
+  useModalEscape(onClose, isOpen);
+
   const [selectedCoach, setSelectedCoach] = useState<SelectOption | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -59,8 +62,7 @@ export const CreateCoachDueModal = ({
       onSuccess();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في تسجيل مستحق المدرب');
+      showToast.apiError(err, 'فشل في تسجيل مستحق المدرب');
     },
   });
 
@@ -106,8 +108,8 @@ export const CreateCoachDueModal = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 480 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div
