@@ -12,7 +12,9 @@ import {
   Truck,
   Package,
   Boxes,
+  ShoppingBag,
   Banknote,
+  Wallet,
   ShieldCheck,
   Ticket,
   ShoppingCart,
@@ -90,9 +92,21 @@ const NAV_ITEMS: NavItem[] = [
     allowedRoles: ['SuperAdmin', 'ShopAdmin'],
   },
   {
+    path: '/purchases',
+    label: 'فواتير المشتريات',
+    icon: <ShoppingBag size={20} className="nav-icon" />,
+    allowedRoles: ['SuperAdmin', 'ShopAdmin'],
+  },
+  {
     path: '/payroll',
     label: 'الرواتب',
     icon: <Banknote size={20} className="nav-icon" />,
+    allowedRoles: ['SuperAdmin'],
+  },
+  {
+    path: '/expenses',
+    label: 'المصروفات',
+    icon: <Wallet size={20} className="nav-icon" />,
     allowedRoles: ['SuperAdmin'],
   },
 ];
