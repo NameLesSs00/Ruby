@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Award,
   Briefcase,
   X,
   Trash2,
+  Edit2,
   Calendar,
   AlertCircle,
 } from 'lucide-react';
@@ -11,10 +13,12 @@ import {
   subscriptionCoachAssignmentsApi,
   coachAssignmentKeys,
   type Subscription,
+  type SubscriptionCoachAssignment,
 } from '../../modules/subscriptions';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { SubscriptionAssignmentForm } from './SubscriptionAssignmentForm';
+import { AssignmentFormModal } from './AssignmentFormModal';
 
 interface SubscriptionAssignmentsModalProps {
   isOpen: boolean;
@@ -27,6 +31,9 @@ export const SubscriptionAssignmentsModal = ({
   subscription,
   onClose,
 }: SubscriptionAssignmentsModalProps) => {
+  const [editingAssignment, setEditingAssignment] =
+    useState<SubscriptionCoachAssignment | null>(null);
+
   const { data: assignmentsData, isLoading } = useQuery({
     queryKey: coachAssignmentKeys.list({ subscriptionId: subscription?.id }),
     queryFn: () =>
@@ -192,32 +199,55 @@ export const SubscriptionAssignmentsModal = ({
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm('هل أنت متأكد من إزالة هذا التعيين؟')) {
-                            deleteMutation.mutate(item.id);
-                          }
-                        }}
-                        style={{
-                          border: 'none',
-                          backgroundColor: '#fee2e2',
-                          color: '#dc2626',
-                          borderRadius: '6px',
-                          padding: '0.35rem 0.5rem',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                        }}
-                        title="حذف التعيين"
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 size={14} />
-                        <span>إزالة</span>
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => setEditingAssignment(item)}
+                          style={{
+                            border: '1px solid #bae6fd',
+                            backgroundColor: '#f0f9ff',
+                            color: '#0284c7',
+                            borderRadius: '6px',
+                            padding: '0.35rem 0.5rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                          }}
+                          title="تعديل التعيين"
+                        >
+                          <Edit2 size={13} />
+                          <span>تعديل</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm('هل أنت متأكد من إزالة هذا التعيين؟')) {
+                              deleteMutation.mutate(item.id);
+                            }
+                          }}
+                          style={{
+                            border: 'none',
+                            backgroundColor: '#fee2e2',
+                            color: '#dc2626',
+                            borderRadius: '6px',
+                            padding: '0.35rem 0.5rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                          }}
+                          title="حذف التعيين"
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 size={13} />
+                          <span>إزالة</span>
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -234,6 +264,18 @@ export const SubscriptionAssignmentsModal = ({
           </button>
         </div>
       </div>
+
+      {/* Edit Assignment Modal */}
+      <AssignmentFormModal
+        isOpen={Boolean(editingAssignment)}
+        editingAssignment={editingAssignment}
+        defaultSubscriptionId={subscription?.id}
+        onClose={() => setEditingAssignment(null)}
+        onSuccess={() => {
+          setEditingAssignment(null);
+          queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all });
+        }}
+      />
     </div>
   );
 };

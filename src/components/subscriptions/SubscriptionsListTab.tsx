@@ -21,6 +21,7 @@ interface SubscriptionsListTabProps {
   onDelete: (sub: Subscription) => void;
   onRecordPayment: (sub: Subscription) => void;
   onManageAssignments: (sub: Subscription) => void;
+  onCancelSubscription: (sub: Subscription) => void;
 }
 
 function fmt(val: number) {
@@ -32,6 +33,7 @@ export const SubscriptionsListTab = ({
   onDelete,
   onRecordPayment,
   onManageAssignments,
+  onCancelSubscription,
 }: SubscriptionsListTabProps) => {
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -278,6 +280,7 @@ export const SubscriptionsListTab = ({
         onDelete={onDelete}
         onRecordPayment={onRecordPayment}
         onManageAssignments={onManageAssignments}
+        onCancelSubscription={onCancelSubscription}
       />
 
       {totalPages > 1 && (

@@ -18,6 +18,7 @@ import { PurchasesPage } from './pages/PurchasesPage';
 import { PayrollPage } from './pages/PayrollPage';
 import { ExpensesPage } from './pages/ExpensesPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
+import { DuePaymentsPage } from './pages/DuePaymentsPage';
 import { PosRegisterPage } from './pages/pos/PosRegisterPage';
 import { PosSalesPage } from './pages/pos/PosSalesPage';
 import { PosReturnsPage } from './pages/pos/PosReturnsPage';
@@ -65,6 +66,9 @@ export function App() {
               <Route path="/employees" element={<EmployeesPage />} />
               <Route path="/suppliers" element={<SuppliersPage />} />
               <Route path="/products" element={<ProductsPage />} />
+              <Route element={<RoleRoute allowedRoles={['SuperAdmin', 'ReceptionAdmin', 'ShopAdmin']} />}>
+                <Route path="/due-payments" element={<DuePaymentsPage />} />
+              </Route>
               <Route element={<RoleRoute allowedRoles={['SuperAdmin', 'ShopAdmin']} />}>
                 <Route path="/inventory" element={<InventoryPage />} />
                 <Route path="/purchases" element={<PurchasesPage />} />

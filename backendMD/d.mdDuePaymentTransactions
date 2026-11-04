@@ -1,0 +1,637 @@
+const items = [
+  "--",
+  "Subscription",
+  "ExternalEntity",
+  "Sale"
+];
+const items = [
+  "--",
+  "Unpaid",
+  "PartiallyPaid",
+  "Paid"
+];
+DuePaymentTransactions
+
+
+POST
+/api/due-payment-transactions
+
+
+Parameters
+Cancel
+Reset
+No parameters
+
+Request body
+
+application/json
+{
+  "duePaymentId": 6,
+  "amountPaid": 10,
+  "idempotencyKey": "q"
+}
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'POST' \
+  'https://swimming1academy.runasp.net/api/due-payment-transactions' \
+  -H 'accept: text/plain' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoic3VwZXJhZG1pbiIsImp0aSI6ImU1NDgxYTMzLWI5NDYtNGUzMC04ZjZmLTFhZTA3MTFjNjBhOCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlN1cGVyQWRtaW4iLCJuYmYiOjE3OTM4MTM4MzIsImV4cCI6MTc5MzgxNDczMiwiaXNzIjoiU3dpbW1pbmdBY2FkZW15LkFwaSIsImF1ZCI6IlN3aW1taW5nQWNhZGVteS5DbGllbnQifQ.4SWFbh-lKPe-MpODehEtaaLP9RsBBF2RC-SgteNph40' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "duePaymentId": 6,
+  "amountPaid": 10,
+  "idempotencyKey": "q"
+}'
+Request URL
+https://swimming1academy.runasp.net/api/due-payment-transactions
+Server response
+Code	Details
+201
+Undocumented
+Response body
+Download
+{
+  "message": "Payment of $10.00 recorded successfully for due payment #6.",
+  "data": {
+    "id": 8,
+    "duePaymentId": 6,
+    "payerName": "Ahmed",
+    "amountPaid": 10,
+    "paymentDate": "2026-11-04T17:41:06.0215414",
+    "cashboxType": "Main"
+  }
+}
+Response headers
+ access-control-allow-origin: * 
+ content-type: application/json; charset=utf-8 
+ date: Wed,04 Nov 2026 17:41:05 GMT 
+ location: https://swimming1academy.runasp.net/api/due-payment-transactions/8 
+ server: Microsoft-IIS/10.0 
+ x-powered-by: ASP.NET 
+Responses
+Code	Description	Links
+200	
+OK
+
+Media type
+
+text/plain
+Controls Accept header.
+Example Value
+Schema
+{
+  "id": 0,
+  "duePaymentId": 0,
+  "payerName": "string",
+  "amountPaid": 0,
+  "paymentDate": "2026-11-04T17:44:09.180Z",
+  "cashboxType": "POS"
+}
+No links
+
+GET
+/api/due-payment-transactions
+
+
+Parameters
+Cancel
+Name	Description
+duePaymentId
+integer($int32)
+(query)
+duePaymentId
+page
+integer($int32)
+(query)
+1
+pageSize
+integer($int32)
+(query)
+10
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'GET' \
+  'https://swimming1academy.runasp.net/api/due-payment-transactions?page=1&pageSize=10' \
+  -H 'accept: text/plain' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoic3VwZXJhZG1pbiIsImp0aSI6ImU1NDgxYTMzLWI5NDYtNGUzMC04ZjZmLTFhZTA3MTFjNjBhOCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlN1cGVyQWRtaW4iLCJuYmYiOjE3OTM4MTM4MzIsImV4cCI6MTc5MzgxNDczMiwiaXNzIjoiU3dpbW1pbmdBY2FkZW15LkFwaSIsImF1ZCI6IlN3aW1taW5nQWNhZGVteS5DbGllbnQifQ.4SWFbh-lKPe-MpODehEtaaLP9RsBBF2RC-SgteNph40'
+Request URL
+https://swimming1academy.runasp.net/api/due-payment-transactions?page=1&pageSize=10
+Server response
+Code	Details
+200	
+Response body
+Download
+{
+  "items": [
+    {
+      "id": 7,
+      "duePaymentId": 6,
+      "payerName": "Ahmed",
+      "amountPaid": 10,
+      "paymentDate": "2026-11-04T17:40:34.727738",
+      "cashboxType": "Main"
+    },
+    {
+      "id": 6,
+      "duePaymentId": 4,
+      "payerName": "حماده فتوح",
+      "amountPaid": 1000,
+      "paymentDate": "2026-11-04T12:12:01.7316524",
+      "cashboxType": "Subscriptions"
+    },
+    {
+      "id": 5,
+      "duePaymentId": 4,
+      "payerName": "حماده فتوح",
+      "amountPaid": 1500,
+      "paymentDate": "2026-11-04T12:10:22.7965429",
+      "cashboxType": "Subscriptions"
+    },
+    {
+      "id": 4,
+      "duePaymentId": 4,
+      "payerName": "حماده فتوح",
+      "amountPaid": 1500,
+      "paymentDate": "2026-11-04T12:08:59.9860851",
+      "cashboxType": "Subscriptions"
+    },
+    {
+      "id": 3,
+      "duePaymentId": 3,
+      "payerName": "Mohamed",
+      "amountPaid": 1000,
+      "paymentDate": "2026-11-04T11:47:54.0130708",
+      "cashboxType": "Subscriptions"
+    },
+    {
+      "id": 2,
+      "duePaymentId": 2,
+      "payerName": "Mohamed",
+      "amountPaid": 400,
+      "paymentDate": "2026-11-04T11:35:38.2335451",
+      "cashboxType": "Subscriptions"
+    },
+    {
+      "id": 1,
+      "duePaymentId": 2,
+      "payerName": "Mohamed",
+      "amountPaid": 300,
+      "paymentDate": "2026-11-04T11:16:44.1272504",
+      "cashboxType": "Subscriptions"
+    }
+  ],
+  "totalCount": 7,
+  "page": 1,
+  "pageSize": 10,
+  "totalPages": 1
+}
+Response headers
+ content-type: application/json; charset=utf-8 
+ date: Wed,04 Nov 2026 17:40:44 GMT 
+ server: Microsoft-IIS/10.0 
+ x-powered-by: ASP.NET 
+Responses
+Code	Description	Links
+200	
+OK
+
+Media type
+
+text/plain
+Controls Accept header.
+Example Value
+Schema
+{
+  "items": [
+    {
+      "id": 0,
+      "duePaymentId": 0,
+      "payerName": "string",
+      "amountPaid": 0,
+      "paymentDate": "2026-11-04T17:44:09.183Z",
+      "cashboxType": "POS"
+    }
+  ],
+  "totalCount": 0,
+  "page": 0,
+  "pageSize": 0,
+  "totalPages": 0
+}
+No links
+
+GET
+/api/due-payment-transactions/{id}
+
+
+Parameters
+Cancel
+Name	Description
+id *
+integer($int32)
+(path)
+7
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'GET' \
+  'https://swimming1academy.runasp.net/api/due-payment-transactions/7' \
+  -H 'accept: text/plain' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoic3VwZXJhZG1pbiIsImp0aSI6ImU1NDgxYTMzLWI5NDYtNGUzMC04ZjZmLTFhZTA3MTFjNjBhOCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlN1cGVyQWRtaW4iLCJuYmYiOjE3OTM4MTM4MzIsImV4cCI6MTc5MzgxNDczMiwiaXNzIjoiU3dpbW1pbmdBY2FkZW15LkFwaSIsImF1ZCI6IlN3aW1taW5nQWNhZGVteS5DbGllbnQifQ.4SWFbh-lKPe-MpODehEtaaLP9RsBBF2RC-SgteNph40'
+Request URL
+https://swimming1academy.runasp.net/api/due-payment-transactions/7
+Server response
+Code	Details
+200	
+Response body
+Download
+{
+  "id": 7,
+  "duePaymentId": 6,
+  "payerName": "Ahmed",
+  "amountPaid": 10,
+  "paymentDate": "2026-11-04T17:40:34.727738",
+  "cashboxType": "Main"
+}
+Response headers
+ content-type: application/json; charset=utf-8 
+ date: Wed,04 Nov 2026 17:42:26 GMT 
+ server: Microsoft-IIS/10.0 
+ x-powered-by: ASP.NET 
+Responses
+Code	Description	Links
+200	
+OK
+
+Media type
+
+text/plain
+Controls Accept header.
+Example Value
+Schema
+{
+  "id": 0,
+  "duePaymentId": 0,
+  "payerName": "string",
+  "amountPaid": 0,
+  "paymentDate": "2026-11-04T17:44:09.184Z",
+  "cashboxType": "POS"
+}
+DuePayments
+
+
+POST
+/api/duepayments
+
+
+Parameters
+Cancel
+Reset
+No parameters
+
+Request body
+
+application/json
+{
+  "payerName": "Ahmed",
+  "description": "budary kinda",
+  "totalAmount": 100,
+  "dueDate": "2026-11-10"
+}
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'POST' \
+  'https://swimming1academy.runasp.net/api/duepayments' \
+  -H 'accept: text/plain' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoic3VwZXJhZG1pbiIsImp0aSI6ImU1NDgxYTMzLWI5NDYtNGUzMC04ZjZmLTFhZTA3MTFjNjBhOCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlN1cGVyQWRtaW4iLCJuYmYiOjE3OTM4MTM4MzIsImV4cCI6MTc5MzgxNDczMiwiaXNzIjoiU3dpbW1pbmdBY2FkZW15LkFwaSIsImF1ZCI6IlN3aW1taW5nQWNhZGVteS5DbGllbnQifQ.4SWFbh-lKPe-MpODehEtaaLP9RsBBF2RC-SgteNph40' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "payerName": "Ahmed",
+  "description": "budary kinda",
+  "totalAmount": 100,
+  "dueDate": "2026-11-10"
+}'
+Request URL
+https://swimming1academy.runasp.net/api/duepayments
+Server response
+Code	Details
+201
+Undocumented
+Response body
+Download
+{
+  "message": "External debt created successfully.",
+  "data": {
+    "id": 6,
+    "dueType": "ExternalEntity",
+    "subscriptionId": null,
+    "saleId": null,
+    "payerName": "Ahmed",
+    "description": "budary kinda",
+    "totalAmount": 100,
+    "paidAmount": 0,
+    "remainingAmount": 100,
+    "dueDate": "2026-11-10",
+    "status": "Unpaid",
+    "createdAt": "2026-11-04T17:38:04.4259449Z"
+  }
+}
+Response headers
+ access-control-allow-origin: * 
+ content-type: application/json; charset=utf-8 
+ date: Wed,04 Nov 2026 17:38:04 GMT 
+ location: https://swimming1academy.runasp.net/api/duepayments/6 
+ server: Microsoft-IIS/10.0 
+ x-powered-by: ASP.NET 
+Responses
+Code	Description	Links
+200	
+OK
+
+Media type
+
+text/plain
+Controls Accept header.
+Example Value
+Schema
+{
+  "message": "string",
+  "data": {
+    "id": 0,
+    "dueType": "Subscription",
+    "subscriptionId": 0,
+    "saleId": 0,
+    "payerName": "string",
+    "description": "string",
+    "totalAmount": 0,
+    "paidAmount": 0,
+    "remainingAmount": 0,
+    "dueDate": "2026-11-04",
+    "status": "Unpaid",
+    "createdAt": "2026-11-04T17:44:09.172Z"
+  }
+}
+No links
+
+GET
+/api/duepayments
+
+
+Parameters
+Cancel
+Name	Description
+dueType
+string
+(query)
+
+--
+status
+string
+(query)
+
+--
+subscriptionId
+integer($int32)
+(query)
+subscriptionId
+saleId
+integer($int32)
+(query)
+saleId
+page
+integer($int32)
+(query)
+1
+pageSize
+integer($int32)
+(query)
+20
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'GET' \
+  'https://swimming1academy.runasp.net/api/duepayments?page=1&pageSize=20' \
+  -H 'accept: text/plain' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoic3VwZXJhZG1pbiIsImp0aSI6ImU1NDgxYTMzLWI5NDYtNGUzMC04ZjZmLTFhZTA3MTFjNjBhOCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlN1cGVyQWRtaW4iLCJuYmYiOjE3OTM4MTM4MzIsImV4cCI6MTc5MzgxNDczMiwiaXNzIjoiU3dpbW1pbmdBY2FkZW15LkFwaSIsImF1ZCI6IlN3aW1taW5nQWNhZGVteS5DbGllbnQifQ.4SWFbh-lKPe-MpODehEtaaLP9RsBBF2RC-SgteNph40'
+Request URL
+https://swimming1academy.runasp.net/api/duepayments?page=1&pageSize=20
+Server response
+Code	Details
+200	
+Response body
+Download
+{
+  "items": [
+    {
+      "id": 6,
+      "dueType": "ExternalEntity",
+      "subscriptionId": null,
+      "saleId": null,
+      "payerName": "Ahmed",
+      "description": "budary kinda",
+      "totalAmount": 100,
+      "paidAmount": 0,
+      "remainingAmount": 100,
+      "dueDate": "2026-11-10",
+      "status": "Unpaid",
+      "createdAt": "2026-11-04T17:38:04.4259449"
+    },
+    {
+      "id": 5,
+      "dueType": "Subscription",
+      "subscriptionId": 4,
+      "saleId": null,
+      "payerName": "حماده فتوح",
+      "description": "Outstanding subscription balance",
+      "totalAmount": 700,
+      "paidAmount": 0,
+      "remainingAmount": 700,
+      "dueDate": null,
+      "status": "Unpaid",
+      "createdAt": "2026-11-04T12:59:56.9840315"
+    },
+    {
+      "id": 4,
+      "dueType": "Subscription",
+      "subscriptionId": 3,
+      "saleId": null,
+      "payerName": "حماده فتوح",
+      "description": "Outstanding subscription balance",
+      "totalAmount": 4000,
+      "paidAmount": 4000,
+      "remainingAmount": 0,
+      "dueDate": null,
+      "status": "Paid",
+      "createdAt": "2026-11-04T12:06:27.9049327"
+    },
+    {
+      "id": 3,
+      "dueType": "Subscription",
+      "subscriptionId": 2,
+      "saleId": null,
+      "payerName": "Mohamed",
+      "description": "Outstanding subscription balance",
+      "totalAmount": 1000,
+      "paidAmount": 1000,
+      "remainingAmount": 0,
+      "dueDate": null,
+      "status": "Paid",
+      "createdAt": "2026-11-04T11:45:01.6030489"
+    },
+    {
+      "id": 2,
+      "dueType": "Subscription",
+      "subscriptionId": 1,
+      "saleId": null,
+      "payerName": "Mohamed",
+      "description": "Outstanding subscription balance",
+      "totalAmount": 700,
+      "paidAmount": 700,
+      "remainingAmount": 0,
+      "dueDate": null,
+      "status": "Paid",
+      "createdAt": "2026-11-04T11:10:42.3730613"
+    },
+    {
+      "id": 1,
+      "dueType": "Sale",
+      "subscriptionId": null,
+      "saleId": 1,
+      "payerName": "علي",
+      "description": "string",
+      "totalAmount": 35,
+      "paidAmount": 0,
+      "remainingAmount": 35,
+      "dueDate": null,
+      "status": "Unpaid",
+      "createdAt": "2026-11-01T21:12:08.6905492"
+    }
+  ],
+  "totalCount": 6,
+  "page": 1,
+  "pageSize": 20,
+  "totalPages": 1
+}
+Response headers
+ content-type: application/json; charset=utf-8 
+ date: Wed,04 Nov 2026 17:39:10 GMT 
+ server: Microsoft-IIS/10.0 
+ x-powered-by: ASP.NET 
+Responses
+Code	Description	Links
+200	
+OK
+
+Media type
+
+text/plain
+Controls Accept header.
+Example Value
+Schema
+{
+  "items": [
+    {
+      "id": 0,
+      "dueType": "Subscription",
+      "subscriptionId": 0,
+      "saleId": 0,
+      "payerName": "string",
+      "description": "string",
+      "totalAmount": 0,
+      "paidAmount": 0,
+      "remainingAmount": 0,
+      "dueDate": "2026-11-04",
+      "status": "Unpaid",
+      "createdAt": "2026-11-04T17:44:09.176Z"
+    }
+  ],
+  "totalCount": 0,
+  "page": 0,
+  "pageSize": 0,
+  "totalPages": 0
+}
+No links
+
+GET
+/api/duepayments/{id}
+
+
+Parameters
+Cancel
+Name	Description
+id *
+integer($int32)
+(path)
+6
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'GET' \
+  'https://swimming1academy.runasp.net/api/duepayments/6' \
+  -H 'accept: text/plain' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoic3VwZXJhZG1pbiIsImp0aSI6ImU1NDgxYTMzLWI5NDYtNGUzMC04ZjZmLTFhZTA3MTFjNjBhOCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlN1cGVyQWRtaW4iLCJuYmYiOjE3OTM4MTM4MzIsImV4cCI6MTc5MzgxNDczMiwiaXNzIjoiU3dpbW1pbmdBY2FkZW15LkFwaSIsImF1ZCI6IlN3aW1taW5nQWNhZGVteS5DbGllbnQifQ.4SWFbh-lKPe-MpODehEtaaLP9RsBBF2RC-SgteNph40'
+Request URL
+https://swimming1academy.runasp.net/api/duepayments/6
+Server response
+Code	Details
+200	
+Response body
+Download
+{
+  "id": 6,
+  "dueType": "ExternalEntity",
+  "subscriptionId": null,
+  "saleId": null,
+  "payerName": "Ahmed",
+  "description": "budary kinda",
+  "totalAmount": 100,
+  "paidAmount": 0,
+  "remainingAmount": 100,
+  "dueDate": "2026-11-10",
+  "status": "Unpaid",
+  "createdAt": "2026-11-04T17:38:04.4259449"
+}
+Response headers
+ content-type: application/json; charset=utf-8 
+ date: Wed,04 Nov 2026 17:39:19 GMT 
+ server: Microsoft-IIS/10.0 
+ x-powered-by: ASP.NET 
+Responses
+Code	Description	Links
+200	
+OK
+
+Media type
+
+text/plain
+Controls Accept header.
+Example Value
+Schema
+{
+  "id": 0,
+  "dueType": "Subscription",
+  "subscriptionId": 0,
+  "saleId": 0,
+  "payerName": "string",
+  "description": "string",
+  "totalAmount": 0,
+  "paidAmount": 0,
+  "remainingAmount": 0,
+  "dueDate": "2026-11-04",
+  "status": "Unpaid",
+  "createdAt": "2026-11-04T17:44:09.179Z"
+}

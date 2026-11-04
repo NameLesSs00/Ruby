@@ -5,6 +5,7 @@ import {
   subscriptionDuePaymentsApi,
   subscriptionDuePaymentKeys,
   subscriptionKeys,
+  generateTimeIdempotencyKey,
   type SubscriptionDuePayment,
   type Subscription,
   type RecordSubscriptionPaymentPayload,
@@ -83,9 +84,12 @@ export const RecordSubscriptionPaymentModal = ({
       return;
     }
 
+    const idempotencyKey = generateTimeIdempotencyKey();
+
     recordPaymentMutation.mutate({
       duePaymentId: activeDuePayment.id,
       amountPaid: amountNum,
+      idempotencyKey,
     });
   };
 

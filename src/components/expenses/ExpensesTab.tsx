@@ -3,10 +3,6 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Search,
   Plus,
-  Edit2,
-  Trash2,
-  AlertCircle,
-  Calendar,
   DollarSign,
   Layers,
 } from 'lucide-react';
@@ -19,7 +15,7 @@ import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { ExpenseFormModal } from './ExpenseFormModal';
 import { DeleteModal } from '../ui/DeleteModal';
-import { PaginationBar } from '../ui/PaginationBar';
+import { ExpensesTable } from './ExpensesTable';
 
 export const ExpensesTab = () => {
   const [page, setPage] = useState(1);
@@ -50,21 +46,20 @@ export const ExpensesTab = () => {
   }, [rawItems, searchTerm]);
 
   // Aggregate metrics
-  const totalAmountSum = useMemo(() => {
-    return rawItems.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  }, [rawItems]);
+  const totalPageExpenses = useMemo(() => {
+    return filteredItems.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+  }, [filteredItems]);
 
-  // Delete Mutation
   const deleteMutation = useMutation({
     mutationFn: (id: number) => expensesApi.delete(id),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: expenseKeys.lists() });
-      showToast.success(res.message || 'تم حذف المصروف بنجاح');
+    onSuccess: () => {
+      showToast.success('تم حذف قيد المصروف بنجاح');
+      queryClient.invalidateQueries({ queryKey: expenseKeys.all });
       setDeletingExpense(null);
     },
-    onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      showToast.error(msg || 'فشل في حذف المصروف');
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.message || 'حدث خطأ أثناء حذف المصروف';
+      showToast.error(msg);
     },
   });
 
@@ -84,36 +79,36 @@ export const ExpensesTab = () => {
     }
   };
 
-  const cardStyle: React.CSSProperties = {
-    backgroundColor: '#ffffff',
-    padding: '1rem 1.25rem',
-    borderRadius: 'var(--radius-md)',
-    boxShadow: 'var(--shadow-sm)',
-    border: '1px solid #e2e8f0',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-  };
-
   return (
     <>
       {/* Metric Summary Cards */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
           gap: '1rem',
           marginBottom: '1.25rem',
         }}
       >
-        <div style={cardStyle}>
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            padding: '1.1rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-sm)',
+            border: '1px solid #e2e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+          }}
+        >
           <div
             style={{
               width: 44,
               height: 44,
-              borderRadius: '10px',
-              backgroundColor: '#fee2e2',
-              color: '#ef4444',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: '#fff1f2',
+              color: '#e11d48',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -122,20 +117,31 @@ export const ExpensesTab = () => {
             <DollarSign size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>إجمالي المصروفات (الصفحة)</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#b91c1c' }}>
-              {totalAmountSum.toLocaleString('ar-EG')}{' '}
-              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>ج.م</span>
+            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>إجمالي مصروفات الصفحة</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0d1527' }}>
+              {totalPageExpenses.toLocaleString('ar-EG')}{' '}
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>ج.م</span>
             </div>
           </div>
         </div>
 
-        <div style={cardStyle}>
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            padding: '1.1rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-sm)',
+            border: '1px solid #e2e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+          }}
+        >
           <div
             style={{
               width: 44,
               height: 44,
-              borderRadius: '10px',
+              borderRadius: 'var(--radius-md)',
               backgroundColor: '#eff6ff',
               color: '#2563eb',
               display: 'flex',
@@ -208,121 +214,19 @@ export const ExpensesTab = () => {
         </button>
       </div>
 
-      {/* Data Table */}
-      <div className="data-table-wrapper" style={{ flex: 1, backgroundColor: '#ffffff' }}>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>تاريخ ووقت الصرف</th>
-              <th>البيان والسبب</th>
-              <th>المبلغ المنصرف</th>
-              <th>تاريخ الإضافة بالنظام</th>
-              <th style={{ textAlign: 'center' }}>الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={5} className="table-loading-row">
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div className="spinner" style={{ borderTopColor: '#ff6b22', borderColor: 'rgba(255,107,34,0.2)' }} />
-                    <span>جاري تحميل سجل المصروفات...</span>
-                  </div>
-                </td>
-              </tr>
-            ) : isError ? (
-              <tr>
-                <td colSpan={5} className="table-empty-row" style={{ color: '#ef4444' }}>
-                  <AlertCircle size={22} style={{ margin: '0 auto 0.5rem', display: 'block' }} />
-                  <span>تعذر تحميل سجل المصروفات، يرجى المحاولة لاحقاً</span>
-                </td>
-              </tr>
-            ) : filteredItems.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="table-empty-row">
-                  <span>لا توجد مصروفات مسجلة حالياً {searchTerm ? 'مطابقة للبحث' : ''}</span>
-                </td>
-              </tr>
-            ) : (
-              filteredItems.map((item) => {
-                const expenseDateFormatted = new Date(item.expenseDate).toLocaleString('ar-EG', {
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
-                });
-                const createdAtFormatted = item.createdAt
-                  ? new Date(item.createdAt).toLocaleDateString('ar-EG')
-                  : '—';
-
-                return (
-                  <tr key={item.id}>
-                    <td>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', color: '#0d1527', fontWeight: 600 }}>
-                        <Calendar size={14} color="#94a3b8" />
-                        {expenseDateFormatted}
-                      </span>
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 700, color: '#1e293b' }}>
-                        {item.description || '—'}
-                      </span>
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 900, color: '#b91c1c', fontSize: '0.95rem' }}>
-                        {item.amount.toLocaleString('ar-EG')}{' '}
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>ج.م</span>
-                      </span>
-                    </td>
-                    <td style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                      {createdAtFormatted}
-                    </td>
-                    <td>
-                      <div className="table-actions" style={{ justifyContent: 'center', gap: '0.45rem' }}>
-                        <button
-                          type="button"
-                          className="btn-icon-action"
-                          title="تعديل المصروف"
-                          onClick={() => handleOpenEditModal(item)}
-                          style={{
-                            color: '#0284c7',
-                            backgroundColor: '#f0f9ff',
-                            border: '1px solid #bae6fd',
-                          }}
-                        >
-                          <Edit2 size={15} />
-                        </button>
-                        <button
-                          type="button"
-                          className="btn-icon-action"
-                          title="حذف المصروف"
-                          onClick={() => setDeletingExpense(item)}
-                          style={{
-                            color: '#ef4444',
-                            backgroundColor: '#fef2f2',
-                            border: '1px solid #fecaca',
-                          }}
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-
-        {totalPages > 1 && (
-          <PaginationBar
-            page={page}
-            totalPages={totalPages}
-            totalCount={totalCount}
-            label="إجمالي بنود المصروفات"
-            isLoading={isLoading}
-            onPageChange={setPage}
-          />
-        )}
-      </div>
+      {/* Data Table Component */}
+      <ExpensesTable
+        isLoading={isLoading}
+        isError={isError}
+        items={filteredItems}
+        searchTerm={searchTerm}
+        page={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        onPageChange={setPage}
+        onEdit={handleOpenEditModal}
+        onDelete={setDeletingExpense}
+      />
 
       {/* Expense Form Modal */}
       <ExpenseFormModal

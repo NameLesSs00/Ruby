@@ -6,6 +6,7 @@ import {
   Award,
   CreditCard,
   UserCheck,
+  Ban,
 } from 'lucide-react';
 import {
   type Subscription,
@@ -25,6 +26,7 @@ interface SubscriptionsTableProps {
   onDelete: (subscription: Subscription) => void;
   onRecordPayment?: (subscription: Subscription) => void;
   onManageAssignments?: (subscription: Subscription) => void;
+  onCancelSubscription?: (subscription: Subscription) => void;
 }
 
 function fmt(val: number) {
@@ -39,6 +41,7 @@ export const SubscriptionsTable = ({
   onDelete,
   onRecordPayment,
   onManageAssignments,
+  onCancelSubscription,
 }: SubscriptionsTableProps) => {
   return (
     <div className="data-table-wrapper">
@@ -204,6 +207,18 @@ export const SubscriptionsTable = ({
                           style={{ color: '#0284c7', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd' }}
                         >
                           <UserCheck size={15} />
+                        </button>
+                      )}
+
+                      {onCancelSubscription && sub.status !== 'Cancelled' && (
+                        <button
+                          type="button"
+                          className="btn-icon-action"
+                          title="إلغاء الاشتراك وتسجيل استرداد"
+                          onClick={() => onCancelSubscription(sub)}
+                          style={{ color: '#dc2626', backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}
+                        >
+                          <Ban size={15} />
                         </button>
                       )}
 

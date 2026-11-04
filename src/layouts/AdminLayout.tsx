@@ -17,6 +17,7 @@ import {
   Wallet,
   ShieldCheck,
   Ticket,
+  ReceiptText,
   ShoppingCart,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
@@ -108,6 +109,12 @@ const NAV_ITEMS: NavItem[] = [
     label: 'المصروفات',
     icon: <Wallet size={20} className="nav-icon" />,
     allowedRoles: ['SuperAdmin'],
+  },
+  {
+    path: '/due-payments',
+    label: 'الديون والمستحقات',
+    icon: <ReceiptText size={20} className="nav-icon" />,
+    allowedRoles: ['SuperAdmin', 'ReceptionAdmin', 'ShopAdmin'],
   },
 ];
 

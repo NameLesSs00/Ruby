@@ -55,18 +55,7 @@ export interface CreateSubscriptionPayload {
   notes?: string | null;
 }
 
-export interface UpdateSubscriptionPayload {
-  commissionCoachId?: number | null;
-  clientType: ClientType;
-  subscriptionType: SubscriptionType;
-  startDate: string;
-  endDate: string;
-  totalSessions: number;
-  amount: number;
-  discountAmount: number;
-  paidAmount: number;
-  notes?: string | null;
-}
+export type UpdateSubscriptionPayload = Omit<CreateSubscriptionPayload, 'clientId'>;
 
 export interface SubscriptionQueryParams {
   clientId?: number;
@@ -138,9 +127,18 @@ export interface DuePaymentListResponse {
   totalPages: number;
 }
 
+export function generateTimeIdempotencyKey(prefix = 'sub_pay'): string {
+  const timestamp = Date.now();
+  const uuid = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : Math.random().toString(36).substring(2, 11);
+  return `${prefix}_${timestamp}_${uuid}`;
+}
+
 export interface RecordSubscriptionPaymentPayload {
   duePaymentId: number;
   amountPaid: number;
+  idempotencyKey: string;
 }
 
 export interface RecordSubscriptionPaymentResponse {
@@ -219,22 +217,10 @@ export const subscriptionsApi = {
     });
     return res.data;
   },
-  getById: async (id: number): Promise<Subscription> => {
-    const res = await apiClient.get<Subscription>(`/api/subscriptions/${id}`);
-    return res.data;
-  },
-  create: async (payload: CreateSubscriptionPayload): Promise<ApiResponse<Subscription>> => {
-    const res = await apiClient.post<ApiResponse<Subscription>>('/api/subscriptions', payload);
-    return res.data;
-  },
-  update: async (id: number, payload: UpdateSubscriptionPayload): Promise<ApiResponse<Subscription>> => {
-    const res = await apiClient.put<ApiResponse<Subscription>>(`/api/subscriptions/${id}`, payload);
-    return res.data;
-  },
-  delete: async (id: number): Promise<ApiResponse<Subscription>> => {
-    const res = await apiClient.delete<ApiResponse<Subscription>>(`/api/subscriptions/${id}`);
-    return res.data;
-  },
+  getById: async (id: number): Promise<Subscription> => (await apiClient.get<Subscription>(`/api/subscriptions/${id}`)).data,
+  create: async (payload: CreateSubscriptionPayload): Promise<ApiResponse<Subscription>> => (await apiClient.post<ApiResponse<Subscription>>('/api/subscriptions', payload)).data,
+  update: async (id: number, payload: UpdateSubscriptionPayload): Promise<ApiResponse<Subscription>> => (await apiClient.put<ApiResponse<Subscription>>(`/api/subscriptions/${id}`, payload)).data,
+  delete: async (id: number): Promise<ApiResponse<Subscription>> => (await apiClient.delete<ApiResponse<Subscription>>(`/api/subscriptions/${id}`)).data,
 };
 
 export const subscriptionCoachAssignmentsApi = {
@@ -303,56 +289,52 @@ export const subscriptionDuePaymentsApi = {
   },
 };
 
-export function clientTypeLabel(type: ClientType): string {
-  return type === 'Academy' ? 'أكاديمية' : 'خارجي';
-}
+const CLIENT_TYPE_MAP: Record<ClientType, string> = {
+  Academy: 'أكاديمية',
+  External: 'خارجي',
+};
+export const clientTypeLabel = (type: ClientType): string => CLIENT_TYPE_MAP[type] || type;
 
-export function subscriptionTypeLabel(type: SubscriptionType): string {
-  switch (type) {
-    case 'Sessions': return 'بالحصص';
-    case 'Duration': return 'بالمدة الزمنية';
-    case 'PrivateTraining': return 'تدريب خاص';
-  }
-}
+const SUB_TYPE_MAP: Record<SubscriptionType, string> = {
+  Sessions: 'بالحصص',
+  Duration: 'بالمدة الزمنية',
+  PrivateTraining: 'تدريب خاص',
+};
+export const subscriptionTypeLabel = (type: SubscriptionType): string => SUB_TYPE_MAP[type] || type;
 
-export function subscriptionStatusLabel(status: SubscriptionStatus): string {
-  switch (status) {
-    case 'Active': return 'نشط';
-    case 'Completed': return 'مكتمل';
-    case 'Expired': return 'منتهي';
-    case 'Cancelled': return 'ملغي';
-  }
-}
+const SUB_STATUS_LABEL_MAP: Record<SubscriptionStatus, string> = {
+  Active: 'نشط',
+  Completed: 'مكتمل',
+  Expired: 'منتهي',
+  Cancelled: 'ملغي',
+};
+export const subscriptionStatusLabel = (status: SubscriptionStatus): string => SUB_STATUS_LABEL_MAP[status] || status;
 
-export function subscriptionStatusBadgeClass(status: SubscriptionStatus): string {
-  switch (status) {
-    case 'Active': return 'active';
-    case 'Completed': return 'completed';
-    case 'Expired': return 'inactive';
-    case 'Cancelled': return 'cancelled';
-  }
-}
+const SUB_STATUS_BADGE_MAP: Record<SubscriptionStatus, string> = {
+  Active: 'active',
+  Completed: 'completed',
+  Expired: 'inactive',
+  Cancelled: 'cancelled',
+};
+export const subscriptionStatusBadgeClass = (status: SubscriptionStatus): string => SUB_STATUS_BADGE_MAP[status] || 'inactive';
 
-export function paymentStatusLabel(status: PaymentStatus): string {
-  switch (status) {
-    case 'Paid': return 'مدفوع بالكامل';
-    case 'PartiallyPaid': return 'مدفوع جزئياً';
-    case 'Unpaid': return 'غير مدفوع';
-  }
-}
+const PAYMENT_STATUS_LABEL_MAP: Record<PaymentStatus, string> = {
+  Paid: 'مدفوع بالكامل',
+  PartiallyPaid: 'مدفوع جزئياً',
+  Unpaid: 'غير مدفوع',
+};
+export const paymentStatusLabel = (status: PaymentStatus): string => PAYMENT_STATUS_LABEL_MAP[status] || status;
 
-export function paymentStatusBadgeClass(status: PaymentStatus): string {
-  switch (status) {
-    case 'Paid': return 'active';
-    case 'PartiallyPaid': return 'partial';
-    case 'Unpaid': return 'inactive';
-  }
-}
+const PAYMENT_STATUS_BADGE_MAP: Record<PaymentStatus, string> = {
+  Paid: 'active',
+  PartiallyPaid: 'partial',
+  Unpaid: 'inactive',
+};
+export const paymentStatusBadgeClass = (status: PaymentStatus): string => PAYMENT_STATUS_BADGE_MAP[status] || 'inactive';
 
-export function duePaymentStatusLabel(status: DuePaymentStatus): string {
-  switch (status) {
-    case 'Paid': return 'مسدد بالكامل';
-    case 'PartiallyPaid': return 'مدفوع جزئياً';
-    case 'Unpaid': return 'غير مدفوع';
-  }
-}
+const DUE_PAYMENT_STATUS_MAP: Record<DuePaymentStatus, string> = {
+  Paid: 'مسدد بالكامل',
+  PartiallyPaid: 'مدفوع جزئياً',
+  Unpaid: 'غير مدفوع',
+};
+export const duePaymentStatusLabel = (status: DuePaymentStatus): string => DUE_PAYMENT_STATUS_MAP[status] || status;

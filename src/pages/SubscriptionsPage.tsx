@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Ticket, Plus, Clock, History } from 'lucide-react';
+import { Ticket, Plus, Clock, History, Ban, Award } from 'lucide-react';
 import {
   subscriptionKeys,
   type Subscription,
@@ -7,20 +7,24 @@ import {
 } from '../modules/subscriptions';
 import { queryClient } from '../lib/query-client';
 import { SubscriptionsListTab } from '../components/subscriptions/SubscriptionsListTab';
+import { SubscriptionAssignmentsTab } from '../components/subscriptions/SubscriptionAssignmentsTab';
 import { SubscriptionDebtsTab } from '../components/subscriptions/SubscriptionDebtsTab';
 import { SubscriptionHistoryTab } from '../components/subscriptions/SubscriptionHistoryTab';
+import { SubscriptionCancellationsTab } from '../components/subscriptions/SubscriptionCancellationsTab';
 import { SubscriptionFormModal } from '../components/subscriptions/SubscriptionFormModal';
 import { SubscriptionDeleteModal } from '../components/subscriptions/SubscriptionDeleteModal';
+import { CancelSubscriptionModal } from '../components/subscriptions/CancelSubscriptionModal';
 import { RecordSubscriptionPaymentModal } from '../components/subscriptions/RecordSubscriptionPaymentModal';
 import { SubscriptionAssignmentsModal } from '../components/subscriptions/SubscriptionAssignmentsModal';
 
-type SubTab = 'subscriptions' | 'debts' | 'history';
+type SubTab = 'subscriptions' | 'assignments' | 'debts' | 'history' | 'cancellations';
 
 export const SubscriptionsPage = () => {
   const [activeTab, setActiveTab] = useState<SubTab>('subscriptions');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
+  const [cancellingSubscription, setCancellingSubscription] = useState<Subscription | null>(null);
   const [payingSubscription, setPayingSubscription] = useState<Subscription | null>(null);
   const [payingDuePayment, setPayingDuePayment] = useState<SubscriptionDuePayment | null>(null);
   const [assignmentSubscription, setAssignmentSubscription] = useState<Subscription | null>(null);
@@ -41,8 +45,10 @@ export const SubscriptionsPage = () => {
 
   const TABS: { key: SubTab; label: string; icon: React.ReactNode }[] = [
     { key: 'subscriptions', label: 'سجل الاشتراكات', icon: <Ticket size={16} /> },
+    { key: 'assignments', label: 'تعيينات الكادر والمدربين', icon: <Award size={16} /> },
     { key: 'debts', label: 'الديون والمستحقات', icon: <Clock size={16} /> },
     { key: 'history', label: 'سجل التحصيلات', icon: <History size={16} /> },
+    { key: 'cancellations', label: 'سجل الإلغاء والاسترداد', icon: <Ban size={16} /> },
   ];
 
   return (
@@ -78,42 +84,20 @@ export const SubscriptionsPage = () => {
               إدارة الاشتراكات والمستحقات
             </h1>
             <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>
-              متابعة اشتراكات العملاء، الكادر التدريبي، ديون الاشتراكات وسجل التحصيلات
+              متابعة اشتراكات العملاء، الكادر التدريبي، ديون الاشتراكات وسجل الإلغاءات
             </p>
           </div>
         </div>
 
         {/* Tab Switcher & Action */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <div
-            style={{
-              display: 'flex',
-              backgroundColor: '#ffffff',
-              borderRadius: 'var(--radius-md)',
-              padding: '0.25rem',
-              boxShadow: 'var(--shadow-sm)',
-              border: '1px solid #e2e8f0',
-            }}
-          >
+          <div className="tab-switcher">
             {TABS.map((t) => (
               <button
                 key={t.key}
                 type="button"
+                className={`tab-btn ${activeTab === t.key ? 'active' : ''}`}
                 onClick={() => setActiveTab(t.key)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  backgroundColor: activeTab === t.key ? '#ff6b22' : 'transparent',
-                  color: activeTab === t.key ? '#ffffff' : '#64748b',
-                }}
               >
                 {t.icon}
                 <span>{t.label}</span>
@@ -137,12 +121,15 @@ export const SubscriptionsPage = () => {
           onDelete={(sub) => setDeletingSubscription(sub)}
           onRecordPayment={(sub) => setPayingSubscription(sub)}
           onManageAssignments={(sub) => setAssignmentSubscription(sub)}
+          onCancelSubscription={(sub) => setCancellingSubscription(sub)}
         />
       )}
+      {activeTab === 'assignments' && <SubscriptionAssignmentsTab />}
       {activeTab === 'debts' && (
         <SubscriptionDebtsTab onSelectForPayment={(item) => setPayingDuePayment(item)} />
       )}
       {activeTab === 'history' && <SubscriptionHistoryTab />}
+      {activeTab === 'cancellations' && <SubscriptionCancellationsTab />}
 
       {/* Modals */}
       <SubscriptionFormModal
@@ -159,6 +146,15 @@ export const SubscriptionsPage = () => {
         onClose={() => setDeletingSubscription(null)}
         onSuccess={() => {
           setDeletingSubscription(null);
+          refreshSubscriptions();
+        }}
+      />
+      <CancelSubscriptionModal
+        isOpen={Boolean(cancellingSubscription)}
+        subscription={cancellingSubscription}
+        onClose={() => setCancellingSubscription(null)}
+        onSuccess={() => {
+          setCancellingSubscription(null);
           refreshSubscriptions();
         }}
       />
