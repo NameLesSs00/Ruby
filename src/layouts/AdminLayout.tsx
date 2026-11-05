@@ -254,7 +254,7 @@ export const AdminLayout = () => {
                   gap: '0.4rem',
                   padding: '0.45rem 0.85rem',
                   borderRadius: 'var(--radius-sm)',
-                  backgroundColor: '#ff6b22',
+                  backgroundColor: '#0d1527',
                   color: '#ffffff',
                   fontSize: '0.85rem',
                   fontWeight: 700,
@@ -262,8 +262,8 @@ export const AdminLayout = () => {
                   boxShadow: 'var(--shadow-sm)',
                   transition: 'background-color 0.2s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e05612')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ff6b22')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0d1527')}
                 title="فتح شاشة نقطة البيع POS"
               >
                 <ShoppingCart size={16} />

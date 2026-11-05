@@ -111,15 +111,15 @@ export const PosProductCatalog = ({
               padding: '0.5rem 1rem',
               borderRadius: '999px',
               border: '1px solid',
-              borderColor: selectedCategoryId === 'all' ? '#ff6b22' : '#cbd5e1',
-              backgroundColor: selectedCategoryId === 'all' ? '#ff6b22' : '#ffffff',
+              borderColor: selectedCategoryId === 'all' ? '#0d1527' : '#cbd5e1',
+              backgroundColor: selectedCategoryId === 'all' ? '#0d1527' : '#ffffff',
               color: selectedCategoryId === 'all' ? '#ffffff' : '#334155',
               fontSize: '0.85rem',
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
               transition: 'all 0.15s ease',
-              boxShadow: selectedCategoryId === 'all' ? '0 2px 6px rgba(255,107,34,0.3)' : 'var(--shadow-sm)',
+              boxShadow: selectedCategoryId === 'all' ? '0 2px 6px rgba(13,21,39,0.3)' : 'var(--shadow-sm)',
             }}
           >
             <Layers size={14} />
@@ -138,15 +138,15 @@ export const PosProductCatalog = ({
                 padding: '0.5rem 1rem',
                 borderRadius: '999px',
                 border: '1px solid',
-                borderColor: selectedCategoryId === cat.id ? '#ff6b22' : '#cbd5e1',
-                backgroundColor: selectedCategoryId === cat.id ? '#ff6b22' : '#ffffff',
+                borderColor: selectedCategoryId === cat.id ? '#0d1527' : '#cbd5e1',
+                backgroundColor: selectedCategoryId === cat.id ? '#0d1527' : '#ffffff',
                 color: selectedCategoryId === cat.id ? '#ffffff' : '#334155',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.15s ease',
-                boxShadow: selectedCategoryId === cat.id ? '0 2px 6px rgba(255,107,34,0.3)' : 'var(--shadow-sm)',
+                boxShadow: selectedCategoryId === cat.id ? '0 2px 6px rgba(13,21,39,0.3)' : 'var(--shadow-sm)',
               }}
             >
               <span>{cat.name}</span>
@@ -276,7 +276,7 @@ export const PosProductCatalog = ({
                         height: 32,
                         borderRadius: '8px',
                         border: 'none',
-                        backgroundColor: inCartItem ? '#ff6b22' : '#f1f5f9',
+                        backgroundColor: inCartItem ? '#0d1527' : '#f1f5f9',
                         color: inCartItem ? '#ffffff' : '#0d1527',
                         display: 'flex',
                         alignItems: 'center',

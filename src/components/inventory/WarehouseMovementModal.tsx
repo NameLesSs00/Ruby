@@ -234,6 +234,7 @@ export const WarehouseMovementModal = ({
             <WarehouseMovementItemRows
               items={items}
               inventoryItems={inventoryItems}
+              movementType={movementType}
               onAddRow={handleAddItemRow}
               onRemoveRow={handleRemoveItemRow}
               onItemChange={handleItemChange}

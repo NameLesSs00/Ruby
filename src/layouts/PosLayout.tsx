@@ -133,9 +133,10 @@ export const PosLayout = () => {
               fontWeight: 700,
               textDecoration: 'none',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              backgroundColor: isActive ? '#ff6b22' : 'transparent',
+              backgroundColor: isActive ? '#0d1527' : 'transparent',
               color: isActive ? '#ffffff' : '#cbd5e1',
-              boxShadow: isActive ? '0 2px 6px rgba(255, 107, 34, 0.35)' : 'none',
+              border: isActive ? '1px solid #38bdf8' : '1px solid transparent',
+              boxShadow: isActive ? '0 2px 6px rgba(13, 21, 39, 0.5)' : 'none',
             })}
           >
             <ShoppingCart size={16} />
@@ -154,9 +155,10 @@ export const PosLayout = () => {
               fontWeight: 700,
               textDecoration: 'none',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              backgroundColor: isActive ? '#ff6b22' : 'transparent',
+              backgroundColor: isActive ? '#0d1527' : 'transparent',
               color: isActive ? '#ffffff' : '#cbd5e1',
-              boxShadow: isActive ? '0 2px 6px rgba(255, 107, 34, 0.35)' : 'none',
+              border: isActive ? '1px solid #38bdf8' : '1px solid transparent',
+              boxShadow: isActive ? '0 2px 6px rgba(13, 21, 39, 0.5)' : 'none',
             })}
           >
             <Receipt size={16} />
@@ -175,9 +177,10 @@ export const PosLayout = () => {
               fontWeight: 700,
               textDecoration: 'none',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              backgroundColor: isActive ? '#ff6b22' : 'transparent',
+              backgroundColor: isActive ? '#0d1527' : 'transparent',
               color: isActive ? '#ffffff' : '#cbd5e1',
-              boxShadow: isActive ? '0 2px 6px rgba(255, 107, 34, 0.35)' : 'none',
+              border: isActive ? '1px solid #38bdf8' : '1px solid transparent',
+              boxShadow: isActive ? '0 2px 6px rgba(13, 21, 39, 0.5)' : 'none',
             })}
           >
             <RotateCcw size={16} />
@@ -196,9 +199,10 @@ export const PosLayout = () => {
               fontWeight: 700,
               textDecoration: 'none',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              backgroundColor: isActive ? '#ff6b22' : 'transparent',
+              backgroundColor: isActive ? '#0d1527' : 'transparent',
               color: isActive ? '#ffffff' : '#cbd5e1',
-              boxShadow: isActive ? '0 2px 6px rgba(255, 107, 34, 0.35)' : 'none',
+              border: isActive ? '1px solid #38bdf8' : '1px solid transparent',
+              boxShadow: isActive ? '0 2px 6px rgba(13, 21, 39, 0.5)' : 'none',
             })}
           >
             <Clock size={16} />

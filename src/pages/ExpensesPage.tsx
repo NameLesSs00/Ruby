@@ -56,7 +56,7 @@ export const ExpensesPage = () => {
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              backgroundColor: activeTab === 'expenses' ? '#ff6b22' : 'transparent',
+              backgroundColor: activeTab === 'expenses' ? '#0d1527' : 'transparent',
               color: activeTab === 'expenses' ? '#ffffff' : '#64748b',
             }}
           >
@@ -78,7 +78,7 @@ export const ExpensesPage = () => {
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              backgroundColor: activeTab === 'other-incomes' ? '#ff6b22' : 'transparent',
+              backgroundColor: activeTab === 'other-incomes' ? '#0d1527' : 'transparent',
               color: activeTab === 'other-incomes' ? '#ffffff' : '#64748b',
             }}
           >

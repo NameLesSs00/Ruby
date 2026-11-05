@@ -251,7 +251,7 @@ export const PosCartDrawer = ({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: '#ff6b22',
+                        color: '#0d1527',
                         borderRadius: '4px',
                       }}
                     >

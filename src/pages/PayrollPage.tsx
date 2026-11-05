@@ -37,13 +37,13 @@ export const PayrollPage = () => {
             width: 42,
             height: 42,
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #F37023, #FF6B22)',
+            background: 'linear-gradient(135deg, #0D1527, #1e293b)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Banknote size={22} color="#fff" />
+          <Banknote size={22} color="#36C5F0" />
         </div>
         <div>
           <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0d1527', margin: 0 }}>الرواتب والبدلات</h1>
@@ -80,7 +80,7 @@ export const PayrollPage = () => {
               fontSize: '0.9rem',
               fontWeight: activeTab === tab.key ? 700 : 500,
               background: activeTab === tab.key ? '#fff' : 'transparent',
-              color: activeTab === tab.key ? '#F37023' : '#64748b',
+              color: activeTab === tab.key ? '#0D1527' : '#64748b',
               boxShadow: activeTab === tab.key ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
               transition: 'all 0.18s ease',
             }}

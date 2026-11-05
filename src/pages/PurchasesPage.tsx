@@ -56,7 +56,7 @@ export const PurchasesPage = () => {
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              backgroundColor: activeTab === 'invoices' ? '#ff6b22' : 'transparent',
+              backgroundColor: activeTab === 'invoices' ? '#0d1527' : 'transparent',
               color: activeTab === 'invoices' ? '#ffffff' : '#64748b',
             }}
           >
@@ -78,7 +78,7 @@ export const PurchasesPage = () => {
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              backgroundColor: activeTab === 'payments' ? '#ff6b22' : 'transparent',
+              backgroundColor: activeTab === 'payments' ? '#0d1527' : 'transparent',
               color: activeTab === 'payments' ? '#ffffff' : '#64748b',
             }}
           >

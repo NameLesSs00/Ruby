@@ -266,7 +266,7 @@ export const PosPaymentSection = ({
           justifyContent: 'center',
           gap: '0.5rem',
           borderRadius: 'var(--radius-md)',
-          boxShadow: '0 4px 14px rgba(255, 107, 34, 0.35)',
+          boxShadow: '0 4px 14px rgba(13, 21, 39, 0.3)',
         }}
         disabled={isCartEmpty || isSubmitting}
         onClick={onCheckout}

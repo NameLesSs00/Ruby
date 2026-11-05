@@ -192,7 +192,7 @@ export const SubscriptionsTable = ({
                           className="btn-icon-action"
                           title="سداد دفعة من المبلغ المتبقي"
                           onClick={() => onRecordPayment(sub)}
-                          style={{ color: '#ff6b22', backgroundColor: '#fff7ed', border: '1px solid #fed7aa' }}
+                          style={{ color: '#0d1527', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1' }}
                         >
                           <CreditCard size={15} />
                         </button>

@@ -258,9 +258,9 @@ export const PosSalesPage = () => {
                     fontWeight: 700,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    border: isSelected ? '1px solid #ff6b22' : '1px solid #e2e8f0',
-                    backgroundColor: isSelected ? '#fff7ed' : '#f8fafc',
-                    color: isSelected ? '#ff6b22' : '#64748b',
+                    border: isSelected ? '1px solid #0d1527' : '1px solid #e2e8f0',
+                    backgroundColor: isSelected ? '#0d1527' : '#f8fafc',
+                    color: isSelected ? '#ffffff' : '#64748b',
                   }}
                 >
                   {pill.label}

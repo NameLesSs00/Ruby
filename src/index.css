@@ -205,17 +205,17 @@ input, button, select, textarea {
   padding: 0.85rem 1.25rem;
   border: none;
   border-radius: var(--radius-md);
-  background-color: var(--color-orange);
+  background-color: var(--color-navy);
   color: #ffffff;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(255, 107, 34, 0.25);
+  box-shadow: 0 4px 12px rgba(13, 21, 39, 0.22);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--color-orange-hover);
+  background-color: var(--color-navy-light);
   transform: translateY(-1px);
 }
 
@@ -548,18 +548,18 @@ input, button, select, textarea {
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1.25rem;
-  background-color: var(--color-orange);
+  background-color: var(--color-navy);
   color: #ffffff;
   border: none;
   border-radius: var(--radius-md);
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(255, 107, 34, 0.25);
+  box-shadow: 0 4px 10px rgba(13, 21, 39, 0.22);
   transition: all 0.15s ease;
 }
 
 .btn-add:hover {
-  background-color: var(--color-orange-hover);
+  background-color: var(--color-navy-light);
   transform: translateY(-1px);
 }
 
@@ -721,9 +721,9 @@ input, button, select, textarea {
 }
 
 .tab-btn.active {
-  background-color: var(--color-orange);
+  background-color: var(--color-navy);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(255, 107, 34, 0.25);
+  box-shadow: 0 2px 8px rgba(13, 21, 39, 0.22);
 }
 
 .pagination-wrapper {
@@ -755,8 +755,14 @@ input, button, select, textarea {
 }
 
 .btn-page:hover:not(:disabled) {
-  border-color: var(--color-orange);
-  color: var(--color-orange);
+  border-color: var(--color-navy);
+  color: var(--color-navy);
+}
+
+.btn-page.active {
+  background-color: var(--color-navy);
+  color: #ffffff;
+  border-color: var(--color-navy);
 }
 
 .btn-page:disabled {

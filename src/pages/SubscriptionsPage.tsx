@@ -70,11 +70,11 @@ export const SubscriptionsPage = () => {
               width: 44,
               height: 44,
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #F37023, #FF6B22)',
+              background: 'linear-gradient(135deg, #0D1527, #1e293b)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              color: '#36C5F0',
             }}
           >
             <Ticket size={24} />

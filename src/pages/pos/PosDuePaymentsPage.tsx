@@ -87,7 +87,7 @@ export const PosDuePaymentsPage = () => {
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              backgroundColor: activeTab === 'debts' ? '#ff6b22' : 'transparent',
+              backgroundColor: activeTab === 'debts' ? '#0d1527' : 'transparent',
               color: activeTab === 'debts' ? '#ffffff' : '#64748b',
             }}
           >
@@ -112,7 +112,7 @@ export const PosDuePaymentsPage = () => {
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              backgroundColor: activeTab === 'history' ? '#ff6b22' : 'transparent',
+              backgroundColor: activeTab === 'history' ? '#0d1527' : 'transparent',
               color: activeTab === 'history' ? '#ffffff' : '#64748b',
             }}
           >

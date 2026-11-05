@@ -198,9 +198,9 @@ export const RecordCoachPaymentModal = ({
                   style={{
                     padding: '0.65rem',
                     borderRadius: 'var(--radius-md)',
-                    border: `2px solid ${paymentType === 'Advance' ? '#F37023' : '#e2e8f0'}`,
-                    backgroundColor: paymentType === 'Advance' ? '#fff7ed' : '#ffffff',
-                    color: paymentType === 'Advance' ? '#c2410c' : '#64748b',
+                    border: `2px solid ${paymentType === 'Advance' ? '#0D1527' : '#e2e8f0'}`,
+                    backgroundColor: paymentType === 'Advance' ? '#f1f5f9' : '#ffffff',
+                    color: paymentType === 'Advance' ? '#0D1527' : '#64748b',
                     fontWeight: 700,
                     cursor: 'pointer',
                   }}

@@ -14,6 +14,16 @@ export interface WarehouseMovementItem {
   quantity: number;
 }
 
+export interface WarehouseItemStock {
+  itemName: string;
+  quantity: number;
+}
+
+export interface WarehouseItemStockResponse {
+  items: WarehouseItemStock[];
+  totalCount: number;
+}
+
 export interface WarehouseMovement {
   movementGroupId: number;
   movementType: MovementType;
@@ -79,9 +89,15 @@ export const warehouseTransactionKeys = {
     [...warehouseTransactionKeys.lists(), params] as const,
   details: () => [...warehouseTransactionKeys.all, 'detail'] as const,
   detail: (id: number) => [...warehouseTransactionKeys.details(), id] as const,
+  stockBalances: () => [...warehouseTransactionKeys.all, 'stock-balances'] as const,
 };
 
 export const warehouseTransactionsApi = {
+  getItemStockBalances: async (): Promise<WarehouseItemStockResponse> => {
+    const res = await apiClient.get<WarehouseItemStockResponse>('/api/warehouse-transactions/item-names');
+    return res.data;
+  },
+
   getAll: async (params?: WarehouseMovementQueryParams): Promise<WarehouseTransactionsResponse> => {
     const res = await apiClient.get<WarehouseTransactionsResponse>('/api/warehousetransactions', {
       params: {

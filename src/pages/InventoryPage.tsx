@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Boxes, Package, ArrowLeftRight, Layers } from 'lucide-react';
+import { Boxes, Package, ArrowLeftRight, Layers, Archive } from 'lucide-react';
 import { inventoryCategoriesApi, inventoryKeys } from '../modules/inventory';
 import { InventoryItemsTab } from '../components/inventory/InventoryItemsTab';
 import { InventoryCategoriesTab } from '../components/inventory/InventoryCategoriesTab';
 import { WarehouseMovementsTab } from '../components/inventory/WarehouseMovementsTab';
+import { WarehouseStockTab } from '../components/inventory/WarehouseStockTab';
 
-type InventoryTab = 'items' | 'movements' | 'categories';
+type InventoryTab = 'items' | 'stock' | 'movements' | 'categories';
 
 export const InventoryPage = () => {
   const [activeTab, setActiveTab] = useState<InventoryTab>('items');
@@ -21,6 +22,7 @@ export const InventoryPage = () => {
 
   const TABS = [
     { key: 'items' as const, label: 'الأصناف المخزنية', icon: <Package size={17} /> },
+    { key: 'stock' as const, label: 'رصيد المخزن الحالي', icon: <Archive size={17} /> },
     { key: 'movements' as const, label: 'حركات التوريد والصرف', icon: <ArrowLeftRight size={17} /> },
     { key: 'categories' as const, label: 'تصنيفات المخزون', icon: <Layers size={17} /> },
   ];
@@ -69,6 +71,7 @@ export const InventoryPage = () => {
 
       {/* Tab Views */}
       {activeTab === 'items' && <InventoryItemsTab categories={categories} />}
+      {activeTab === 'stock' && <WarehouseStockTab />}
       {activeTab === 'movements' && <WarehouseMovementsTab />}
       {activeTab === 'categories' && <InventoryCategoriesTab />}
     </div>

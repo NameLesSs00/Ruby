@@ -147,7 +147,7 @@ export const PayrollsTab = ({ employees }: { employees: Employee[] }) => {
                         <button
                           type="button"
                           className="btn-icon-action"
-                          style={{ color: canPay ? '#ff6b22' : '#94a3b8', opacity: canPay ? 1 : 0.45 }}
+                          style={{ color: canPay ? '#0D1527' : '#94a3b8', opacity: canPay ? 1 : 0.45 }}
                           disabled={!canPay}
                           title={canPay ? 'تسجيل صرف دفعة' : 'تم صرف كامل الراتب'}
                           onClick={() => setPayingRecord(record)}

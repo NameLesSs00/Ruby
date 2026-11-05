@@ -106,7 +106,7 @@ export const SubscriptionPlanSection = ({
                   border: 'none',
                   cursor: 'pointer',
                   backgroundColor: isSelected ? '#ffffff' : 'transparent',
-                  color: isSelected ? '#ff6b22' : '#64748b',
+                  color: isSelected ? '#0d1527' : '#64748b',
                   boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
@@ -178,16 +178,16 @@ export const SubscriptionPlanSection = ({
                   type="button"
                   onClick={() => applyDatePreset(preset.months)}
                   style={{
-                    border: isSelected ? '1.5px solid #ff6b22' : '1px solid #cbd5e1',
-                    backgroundColor: isSelected ? '#fff7ed' : '#ffffff',
-                    color: isSelected ? '#ff6b22' : '#64748b',
+                    border: isSelected ? '1.5px solid #0d1527' : '1px solid #cbd5e1',
+                    backgroundColor: isSelected ? '#f1f5f9' : '#ffffff',
+                    color: isSelected ? '#0d1527' : '#64748b',
                     fontSize: '0.75rem',
                     fontWeight: isSelected ? 800 : 600,
                     borderRadius: '5px',
                     padding: '0.2rem 0.6rem',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
-                    boxShadow: isSelected ? '0 1px 3px rgba(255, 107, 34, 0.2)' : 'none',
+                    boxShadow: isSelected ? '0 1px 3px rgba(13, 21, 39, 0.2)' : 'none',
                   }}
                 >
                   {preset.label}

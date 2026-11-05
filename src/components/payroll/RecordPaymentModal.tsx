@@ -71,8 +71,8 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{
-              width: 38, height: 38, borderRadius: '8px', backgroundColor: '#F3702315',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F37023'
+              width: 38, height: 38, borderRadius: '8px', backgroundColor: '#0D152715',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0D1527'
             }}>
               <CreditCard size={20} />
             </div>
@@ -116,7 +116,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
                     type="button"
                     onClick={() => setAmountPaid(payroll.remainingAmount)}
                     style={{
-                      fontSize: '0.78rem', color: '#F37023', background: 'none',
+                      fontSize: '0.78rem', color: '#0D1527', background: 'none',
                       border: 'none', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600
                     }}
                   >

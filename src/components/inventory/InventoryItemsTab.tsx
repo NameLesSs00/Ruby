@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
-import { Search, Plus, Edit2, Trash2, CheckCircle, XCircle, AlertCircle, Package } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import {
   inventoryItemsApi,
   inventoryKeys,
-  getUnitLabel,
   type InventoryItem,
   type InventoryCategory,
 } from '../../modules/inventory';
+import {
+  warehouseTransactionsApi,
+  warehouseTransactionKeys,
+} from '../../modules/warehouseTransactions';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { InventoryItemFormModal } from './InventoryItemFormModal';
+import { InventoryItemsTable } from './InventoryItemsTable';
 import { DeleteModal } from '../ui/DeleteModal';
 import { PaginationBar } from '../ui/PaginationBar';
 
@@ -58,6 +62,22 @@ export const InventoryItemsTab = ({ categories }: InventoryItemsTabProps) => {
       }),
     placeholderData: keepPreviousData,
   });
+
+  // Fetch real-time warehouse stock balances
+  const { data: stockData } = useQuery({
+    queryKey: warehouseTransactionKeys.stockBalances(),
+    queryFn: () => warehouseTransactionsApi.getItemStockBalances(),
+  });
+
+  const stockMap = useMemo(() => {
+    const map = new Map<string, number>();
+    (stockData?.items || []).forEach((s) => {
+      if (s.itemName) {
+        map.set(s.itemName.trim().toLowerCase(), s.quantity);
+      }
+    });
+    return map;
+  }, [stockData]);
 
   const statusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
@@ -142,115 +162,28 @@ export const InventoryItemsTab = ({ categories }: InventoryItemsTabProps) => {
         </button>
       </div>
 
-      <div className="data-table-wrapper">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>الصنف المخزني</th>
-              <th>التصنيف</th>
-              <th>وحدة القياس</th>
-              <th>الحالة</th>
-              <th style={{ textAlign: 'center' }}>الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={5} className="table-loading-row">
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div className="spinner" style={{ borderTopColor: '#ff6b22', borderColor: 'rgba(255,107,34,0.2)' }} />
-                    <span>جاري تحميل الأصناف المخزنية...</span>
-                  </div>
-                </td>
-              </tr>
-            ) : isError ? (
-              <tr>
-                <td colSpan={5} className="table-empty-row" style={{ color: '#ef4444' }}>
-                  <AlertCircle size={24} style={{ marginBottom: '0.5rem', display: 'block', marginInline: 'auto' }} />
-                  <span>تعذر تحميل الأصناف المخزنية، يرجى المحاولة لاحقاً</span>
-                </td>
-              </tr>
-            ) : items.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="table-empty-row">
-                  <span>لا توجد أصناف مخزنية مسجلة {debouncedSearch ? 'مطابقة للبحث' : ''}</span>
-                </td>
-              </tr>
-            ) : (
-              items.map((item) => (
-                <tr key={item.id}>
-                  <td>
-                    <div className="coach-cell-name">
-                      <div className="coach-avatar" style={{ backgroundColor: '#f0fdf4', color: '#16a34a' }}>
-                        <Package size={17} />
-                      </div>
-                      <span style={{ fontWeight: 600 }}>{item.name}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="job-title-badge">
-                      {item.inventoryCategoryName || '—'}
-                    </span>
-                  </td>
-                  <td>
-                    <span style={{ color: '#475569', fontSize: '0.88rem', fontWeight: 600 }}>
-                      {getUnitLabel(item.unit)}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status-badge ${item.isActive ? 'active' : 'inactive'}`}>
-                      {item.isActive ? 'نشط' : 'غير نشط'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="table-actions" style={{ justifyContent: 'center' }}>
-                      <button
-                        type="button"
-                        className="btn-icon-action"
-                        title="تعديل الصنف"
-                        onClick={() => {
-                          setEditingItem(item);
-                          setIsFormOpen(true);
-                        }}
-                      >
-                        <Edit2 size={16} />
-                      </button>
+      <InventoryItemsTable
+        items={items}
+        stockMap={stockMap}
+        isLoading={isLoading}
+        isError={isError}
+        debouncedSearch={debouncedSearch}
+        onEdit={(item) => {
+          setEditingItem(item);
+          setIsFormOpen(true);
+        }}
+        onDelete={(item) => setDeletingItem(item)}
+        onToggleStatus={(item) => statusMutation.mutate({ id: item.id, isActive: !item.isActive })}
+      />
 
-                      <button
-                        type="button"
-                        className={`btn-icon-action ${item.isActive ? 'toggle-active' : 'toggle-inactive'}`}
-                        title={item.isActive ? 'تعطيل الصنف' : 'تفعيل الصنف'}
-                        disabled={statusMutation.isPending}
-                        onClick={() => statusMutation.mutate({ id: item.id, isActive: !item.isActive })}
-                      >
-                        {item.isActive ? <XCircle size={16} /> : <CheckCircle size={16} />}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn-icon-action delete"
-                        title="حذف الصنف"
-                        onClick={() => setDeletingItem(item)}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-
-        <PaginationBar
-          page={page}
-          totalPages={totalPages}
-          totalCount={totalCount}
-          label="إجمالي الأصناف"
-          isLoading={isLoading}
-          onPageChange={setPage}
-        />
-      </div>
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        label="أصناف مخزنية"
+        isLoading={isLoading}
+        onPageChange={setPage}
+      />
 
       <InventoryItemFormModal
         isOpen={isFormOpen}
@@ -268,12 +201,14 @@ export const InventoryItemsTab = ({ categories }: InventoryItemsTabProps) => {
 
       <DeleteModal
         isOpen={!!deletingItem}
-        title="تأكيد حذف الصنف المخزني"
-        message={`هل أنت متأكد من حذف الصنف "${deletingItem?.name}"؟`}
-        confirmLabel="نعم، حذف الصنف"
+        title="حذف الصنف المخزني"
+        message={`هل أنت متأكد من حذف الصنف "${deletingItem?.name}"؟ لا يمكن التراجع عن هذا الإجراء.`}
+        confirmLabel="نعم، حذف"
         isPending={deleteMutation.isPending}
+        onConfirm={() => {
+          if (deletingItem) deleteMutation.mutate(deletingItem.id);
+        }}
         onClose={() => setDeletingItem(null)}
-        onConfirm={() => deletingItem && deleteMutation.mutate(deletingItem.id)}
       />
     </>
   );
