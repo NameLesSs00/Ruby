@@ -206,7 +206,6 @@ export const AsyncSearchableSelect = ({
               transition: 'all 0.15s ease',
             }}
           >
-            <Search size={16} color="#94a3b8" />
             <input
               type="text"
               placeholder={placeholder}
@@ -228,9 +227,12 @@ export const AsyncSearchableSelect = ({
               }}
             />
             {isLoading ? (
-              <Loader2 size={16} color="#ff6b22" className="spinner" />
+              <Loader2 size={16} color="#0d1527" className="spinner" />
             ) : (
-              <ChevronDown size={16} color="#94a3b8" />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                <Search size={15} color="#94a3b8" />
+                <ChevronDown size={15} color="#94a3b8" />
+              </div>
             )}
           </div>
 

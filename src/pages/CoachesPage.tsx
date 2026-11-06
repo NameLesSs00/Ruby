@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
 import { Search, Plus, Award, Clock, DollarSign } from 'lucide-react';
 import { coachesApi, coachKeys, type Coach } from '../modules/coaches';
+import { decodeJwt, isSuperAdminRole } from '../modules/auth';
+import { getStoredTokens } from '../lib/axios';
 import { queryClient } from '../lib/query-client';
 import { showToast } from '../lib/sonner';
 import { CoachesTable } from '../components/coaches/CoachesTable';
@@ -12,6 +14,10 @@ import { CoachPaymentsTab } from '../components/coaches/CoachPaymentsTab';
 type CoachTab = 'coaches' | 'dues' | 'payments';
 
 export const CoachesPage = () => {
+  const tokens = getStoredTokens();
+  const decodedUser = tokens?.accessToken ? decodeJwt(tokens.accessToken) : null;
+  const canManageCoachFinances = isSuperAdminRole(decodedUser?.role || 'SuperAdmin');
+
   const [activeTab, setActiveTab] = useState<CoachTab>('coaches');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -67,8 +73,12 @@ export const CoachesPage = () => {
 
   const TABS: { key: CoachTab; label: string; icon: React.ReactNode }[] = [
     { key: 'coaches', label: 'دليل المدربين', icon: <Award size={16} /> },
-    { key: 'dues', label: 'مستحقات المدربين', icon: <Clock size={16} /> },
-    { key: 'payments', label: 'سجل المدفوعات والسلف', icon: <DollarSign size={16} /> },
+    ...(canManageCoachFinances
+      ? ([
+          { key: 'dues', label: 'مستحقات المدربين', icon: <Clock size={16} /> },
+          { key: 'payments', label: 'سجل المدفوعات والسلف', icon: <DollarSign size={16} /> },
+        ] as const)
+      : []),
   ];
 
   return (
@@ -101,28 +111,32 @@ export const CoachesPage = () => {
           </div>
           <div>
             <h1 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0d1527', margin: 0 }}>
-              إدارة الكادر التدريبي والمستحقات
+              {canManageCoachFinances ? 'إدارة الكادر التدريبي والمستحقات' : 'دليل المدربين'}
             </h1>
             <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>
-              دليل المدربين، متابعة المستحقات المالية، وصرف الدفعات والسلف النقدية
+              {canManageCoachFinances
+                ? 'دليل المدربين، متابعة المستحقات المالية، وصرف الدفعات والسلف النقدية'
+                : 'عرض قائمة الكادر التدريبي وإضافة أو تعديل بيانات المدربين'}
             </p>
           </div>
         </div>
 
         {/* Tab Switcher */}
-        <div className="tab-switcher">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              className={`tab-btn ${activeTab === t.key ? 'active' : ''}`}
-              onClick={() => setActiveTab(t.key)}
-            >
-              {t.icon}
-              <span>{t.label}</span>
-            </button>
-          ))}
-        </div>
+        {TABS.length > 1 && (
+          <div className="tab-switcher">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                className={`tab-btn ${activeTab === t.key ? 'active' : ''}`}
+                onClick={() => setActiveTab(t.key)}
+              >
+                {t.icon}
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Tab Views */}
@@ -168,9 +182,9 @@ export const CoachesPage = () => {
         </>
       )}
 
-      {activeTab === 'dues' && <CoachDuesTab />}
+      {canManageCoachFinances && activeTab === 'dues' && <CoachDuesTab />}
 
-      {activeTab === 'payments' && <CoachPaymentsTab />}
+      {canManageCoachFinances && activeTab === 'payments' && <CoachPaymentsTab />}
     </div>
   );
 };

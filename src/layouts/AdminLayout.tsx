@@ -23,7 +23,13 @@ import {
   Landmark,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
-import { authApi, decodeJwt } from '../modules/auth';
+import {
+  authApi,
+  decodeJwt,
+  ADMIN_ROLES,
+  POS_ROLES,
+  RECEPTION_ROLES,
+} from '../modules/auth';
 import { getStoredTokens, setStoredTokens } from '../lib/axios';
 import { showToast } from '../lib/sonner';
 
@@ -31,7 +37,7 @@ interface NavItem {
   path: string;
   label: string;
   icon: ReactNode;
-  allowedRoles?: string[];
+  allowedRoles: string[];
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -39,96 +45,97 @@ const NAV_ITEMS: NavItem[] = [
     path: '/dashboard',
     label: 'لوحة التحكم',
     icon: <LayoutDashboard size={20} className="nav-icon" />,
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/pos',
     label: 'نقطة البيع POS',
     icon: <ShoppingCart size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ShopAdmin'],
+    allowedRoles: POS_ROLES,
   },
   {
     path: '/admins',
     label: 'المسؤولون',
     icon: <ShieldCheck size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin'],
-  },
-  {
-    path: '/clients',
-    label: 'العملاء',
-    icon: <Users size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ReceptionAdmin'],
-  },
-  {
-    path: '/attendance',
-    label: 'تسجيل الحضور',
-    icon: <UserCheck size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ReceptionAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/subscriptions',
     label: 'الاشتراكات',
     icon: <Ticket size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ReceptionAdmin'],
+    allowedRoles: RECEPTION_ROLES,
+  },
+  {
+    path: '/clients',
+    label: 'العملاء',
+    icon: <Users size={20} className="nav-icon" />,
+    allowedRoles: RECEPTION_ROLES,
+  },
+  {
+    path: '/attendance',
+    label: 'تسجيل الحضور',
+    icon: <UserCheck size={20} className="nav-icon" />,
+    allowedRoles: RECEPTION_ROLES,
   },
   {
     path: '/coaches',
     label: 'المدربون',
     icon: <Award size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ReceptionAdmin'],
+    allowedRoles: RECEPTION_ROLES,
   },
   {
     path: '/employees',
     label: 'الموظفون',
     icon: <Briefcase size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/suppliers',
     label: 'الموردون',
     icon: <Truck size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ShopAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/products',
     label: 'المنتجات',
     icon: <Package size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ShopAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/inventory',
     label: 'المخزون',
     icon: <Boxes size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ShopAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/purchases',
     label: 'فواتير المشتريات',
     icon: <ShoppingBag size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ShopAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/payroll',
     label: 'الرواتب',
     icon: <Banknote size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/expenses',
     label: 'المصروفات',
     icon: <Wallet size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/cash-transactions',
     label: 'حسابات الخزينة',
     icon: <Landmark size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
   {
     path: '/due-payments',
     label: 'الديون والمستحقات',
     icon: <ReceiptText size={20} className="nav-icon" />,
-    allowedRoles: ['SuperAdmin', 'ReceptionAdmin', 'ShopAdmin'],
+    allowedRoles: ADMIN_ROLES,
   },
 ];
 
@@ -167,7 +174,7 @@ export const AdminLayout = () => {
     }
   };
 
-  const canAccessPos = ['SuperAdmin', 'ShopAdmin'].includes(userRole);
+  const canAccessPos = POS_ROLES.includes(userRole);
 
   return (
     <div className="dashboard-container">

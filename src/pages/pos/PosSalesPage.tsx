@@ -74,7 +74,7 @@ export const PosSalesPage = () => {
 
   const filterPills: { label: string; value: SaleStatus | '' }[] = [
     { label: 'جميع الفواتير', value: '' },
-    { label: 'سليمة (غير مرتجعة)', value: 'NotReturned' },
+    { label: 'مدفوعه', value: 'NotReturned' },
     { label: 'مرتجع جزئياً', value: 'PartiallyReturned' },
     { label: 'مرتجع بالكامل', value: 'FullyReturned' },
   ];
@@ -163,7 +163,7 @@ export const PosSalesPage = () => {
             <CheckCircle2 size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>فواتير سليمة وغير مرتجعة</div>
+            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>فواتير مدفوعه</div>
             <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#047857' }}>
               {activeSalesCount} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>فاتورة</span>
             </div>
@@ -204,7 +204,7 @@ export const PosSalesPage = () => {
             <Search
               size={16}
               color="#94a3b8"
-              style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', insetInlineStart: '0.75rem' }}
+              style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', insetInlineEnd: '0.75rem', pointerEvents: 'none' }}
             />
             <input
               type="text"
@@ -213,8 +213,8 @@ export const PosSalesPage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="form-input"
               style={{
-                paddingInlineStart: '2.25rem',
-                paddingInlineEnd: searchTerm ? '2.25rem' : '0.75rem',
+                paddingInlineStart: '0.85rem',
+                paddingInlineEnd: searchTerm ? '3.5rem' : '2.25rem',
                 fontSize: '0.85rem',
               }}
             />
@@ -226,16 +226,17 @@ export const PosSalesPage = () => {
                   position: 'absolute',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  insetInlineEnd: '0.6rem',
-                  border: 'none',
-                  background: 'transparent',
+                  insetInlineEnd: '2.1rem',
+                  border: '1px solid #fecaca',
+                  background: '#fee2e2',
+                  borderRadius: '4px',
                   cursor: 'pointer',
-                  color: '#94a3b8',
-                  padding: '0.2rem',
+                  color: '#dc2626',
+                  padding: '0.15rem',
                   display: 'flex',
                 }}
               >
-                <X size={15} />
+                <X size={14} />
               </button>
             )}
           </div>

@@ -51,7 +51,6 @@ export const ReceiptModal = ({ sale, isOpen, onClose }: ReceiptModalProps) => {
           <button
             type="button"
             className="modal-close-btn"
-            style={{ color: '#ffffff' }}
             onClick={onClose}
           >
             <X size={18} />

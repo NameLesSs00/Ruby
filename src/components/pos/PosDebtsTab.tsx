@@ -231,7 +231,8 @@ export const PosDebtsTab = ({
                 position: 'absolute',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                insetInlineStart: '0.75rem',
+                insetInlineEnd: '0.75rem',
+                pointerEvents: 'none',
               }}
             />
             <input
@@ -240,7 +241,7 @@ export const PosDebtsTab = ({
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
               className="form-input"
-              style={{ paddingInlineStart: '2.25rem' }}
+              style={{ paddingInlineEnd: '2.25rem' }}
             />
           </div>
 

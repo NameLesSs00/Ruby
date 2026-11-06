@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import logoImg from '../assets/logo.png';
-import { authApi } from '../modules/auth';
+import { authApi, decodeJwt, getDefaultRouteForRole } from '../modules/auth';
 import { showToast } from '../lib/sonner';
 
 interface LoginPageProps {
@@ -33,16 +33,19 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
     setIsLoading(true);
 
     try {
-      await authApi.login({
+      const tokens = await authApi.login({
         email: email.trim(),
         password,
       });
+
+      const decoded = decodeJwt(tokens.accessToken);
+      const targetRoute = getDefaultRouteForRole(decoded?.role);
 
       showToast.success('تم تسجيل الدخول بنجاح', 'أهلاً بك في أكاديمية روبي للسباحة');
       if (onLoginSuccess) {
         onLoginSuccess();
       }
-      navigate('/dashboard', { replace: true });
+      navigate(targetRoute, { replace: true });
     } catch (error: unknown) {
       showToast.apiError(error, 'بيانات الدخول غير صحيحة');
     } finally {

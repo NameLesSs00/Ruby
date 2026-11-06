@@ -168,13 +168,13 @@ export const PosPaymentSection = ({
               اسم العميل / المدين <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <div style={{ position: 'relative' }}>
-              <User size={14} color="#94a3b8" style={{ position: 'absolute', top: 9, insetInlineStart: 8 }} />
+              <User size={14} color="#94a3b8" style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', insetInlineEnd: 8, pointerEvents: 'none' }} />
               <input
                 type="text"
                 placeholder="اكتب اسم العميل أو المشترك"
                 value={payerName}
                 onChange={(e) => setPayerName(e.target.value)}
-                style={{ width: '100%', padding: '0.35rem 0.5rem 0.35rem 1.8rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                style={{ width: '100%', padding: '0.35rem 0.6rem', paddingInlineEnd: '1.8rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
                 required
               />
             </div>

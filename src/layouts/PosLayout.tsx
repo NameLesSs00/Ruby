@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Outlet, Link } from 'react-router-dom';
+import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart,
   Receipt,
@@ -7,13 +7,17 @@ import {
   Clock,
   LayoutDashboard,
   User,
+  LogOut,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
-import { getStoredTokens } from '../lib/axios';
-import { decodeJwt } from '../modules/auth';
+import { getStoredTokens, setStoredTokens } from '../lib/axios';
+import { authApi, decodeJwt, isSuperAdminRole } from '../modules/auth';
+import { showToast } from '../lib/sonner';
 
 export const PosLayout = () => {
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const update = () => {
@@ -34,12 +38,29 @@ export const PosLayout = () => {
 
   const tokens = getStoredTokens();
   const decodedUser = tokens?.accessToken ? decodeJwt(tokens.accessToken) : null;
-  const roleDisplay =
-    decodedUser?.role === 'SuperAdmin'
-      ? 'مدير عام النظام'
-      : decodedUser?.role === 'ShopAdmin'
-      ? 'مسؤول المتجر والـ POS'
-      : decodedUser?.role || 'مستخدم النظام';
+  const userRole = decodedUser?.role || 'SuperAdmin';
+  const canViewAdminDashboard = isSuperAdminRole(userRole);
+  const roleDisplay = isSuperAdminRole(userRole)
+    ? 'مدير عام النظام'
+    : userRole === 'ShopAdmin'
+    ? 'مسؤول المتجر والـ POS'
+    : userRole || 'مستخدم النظام';
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      if (tokens?.refreshToken) {
+        await authApi.logout(tokens.refreshToken);
+      }
+      showToast.info('تم تسجيل الخروج بنجاح');
+    } catch {
+      showToast.info('تم تسجيل الخروج');
+    } finally {
+      setStoredTokens(null);
+      setIsLoggingOut(false);
+      navigate('/login', { replace: true });
+    }
+  };
 
   return (
     <div
@@ -88,19 +109,6 @@ export const PosLayout = () => {
               }}
             >
               <span>نظام نقاط البيع</span>
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '0.15rem 0.5rem',
-                  borderRadius: '4px',
-                  backgroundColor: '#ff6b22',
-                  color: '#ffffff',
-                  fontWeight: 800,
-                  letterSpacing: '0.5px',
-                }}
-              >
-                POS TERMINAL
-              </span>
             </div>
             <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
               أكاديمية روبي للسباحة
@@ -253,29 +261,63 @@ export const PosLayout = () => {
             <span style={{ color: '#38bdf8', fontWeight: 600 }}>{roleDisplay}</span>
           </div>
 
-          {/* Link to Admin Dashboard */}
-          <Link
-            to="/dashboard"
+          {/* Link to Admin Dashboard (SuperAdmin / Admin Only) */}
+          {canViewAdminDashboard && (
+            <Link
+              to="/dashboard"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.45rem 0.9rem',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                backgroundColor: '#334155',
+                color: '#ffffff',
+                textDecoration: 'none',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#475569')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#334155')}
+              title="الانتقال إلى لوحة التحكم الإدارية"
+            >
+              <LayoutDashboard size={15} />
+              <span>لوحة الإدارة</span>
+            </Link>
+          )}
+
+          {/* Logout Button */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.45rem',
-              padding: '0.45rem 0.9rem',
+              gap: '0.4rem',
+              padding: '0.45rem 0.85rem',
               borderRadius: 'var(--radius-sm)',
               fontSize: '0.8rem',
               fontWeight: 700,
-              backgroundColor: '#334155',
+              backgroundColor: '#dc2626',
               color: '#ffffff',
-              textDecoration: 'none',
+              border: '1px solid #ef4444',
+              cursor: isLoggingOut ? 'not-allowed' : 'pointer',
+              fontFamily: 'inherit',
               transition: 'background-color 0.2s',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#475569')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#334155')}
-            title="الانتقال إلى لوحة التحكم الإدارية"
+            onMouseEnter={(e) => {
+              if (!isLoggingOut) e.currentTarget.style.backgroundColor = '#b91c1c';
+            }}
+            onMouseLeave={(e) => {
+              if (!isLoggingOut) e.currentTarget.style.backgroundColor = '#dc2626';
+            }}
+            title="تسجيل الخروج من النظام"
           >
-            <LayoutDashboard size={15} />
-            <span>لوحة الإدارة</span>
-          </Link>
+            <LogOut size={15} />
+            <span>{isLoggingOut ? 'جاري الخروج...' : 'تسجيل الخروج'}</span>
+          </button>
         </div>
       </header>
 

@@ -201,7 +201,8 @@ export const CoachDuesTab = () => {
                 position: 'absolute',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                insetInlineStart: '0.75rem',
+                insetInlineEnd: '0.75rem',
+                pointerEvents: 'none',
               }}
             />
             <input
@@ -210,7 +211,7 @@ export const CoachDuesTab = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="form-input"
-              style={{ paddingInlineStart: '2.25rem' }}
+              style={{ paddingInlineEnd: '2.25rem' }}
             />
           </div>
 

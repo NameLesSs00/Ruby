@@ -1,8 +1,14 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { queryClient } from './lib/query-client';
-import { ProtectedRoute, PublicOnlyRoute, RoleRoute } from './components/ProtectedRoute';
+import {
+  ProtectedRoute,
+  PublicOnlyRoute,
+  RoleRoute,
+  RoleHomeRedirect,
+} from './components/ProtectedRoute';
+import { ADMIN_ROLES, POS_ROLES, RECEPTION_ROLES } from './modules/auth';
 import { AdminLayout } from './layouts/AdminLayout';
 import { PosLayout } from './layouts/PosLayout';
 import { LoginPage } from './pages/LoginPage';
@@ -45,8 +51,11 @@ export function App() {
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
-            {/* Dedicated POS Workspace */}
-            <Route element={<RoleRoute allowedRoles={['SuperAdmin', 'ShopAdmin']} />}>
+            {/* Root Role-Aware Redirect */}
+            <Route path="/" element={<RoleHomeRedirect />} />
+
+            {/* Dedicated POS Workspace (SuperAdmin, Admin, ShopAdmin ONLY) */}
+            <Route element={<RoleRoute allowedRoles={POS_ROLES} />}>
               <Route path="/pos" element={<PosLayout />}>
                 <Route index element={<PosRegisterPage />} />
                 <Route path="sales" element={<PosSalesPage />} />
@@ -55,28 +64,26 @@ export function App() {
               </Route>
             </Route>
 
-            {/* Admin Management Dashboard */}
+            {/* Admin Management Workspace */}
             <Route element={<AdminLayout />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardOverviewPage />} />
-              <Route element={<RoleRoute allowedRoles={['SuperAdmin']} />}>
+              {/* ReceptionAdmin + SuperAdmin Allowed Routes */}
+              <Route element={<RoleRoute allowedRoles={RECEPTION_ROLES} />}>
+                <Route path="/subscriptions" element={<SubscriptionsPage />} />
+                <Route path="/clients" element={<ClientsPage />} />
+                <Route path="/attendance" element={<AttendancePage />} />
+                <Route path="/coaches" element={<CoachesPage />} />
+              </Route>
+
+              {/* SuperAdmin / Admin Strictly Restricted Routes */}
+              <Route element={<RoleRoute allowedRoles={ADMIN_ROLES} />}>
+                <Route path="/dashboard" element={<DashboardOverviewPage />} />
                 <Route path="/admins" element={<AdminsPage />} />
-              </Route>
-              <Route path="/clients" element={<ClientsPage />} />
-              <Route path="/attendance" element={<AttendancePage />} />
-              <Route path="/subscriptions" element={<SubscriptionsPage />} />
-              <Route path="/coaches" element={<CoachesPage />} />
-              <Route path="/employees" element={<EmployeesPage />} />
-              <Route path="/suppliers" element={<SuppliersPage />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route element={<RoleRoute allowedRoles={['SuperAdmin', 'ReceptionAdmin', 'ShopAdmin']} />}>
-                <Route path="/due-payments" element={<DuePaymentsPage />} />
-              </Route>
-              <Route element={<RoleRoute allowedRoles={['SuperAdmin', 'ShopAdmin']} />}>
+                <Route path="/employees" element={<EmployeesPage />} />
+                <Route path="/suppliers" element={<SuppliersPage />} />
+                <Route path="/products" element={<ProductsPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
                 <Route path="/purchases" element={<PurchasesPage />} />
-              </Route>
-              <Route element={<RoleRoute allowedRoles={['SuperAdmin']} />}>
+                <Route path="/due-payments" element={<DuePaymentsPage />} />
                 <Route path="/payroll" element={<PayrollPage />} />
                 <Route path="/expenses" element={<ExpensesPage />} />
                 <Route path="/cash-transactions" element={<CashTransactionsPage />} />
@@ -85,7 +92,7 @@ export function App() {
           </Route>
 
           {/* Fallback Catch-All Route */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<RoleHomeRedirect />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

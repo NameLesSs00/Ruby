@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { getStoredTokens } from '../lib/axios';
-import { decodeJwt } from '../modules/auth';
+import { decodeJwt, getDefaultRouteForRole } from '../modules/auth';
+import { UnauthorizedPage } from '../pages/UnauthorizedPage';
 
 export const ProtectedRoute = () => {
   const tokens = getStoredTokens();
@@ -23,20 +24,30 @@ export const RoleRoute = ({ allowedRoles }: { allowedRoles: string[] }) => {
   const role = user?.role || 'SuperAdmin';
 
   if (!allowedRoles.includes(role)) {
-    return <Navigate to="/dashboard" replace />;
+    return <UnauthorizedPage />;
   }
 
   return <Outlet />;
+};
+
+export const RoleHomeRedirect = () => {
+  const tokens = getStoredTokens();
+
+  if (!tokens?.accessToken) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const user = decodeJwt(tokens.accessToken);
+  return <Navigate to={getDefaultRouteForRole(user?.role)} replace />;
 };
 
 export const PublicOnlyRoute = () => {
   const tokens = getStoredTokens();
 
   if (tokens?.accessToken) {
-    return <Navigate to="/dashboard" replace />;
+    const user = decodeJwt(tokens.accessToken);
+    return <Navigate to={getDefaultRouteForRole(user?.role)} replace />;
   }
 
   return <Outlet />;
 };
-
-

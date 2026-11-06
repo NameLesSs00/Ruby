@@ -237,7 +237,7 @@ export const DuePaymentsTab = () => {
             <Search
               size={16}
               color="#94a3b8"
-              style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', insetInlineStart: '0.75rem' }}
+              style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', insetInlineEnd: '0.75rem', pointerEvents: 'none' }}
             />
             <input
               type="text"
@@ -245,7 +245,7 @@ export const DuePaymentsTab = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="form-input"
-              style={{ paddingInlineStart: '2.25rem' }}
+              style={{ paddingInlineEnd: '2.25rem' }}
             />
           </div>
 

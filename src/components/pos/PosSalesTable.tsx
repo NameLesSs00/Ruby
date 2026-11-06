@@ -32,7 +32,7 @@ const getStatusBadge = (status: SaleStatus) => {
             gap: '0.25rem',
           }}
         >
-          سليمة (غير مرتجعة)
+          مدفوعه
         </span>
       );
     case 'PartiallyReturned':

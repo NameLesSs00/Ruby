@@ -170,14 +170,14 @@ export const SubscriptionDebtsTab = ({ onSelectForPayment }: SubscriptionDebtsTa
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
           <div style={{ position: 'relative', minWidth: 260 }}>
-            <Search size={16} color="#94a3b8" style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', insetInlineStart: '0.75rem' }} />
+            <Search size={16} color="#94a3b8" style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', insetInlineEnd: '0.75rem', pointerEvents: 'none' }} />
             <input
               type="text"
               placeholder="البحث باسم المشترك أو الوصف..."
               value={debtSearchTerm}
               onChange={(e) => setDebtSearchTerm(e.target.value)}
               className="form-input"
-              style={{ paddingInlineStart: '2.25rem' }}
+              style={{ paddingInlineEnd: '2.25rem' }}
             />
           </div>
 

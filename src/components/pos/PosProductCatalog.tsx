@@ -62,7 +62,7 @@ export const PosProductCatalog = ({
           <Search
             size={18}
             color="#94a3b8"
-            style={{ position: 'absolute', insetInlineStart: '1rem', pointerEvents: 'none' }}
+            style={{ position: 'absolute', insetInlineEnd: '1rem', pointerEvents: 'none' }}
           />
           <input
             type="text"
@@ -71,7 +71,8 @@ export const PosProductCatalog = ({
             onChange={(e) => onSearchChange(e.target.value)}
             style={{
               width: '100%',
-              padding: '0.8rem 1rem 0.8rem 2.75rem',
+              padding: '0.8rem 1rem',
+              paddingInlineEnd: searchTerm ? '4.25rem' : '2.75rem',
               border: 'none',
               outline: 'none',
               background: 'transparent',
@@ -85,16 +86,20 @@ export const PosProductCatalog = ({
               onClick={() => onSearchChange('')}
               style={{
                 position: 'absolute',
-                insetInlineEnd: '0.75rem',
-                border: 'none',
-                background: 'transparent',
-                color: '#94a3b8',
+                insetInlineEnd: '2.5rem',
+                border: '1px solid #fecaca',
+                background: '#fee2e2',
+                color: '#dc2626',
+                borderRadius: '4px',
                 cursor: 'pointer',
-                padding: '0.2rem',
+                padding: '0.15rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
               title="مسح البحث"
             >
-              <X size={16} />
+              <X size={15} />
             </button>
           )}
         </div>

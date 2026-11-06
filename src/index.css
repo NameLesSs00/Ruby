@@ -519,7 +519,7 @@ input, button, select, textarea {
 
 .toolbar-search .search-icon {
   position: absolute;
-  inset-inline-start: 0.85rem;
+  inset-inline-end: 0.85rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-text-muted);
@@ -529,7 +529,7 @@ input, button, select, textarea {
 .toolbar-search input {
   width: 100%;
   padding: 0.65rem 1rem;
-  padding-inline-start: 2.5rem;
+  padding-inline-end: 2.5rem;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
@@ -819,9 +819,9 @@ input, button, select, textarea {
 }
 
 .modal-close-btn {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: var(--color-text-muted);
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
   cursor: pointer;
   width: 32px;
   height: 32px;
@@ -833,9 +833,9 @@ input, button, select, textarea {
 }
 
 .modal-close-btn:hover {
-  background: #fee2e2;
-  border-color: #fecaca;
-  color: #ef4444;
+  background: #ef4444;
+  border-color: #dc2626;
+  color: #ffffff;
 }
 
 .modal-body {
@@ -857,17 +857,19 @@ input, button, select, textarea {
 
 .btn-secondary {
   padding: 0.65rem 1.25rem;
-  background-color: #e2e8f0;
-  color: var(--color-text);
-  border: none;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
   border-radius: var(--radius-md);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
-.btn-secondary:hover {
-  background-color: #cbd5e1;
+.btn-secondary:hover:not(:disabled) {
+  background-color: #ef4444;
+  border-color: #dc2626;
+  color: #ffffff;
 }
 
 .table-loading-row,
@@ -911,17 +913,20 @@ input, button, select, textarea {
 
 .sidebar-close-btn {
   display: none;
-  background: none;
-  border: none;
-  color: #94a3b8;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
   cursor: pointer;
   padding: 0.35rem;
   border-radius: var(--radius-sm);
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
 }
 
 .sidebar-close-btn:hover {
+  background: #ef4444;
+  border-color: #dc2626;
   color: #ffffff;
 }
 

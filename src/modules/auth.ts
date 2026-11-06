@@ -26,6 +26,115 @@ export interface LogoutPayload {
 
 export type UserRole = 'SuperAdmin' | 'ReceptionAdmin' | 'ShopAdmin' | 'Admin' | 'Coach' | 'Receptionist';
 
+export const ADMIN_ROLES = ['SuperAdmin', 'Admin'];
+export const POS_ROLES = ['SuperAdmin', 'Admin', 'ShopAdmin'];
+export const RECEPTION_ROLES = ['SuperAdmin', 'Admin', 'ReceptionAdmin'];
+
+export interface AllowedPageSection {
+  path: string;
+  label: string;
+  description: string;
+}
+
+export function isSuperAdminRole(role?: string): boolean {
+  return role === 'SuperAdmin' || role === 'Admin';
+}
+
+export function getRoleDisplayName(role?: string): string {
+  switch (role) {
+    case 'SuperAdmin':
+    case 'Admin':
+      return 'مدير عام النظام (SuperAdmin)';
+    case 'ReceptionAdmin':
+      return 'مسؤول الاستقبال والاشتراكات (ReceptionAdmin)';
+    case 'ShopAdmin':
+      return 'مسؤول نقطة البيع (POS)';
+    default:
+      return role || 'مستخدم النظام';
+  }
+}
+
+export function getDefaultRouteForRole(role?: string): string {
+  if (role === 'ShopAdmin') return '/pos';
+  if (role === 'ReceptionAdmin') return '/subscriptions';
+  return '/dashboard';
+}
+
+export function getAllowedPagesForRole(role?: string): AllowedPageSection[] {
+  if (role === 'ShopAdmin') {
+    return [
+      {
+        path: '/pos',
+        label: 'شاشة الكاشير (نقطة البيع)',
+        description: 'إصدار فواتير المبيعات وإدارة الفواتير المفتوحة',
+      },
+      {
+        path: '/pos/sales',
+        label: 'سجل المبيعات',
+        description: 'استعراض وطباعة فواتير مبيعات المتجر',
+      },
+      {
+        path: '/pos/returns',
+        label: 'مرتجعات المبيعات',
+        description: 'تسجيل ومراجعة مرتجعات فواتير نقاط البيع',
+      },
+      {
+        path: '/pos/due-payments',
+        label: 'ديون ومستحقات الكاشير',
+        description: 'متابعة وتحصيل المبالغ المتبقية على فواتير البيع',
+      },
+    ];
+  }
+
+  if (role === 'ReceptionAdmin') {
+    return [
+      {
+        path: '/subscriptions',
+        label: 'الاشتراكات وتحصيل الدفعات',
+        description: 'إدارة الاشتراكات، تحصيل مدفوعات وديون الاشتراكات، وتعيين المدربين',
+      },
+      {
+        path: '/clients',
+        label: 'دليل العملاء والسباحين',
+        description: 'عرض وإضافة وتعديل بيانات المشتركين والسباحين',
+      },
+      {
+        path: '/attendance',
+        label: 'تسجيل الحضور والانصراف',
+        description: 'تسجيل حضور السباحين والاشتراكات بالباركود أو الاسم',
+      },
+      {
+        path: '/coaches',
+        label: 'دليل المدربين',
+        description: 'عرض قائمة الكادر التدريبي وإضافة أو تعديل بيانات المدربين',
+      },
+    ];
+  }
+
+  return [
+    {
+      path: '/dashboard',
+      label: 'لوحة التحكم الرئيسية',
+      description: 'نظرة شاملة على مؤشرات الأكاديمية والوصول لكافة الأقسام',
+    },
+    {
+      path: '/pos',
+      label: 'نقطة البيع (POS)',
+      description: 'شاشة الكاشير وإدارة المبيعات والمرتجعات',
+    },
+    {
+      path: '/subscriptions',
+      label: 'إدارة الاشتراكات',
+      description: 'متابعة اشتراكات السباحين والمدفوعات',
+    },
+    {
+      path: '/clients',
+      label: 'العملاء والسباحين',
+      description: 'إدارة ملفات المشتركين والباركود',
+    },
+  ];
+}
+
 export interface DecodedUser {
   id: string;
   name: string;
