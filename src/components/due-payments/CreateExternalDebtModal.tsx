@@ -66,16 +66,11 @@ export const CreateExternalDebtModal = ({
       return;
     }
 
-    if (!description.trim()) {
-      showToast.warning('يرجى كتابة بيان وسبب الدين');
-      return;
-    }
-
     mutation.mutate({
       payerName: payerName.trim(),
       totalAmount: amountNum,
       dueDate: dueDate ? dueDate : null,
-      description: description.trim(),
+      description: description.trim() || 'دين / مستحق خارجي',
     });
   };
 
@@ -145,7 +140,7 @@ export const CreateExternalDebtModal = ({
 
             <div className="form-group">
               <label className="form-label" htmlFor="debt-description">
-                البيان والسبب <span style={{ color: '#ef4444' }}>*</span>
+                البيان والسبب (اختياري)
               </label>
               <textarea
                 id="debt-description"
@@ -154,7 +149,6 @@ export const CreateExternalDebtModal = ({
                 placeholder="أدخل سبب أو تفاصيل هذا الدين والمستحق المالي..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                required
                 disabled={mutation.isPending}
                 style={{ resize: 'vertical' }}
               />

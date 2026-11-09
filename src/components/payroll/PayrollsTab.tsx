@@ -230,7 +230,7 @@ export const PayrollsTab = ({ employees }: { employees: Employee[] }) => {
             <form onSubmit={handleEditSubmit}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label className="form-label" htmlFor="edit-notes">الملاحظات</label>
+                  <label className="form-label" htmlFor="edit-notes">الملاحظات (اختياري)</label>
                   <textarea
                     id="edit-notes"
                     className="form-input"

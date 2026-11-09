@@ -143,7 +143,7 @@ export const DeductionsTab = ({ employees }: { employees: Employee[] }) => {
                   <input id="deduction-amount" type="number" min="1" step="50" className="form-input" placeholder="مثال: 300" value={addAmount} onChange={(e) => setAddAmount(e.target.value)} disabled={createMutation.isPending} />
                 </div>
                 <div className="form-group">
-                  <label className="form-label" htmlFor="deduction-desc">الوصف</label>
+                  <label className="form-label" htmlFor="deduction-desc">الوصف / ملاحظات (اختياري)</label>
                   <input id="deduction-desc" type="text" className="form-input" placeholder="سبب الخصم..." value={addDescription} onChange={(e) => setAddDescription(e.target.value)} disabled={createMutation.isPending} />
                 </div>
               </div>

@@ -95,15 +95,10 @@ export const CreateCoachDueModal = ({
       return;
     }
 
-    if (!description.trim()) {
-      showToast.warning('يرجى إدخال بيان وسبب المستحق');
-      return;
-    }
-
     mutation.mutate({
       coachId: selectedCoach.id,
       amount: amountNum,
-      description: description.trim(),
+      description: description.trim() || 'مستحق تدريب',
     });
   };
 
@@ -170,14 +165,13 @@ export const CreateCoachDueModal = ({
 
             {/* Description */}
             <div className="form-group">
-              <label className="form-label required">البيان وسبب الاستحقاق</label>
+              <label className="form-label">البيان وسبب الاستحقاق (اختياري)</label>
               <textarea
                 className="form-input"
                 rows={3}
                 placeholder="مثال: مستحقات تدريب حصص إضافية، مكافأة أداء، نسبة تدريب خاص..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                required
                 disabled={mutation.isPending}
               />
             </div>

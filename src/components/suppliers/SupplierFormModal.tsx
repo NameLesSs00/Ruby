@@ -90,11 +90,11 @@ export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess 
               <input id="supplier-phone" type="tel" className="form-input" placeholder="01012345678" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required disabled={isSaving} dir="ltr" style={{ textAlign: 'end' }} />
             </div>
             <div className="form-group">
-              <label className="form-label" htmlFor="supplier-address">العنوان / المقر</label>
+              <label className="form-label" htmlFor="supplier-address">العنوان / المقر (اختياري)</label>
               <input id="supplier-address" type="text" className="form-input" placeholder="مثال: القاهرة، مدينة نصر" value={address} onChange={(e) => setAddress(e.target.value)} disabled={isSaving} />
             </div>
             <div className="form-group">
-              <label className="form-label" htmlFor="supplier-notes">ملاحظات إضافية</label>
+              <label className="form-label" htmlFor="supplier-notes">ملاحظات إضافية (اختياري)</label>
               <textarea id="supplier-notes" className="form-input" rows={3} placeholder="أي ملاحظات حول التوريد أو المنتجات..." value={notes} onChange={(e) => setNotes(e.target.value)} disabled={isSaving} />
             </div>
           </div>

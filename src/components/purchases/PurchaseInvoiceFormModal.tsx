@@ -265,7 +265,7 @@ export const PurchaseInvoiceFormModal = ({
 
               <div className="form-group">
                 <label className="form-label" htmlFor="inv-notes">
-                  ملاحظات
+                  ملاحظات (اختياري)
                 </label>
                 <input
                   id="inv-notes"

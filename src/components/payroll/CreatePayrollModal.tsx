@@ -92,7 +92,7 @@ export const CreatePayrollModal = ({ isOpen, employees, onClose }: CreatePayroll
               />
             </div>
             <div className="form-group">
-              <label className="form-label" htmlFor="pr-notes">ملاحظات</label>
+              <label className="form-label" htmlFor="pr-notes">ملاحظات (اختياري)</label>
               <textarea
                 id="pr-notes"
                 className="form-input"

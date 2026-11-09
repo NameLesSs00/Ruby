@@ -160,7 +160,7 @@ export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: Coa
             {/* Notes */}
             <div className="form-group">
               <label className="form-label" htmlFor="coach-notes">
-                ملاحظات إضافية
+                ملاحظات إضافية (اختياري)
               </label>
               <textarea
                 id="coach-notes"

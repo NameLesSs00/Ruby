@@ -140,7 +140,7 @@ export const EditAttendanceModal = ({
             </div>
 
             <div className="form-group">
-              <label className="form-label">ملاحظات الحضور</label>
+              <label className="form-label">ملاحظات الحضور (اختياري)</label>
               <textarea
                 className="form-input"
                 rows={3}

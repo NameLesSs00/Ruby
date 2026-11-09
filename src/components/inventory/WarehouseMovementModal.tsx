@@ -110,11 +110,6 @@ export const WarehouseMovementModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!description.trim()) {
-      showToast.error('يرجى كتابة بيان أو سبب الحركة');
-      return;
-    }
-
     if (items.length === 0) {
       showToast.error('يرجى إضافة صنف واحد على الأقل');
       return;
@@ -133,7 +128,7 @@ export const WarehouseMovementModal = ({
 
     const payload: CreateWarehouseMovementPayload = {
       movementType,
-      description: description.trim(),
+      description: description.trim() || (movementType === 'In' ? 'إذن توريد وارد' : 'إذن صرف صادر'),
       items: items.map((i) => ({
         inventoryItemId: Number(i.inventoryItemId),
         quantity: Number(i.quantity),
@@ -219,14 +214,13 @@ export const WarehouseMovementModal = ({
 
             {/* Description */}
             <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">البيان والسبب *</label>
+              <label className="form-label">البيان والسبب (اختياري)</label>
               <textarea
                 className="form-input"
                 rows={2}
                 placeholder="اكتب سبب التوريد أو جهة الصرف (مثال: استلام توريد ملابس سباحة من المورد...)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                required
               />
             </div>
 

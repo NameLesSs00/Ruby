@@ -303,7 +303,7 @@ export const ProcessReturnModal = ({
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label" htmlFor="return-notes">سبب الإرجاع / ملاحظات</label>
+                  <label className="form-label" htmlFor="return-notes">سبب الإرجاع / ملاحظات (اختياري)</label>
                   <input
                     id="return-notes"
                     type="text"

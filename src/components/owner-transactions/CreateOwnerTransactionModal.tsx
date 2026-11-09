@@ -68,16 +68,11 @@ export const CreateOwnerTransactionModal = ({
       return;
     }
 
-    if (!notes.trim()) {
-      showToast.warning('يرجى إدخال البيان أو سبب الحركة');
-      return;
-    }
-
     mutation.mutate({
       transactionType,
       cashboxType,
       amount: numericAmount,
-      notes: notes.trim(),
+      notes: notes.trim() || 'حركة مالك',
     });
   };
 
@@ -226,7 +221,7 @@ export const CreateOwnerTransactionModal = ({
 
             {/* Notes / Statement Textarea */}
             <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">البيان والملاحظات *</label>
+              <label className="form-label">البيان والملاحظات (اختياري)</label>
               <textarea
                 className="form-input"
                 rows={2}
@@ -234,7 +229,6 @@ export const CreateOwnerTransactionModal = ({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 disabled={mutation.isPending}
-                required
               />
             </div>
           </div>

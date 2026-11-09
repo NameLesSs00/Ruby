@@ -143,7 +143,7 @@ export const BonusesTab = ({ employees }: { employees: Employee[] }) => {
                   <input id="bonus-amount" type="number" min="1" step="50" className="form-input" placeholder="مثال: 500" value={addAmount} onChange={(e) => setAddAmount(e.target.value)} disabled={createMutation.isPending} />
                 </div>
                 <div className="form-group">
-                  <label className="form-label" htmlFor="bonus-desc">الوصف</label>
+                  <label className="form-label" htmlFor="bonus-desc">الوصف / ملاحظات (اختياري)</label>
                   <input id="bonus-desc" type="text" className="form-input" placeholder="سبب المكافأة..." value={addDescription} onChange={(e) => setAddDescription(e.target.value)} disabled={createMutation.isPending} />
                 </div>
               </div>
