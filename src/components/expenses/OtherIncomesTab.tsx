@@ -16,6 +16,7 @@ import {
   type OtherIncome,
 } from '../../modules/expenses';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { OtherIncomeFormModal } from './OtherIncomeFormModal';
 import { DeleteModal } from '../ui/DeleteModal';
@@ -55,7 +56,8 @@ export const OtherIncomesTab = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => otherIncomesApi.delete(id),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم حذف الإيراد الإضافي بنجاح');
       setDeletingIncome(null);
     },

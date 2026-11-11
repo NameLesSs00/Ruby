@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { payrollPaymentsApi, payrollKeys } from '../../modules/payrolls';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import type { PayrollRecord } from '../../modules/payrolls';
 import type { Employee } from '../../modules/employees';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface RecordPaymentModalProps {
   isOpen: boolean;
@@ -39,11 +41,12 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       });
     },
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: payrollKeys.all });
       if (payroll) {
         queryClient.invalidateQueries({ queryKey: payrollKeys.paymentsByPayroll(payroll.id) });
       }
       queryClient.invalidateQueries({ queryKey: payrollKeys.payments() });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل صرف الراتب بنجاح');
       onClose();
     },
@@ -132,6 +135,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
                 className="form-input"
                 value={amountPaid}
                 onChange={(e) => setAmountPaid(e.target.value === '' ? '' : Number(e.target.value))}
+                onKeyDown={blockInvalidNumberKeys}
                 placeholder="0.00"
                 required
                 autoFocus

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { X, UploadCloud, Trash2, Image as ImageIcon, RotateCcw } from 'lucide-react';
+import { X } from 'lucide-react';
 import {
   productsApi,
   productKeys,
@@ -14,6 +14,8 @@ import {
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
+import { ProductImageUpload } from './ProductImageUpload';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -34,24 +36,29 @@ export const ProductFormModal = ({
 
   const [productName, setProductName] = useState('');
   const [productCategoryId, setProductCategoryId] = useState<number | ''>('');
-  const [salePrice, setSalePrice] = useState('');
+  const [barcode, setBarcode] = useState('');
+  const [customerPrice, setCustomerPrice] = useState('');
+  const [employeePrice, setEmployeePrice] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [removeExistingImage, setRemoveExistingImage] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editingProduct) {
       setProductName(editingProduct.name);
       setProductCategoryId(editingProduct.productCategoryId);
-      setSalePrice(editingProduct.salePrice.toString());
+      setBarcode(editingProduct.barcode || '');
+      setCustomerPrice(editingProduct.customerPrice !== undefined ? editingProduct.customerPrice.toString() : '');
+      setEmployeePrice(editingProduct.employeePrice !== undefined ? editingProduct.employeePrice.toString() : '');
       setSelectedFile(null);
       setRemoveExistingImage(false);
       setPreviewUrl(getProductImageUrl(editingProduct.imageUrl));
     } else {
       setProductName('');
       setProductCategoryId(categories.length > 0 ? categories[0].id : '');
-      setSalePrice('');
+      setBarcode('');
+      setCustomerPrice('');
+      setEmployeePrice('');
       setSelectedFile(null);
       setRemoveExistingImage(false);
       setPreviewUrl(null);
@@ -92,7 +99,6 @@ export const ProductFormModal = ({
     setSelectedFile(null);
     setPreviewUrl(null);
     if (editingProduct?.imageUrl) setRemoveExistingImage(true);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleRestoreExistingImage = () => {
@@ -100,14 +106,13 @@ export const ProductFormModal = ({
       setSelectedFile(null);
       setRemoveExistingImage(false);
       setPreviewUrl(getProductImageUrl(editingProduct.imageUrl));
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateProductPayload) => productsApi.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
       showToast.success('تمت إضافة المنتج بنجاح');
       onSuccess();
     },
@@ -120,7 +125,7 @@ export const ProductFormModal = ({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateProductPayload }) =>
       productsApi.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
       showToast.success('تم تحديث بيانات المنتج بنجاح');
       onSuccess();
     },
@@ -141,9 +146,18 @@ export const ProductFormModal = ({
       showToast.warning('يرجى اختيار تصنيف المنتج');
       return;
     }
-    const priceNum = parseFloat(salePrice);
-    if (isNaN(priceNum) || priceNum < 0) {
-      showToast.warning('يرجى كتابة سعر بيع صحيح');
+    if (!barcode.trim()) {
+      showToast.warning('يرجى إدخال باركود المنتج');
+      return;
+    }
+    const custPriceNum = parseFloat(customerPrice);
+    if (isNaN(custPriceNum) || custPriceNum < 0) {
+      showToast.warning('يرجى كتابة سعر عميل صحيح');
+      return;
+    }
+    const empPriceNum = parseFloat(employeePrice);
+    if (isNaN(empPriceNum) || empPriceNum < 0) {
+      showToast.warning('يرجى كتابة سعر موظف صحيح');
       return;
     }
 
@@ -153,7 +167,9 @@ export const ProductFormModal = ({
         payload: {
           productCategoryId: Number(productCategoryId),
           name: productName.trim(),
-          salePrice: priceNum,
+          barcode: barcode.trim(),
+          customerPrice: custPriceNum,
+          employeePrice: empPriceNum,
           imageFile: selectedFile,
           removeImage: removeExistingImage,
         },
@@ -162,7 +178,9 @@ export const ProductFormModal = ({
       createMutation.mutate({
         productCategoryId: Number(productCategoryId),
         name: productName.trim(),
-        salePrice: priceNum,
+        barcode: barcode.trim(),
+        customerPrice: custPriceNum,
+        employeePrice: empPriceNum,
         imageFile: selectedFile,
       });
     }
@@ -182,81 +200,16 @@ export const ProductFormModal = ({
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body" style={{ maxHeight: 'calc(80vh - 120px)', overflowY: 'auto' }}>
-            <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <ImageIcon size={16} color="var(--color-orange)" />
-                <span>صورة المنتج (اختياري)</span>
-              </label>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/jpg"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-                disabled={isSaving}
-              />
-
-              {previewUrl && !removeExistingImage ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
-                  <img
-                    src={previewUrl}
-                    alt="معاينة المنتج"
-                    style={{ width: 72, height: 72, borderRadius: 'var(--radius-sm)', objectFit: 'cover', border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.25rem' }}>
-                      {selectedFile ? selectedFile.name : 'الصورة الحالية للمنتج'}
-                    </div>
-                    {selectedFile && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                        {(selectedFile.size / 1024).toFixed(1)} ك.ب
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                      <button type="button" className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }} onClick={() => fileInputRef.current?.click()} disabled={isSaving}>
-                        تغيير الصورة
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                        style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#fca5a5', backgroundColor: '#fef2f2' }}
-                        onClick={handleRemoveImage}
-                        disabled={isSaving}
-                      >
-                        <Trash2 size={13} style={{ marginInlineEnd: '0.25rem' }} />
-                        إزالة
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : removeExistingImage ? (
-                <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px dashed #f87171', backgroundColor: '#fff1f2', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.85rem', color: '#b91c1c' }}>تم تحديد إزالة الصورة الحالية عند الحفظ</span>
-                  <button type="button" className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }} onClick={handleRestoreExistingImage} disabled={isSaving}>
-                    <RotateCcw size={13} style={{ marginInlineEnd: '0.25rem' }} />
-                    تراجع
-                  </button>
-                </div>
-              ) : (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{ border: '2px dashed #cbd5e1', borderRadius: 'var(--radius-md)', padding: '1.25rem 1rem', textAlign: 'center', cursor: 'pointer', backgroundColor: '#ffffff', transition: 'border-color 0.2s, background-color 0.2s' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--color-orange)';
-                    e.currentTarget.style.backgroundColor = '#fffaf7';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#cbd5e1';
-                    e.currentTarget.style.backgroundColor = '#ffffff';
-                  }}
-                >
-                  <UploadCloud size={32} color="var(--color-orange)" style={{ margin: '0 auto 0.5rem' }} />
-                  <p style={{ margin: '0 0 0.25rem', fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text)' }}>اضغط هنا لرفع صورة المنتج</p>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>صيغ مدعومة: JPG, PNG, WebP (بحد أقصى 5 ميجابايت)</p>
-                </div>
-              )}
-            </div>
+            <ProductImageUpload
+              previewUrl={previewUrl}
+              removeExistingImage={removeExistingImage}
+              selectedFile={selectedFile}
+              hasExistingImage={Boolean(editingProduct?.imageUrl)}
+              isSaving={isSaving}
+              onFileChange={handleFileChange}
+              onRemoveImage={handleRemoveImage}
+              onRestoreExistingImage={handleRestoreExistingImage}
+            />
 
             <div className="form-group">
               <label className="form-label" htmlFor="product-name">
@@ -294,21 +247,59 @@ export const ProductFormModal = ({
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="product-price">
-                سعر البيع (بالجنيه المصري) <span style={{ color: '#ef4444' }}>*</span>
+              <label className="form-label" htmlFor="product-barcode">
+                الباركود <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
-                id="product-price"
-                type="number"
-                min="0"
-                step="0.5"
+                id="product-barcode"
+                type="text"
                 className="form-input"
-                placeholder="مثال: 50"
-                value={salePrice}
-                onChange={(e) => setSalePrice(e.target.value)}
+                placeholder="مثال: 123456789 أو PROD-01"
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
                 required
                 disabled={isSaving}
               />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label" htmlFor="product-customer-price">
+                  سعر العميل (ج.م) <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  id="product-customer-price"
+                  type="number"
+                  min="0"
+                  step="any"
+                  className="form-input"
+                  placeholder="مثال: 50"
+                  value={customerPrice}
+                  onChange={(e) => setCustomerPrice(e.target.value)}
+                  onKeyDown={blockInvalidNumberKeys}
+                  required
+                  disabled={isSaving}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="product-employee-price">
+                  سعر الموظف (ج.م) <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  id="product-employee-price"
+                  type="number"
+                  min="0"
+                  step="any"
+                  className="form-input"
+                  placeholder="مثال: 35"
+                  value={employeePrice}
+                  onChange={(e) => setEmployeePrice(e.target.value)}
+                  onKeyDown={blockInvalidNumberKeys}
+                  required
+                  disabled={isSaving}
+                />
+              </div>
             </div>
           </div>
 

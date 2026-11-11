@@ -40,7 +40,7 @@ export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess 
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateSupplierPayload) => suppliersApi.create(payload),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: supplierKeys.lists() }); showToast.success('تمت إضافة المورد بنجاح'); onSuccess(); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: supplierKeys.all }); showToast.success('تمت إضافة المورد بنجاح'); onSuccess(); },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في إضافة المورد');
     },
@@ -48,7 +48,7 @@ export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess 
 
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateSupplierPayload }) => suppliersApi.update(id, payload),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: supplierKeys.lists() }); showToast.success('تم تحديث بيانات المورد بنجاح'); onSuccess(); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: supplierKeys.all }); showToast.success('تم تحديث بيانات المورد بنجاح'); onSuccess(); },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في تحديث بيانات المورد');
     },

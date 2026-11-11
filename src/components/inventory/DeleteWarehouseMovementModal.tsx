@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { DeleteModal } from '../ui/DeleteModal';
 import { warehouseTransactionsApi, warehouseTransactionKeys, type WarehouseMovement } from '../../modules/warehouseTransactions';
+import { inventoryKeys } from '../../modules/inventory';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 
@@ -19,6 +20,7 @@ export const DeleteWarehouseMovementModal = ({
     mutationFn: (id: number) => warehouseTransactionsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all });
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
       showToast.success('تم حذف إذن الحركة المخزنية بنجاح');
       onClose();
     },

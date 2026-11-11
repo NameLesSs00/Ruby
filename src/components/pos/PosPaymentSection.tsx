@@ -1,4 +1,5 @@
 import { User, CreditCard, Banknote } from 'lucide-react';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface PosPaymentSectionProps {
   subtotal: number;
@@ -66,10 +67,11 @@ export const PosPaymentSection = ({
             type="number"
             min="0"
             max={subtotal}
-            step="1"
+            step="any"
             placeholder="0"
             value={discountAmount || ''}
             onChange={(e) => setDiscountAmount(Math.max(0, Number(e.target.value)))}
+            onKeyDown={blockInvalidNumberKeys}
             style={{
               width: '100%',
               padding: '0.25rem 0.5rem',
@@ -191,6 +193,7 @@ export const PosPaymentSection = ({
                 max={finalAmount}
                 value={partialAmountPaid}
                 onChange={(e) => setPartialAmountPaid(Math.max(0, Number(e.target.value)))}
+                onKeyDown={blockInvalidNumberKeys}
                 style={{ width: '100%', padding: '0.35rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontWeight: 700 }}
               />
             </div>

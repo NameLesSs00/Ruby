@@ -10,8 +10,10 @@ import {
   type UpdateExpensePayload,
 } from '../../modules/expenses';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface ExpenseFormModalProps {
   isOpen: boolean;
@@ -52,7 +54,8 @@ export const ExpenseFormModal = ({
   const createMutation = useMutation({
     mutationFn: (payload: CreateExpensePayload) => expensesApi.create(payload),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: expenseKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: expenseKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل المصروف بنجاح');
       onSuccess();
     },
@@ -65,7 +68,8 @@ export const ExpenseFormModal = ({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateExpensePayload }) =>
       expensesApi.update(id, payload),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: expenseKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: expenseKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تحديث بيانات المصروف بنجاح');
       onSuccess();
     },
@@ -143,12 +147,13 @@ export const ExpenseFormModal = ({
               <input
                 id="expense-amount"
                 type="number"
-                step="0.5"
-                min="0.5"
+                step="any"
+                min="0.01"
                 className="form-input"
                 placeholder="مثال: 250"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={isSaving}
                 autoFocus

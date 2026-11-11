@@ -7,8 +7,10 @@ import {
   subscriptionCancellationKeys,
 } from '../../modules/subscriptionCancellations';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface RecordRefundPaymentModalProps {
   isOpen: boolean;
@@ -50,6 +52,7 @@ export const RecordRefundPaymentModal = ({
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: subscriptionCancellationKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل صرف الاسترداد بنجاح');
       onSuccess();
     },
@@ -182,6 +185,7 @@ export const RecordRefundPaymentModal = ({
                 placeholder="0.00"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={mutation.isPending}
                 autoFocus
@@ -216,7 +220,14 @@ export const RecordRefundPaymentModal = ({
               className="btn-primary"
               disabled={mutation.isPending}
             >
-              {mutation.isPending ? 'جاري تسجيل الصرف...' : 'تأكيد تسجيل الصرف'}
+              {mutation.isPending ? (
+                <>
+                  <div className="spinner" />
+                  <span>جاري تسجيل الصرف...</span>
+                </>
+              ) : (
+                <span>تأكيد تسجيل الصرف</span>
+              )}
             </button>
           </div>
         </form>

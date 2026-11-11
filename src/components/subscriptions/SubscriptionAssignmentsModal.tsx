@@ -12,6 +12,7 @@ import {
 import {
   subscriptionCoachAssignmentsApi,
   coachAssignmentKeys,
+  subscriptionKeys,
   type Subscription,
   type SubscriptionCoachAssignment,
 } from '../../modules/subscriptions';
@@ -54,6 +55,7 @@ export const SubscriptionAssignmentsModal = ({
     mutationFn: (id: number) => subscriptionCoachAssignmentsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all });
+      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
       showToast.success('تم إزالة التعيين بنجاح');
     },
     onError: (err: unknown) => {
@@ -275,6 +277,7 @@ export const SubscriptionAssignmentsModal = ({
         onSuccess={() => {
           setEditingAssignment(null);
           queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all });
+          queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
         }}
       />
     </div>

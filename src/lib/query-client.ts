@@ -12,8 +12,8 @@ export const queryClient = new QueryClient({
   }),
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes
+      staleTime: 0, // Ensure tables and tabs always fetch the latest server data on mount/invalidation
+      gcTime: 1000 * 60 * 30, // 30 minutes in memory cache for instant render
       retry: 1,
       refetchOnWindowFocus: false,
     },

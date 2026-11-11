@@ -91,7 +91,7 @@ export const PurchaseInvoiceFormModal = ({
   const createMutation = useMutation({
     mutationFn: (payload: CreatePurchaseInvoicePayload) => purchaseInvoicesApi.create(payload),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
       showToast.success(res.message || 'تم إنشاء فاتورة المشتريات بنجاح');
       onSuccess();
     },
@@ -104,7 +104,7 @@ export const PurchaseInvoiceFormModal = ({
     mutationFn: ({ id, payload }: { id: number; payload: UpdatePurchaseInvoicePayload }) =>
       purchaseInvoicesApi.update(id, payload),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
       showToast.success(res.message || 'تم تحديث فاتورة المشتريات بنجاح');
       onSuccess();
     },

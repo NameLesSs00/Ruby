@@ -63,7 +63,7 @@ export const ProductsPage = () => {
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       productsApi.updateStatus(id, isActive),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
       showToast.success(
         variables.isActive ? 'تم تفعيل المنتج بنجاح' : 'تم تعطيل المنتج بنجاح'
       );
@@ -76,7 +76,7 @@ export const ProductsPage = () => {
   const deleteProductMutation = useMutation({
     mutationFn: (id: number) => productsApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
       showToast.success('تم حذف المنتج بنجاح');
       setDeletingProduct(null);
     },

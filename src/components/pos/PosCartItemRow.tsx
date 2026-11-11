@@ -14,7 +14,7 @@ export const PosCartItemRow = ({
   onRemoveFromCart,
 }: PosCartItemRowProps) => {
   const imgUrl = getProductImageUrl(item.product.imageUrl);
-  const lineTotal = item.product.salePrice * item.quantity;
+  const lineTotal = item.product.customerPrice * item.quantity;
 
   return (
     <div
@@ -67,7 +67,7 @@ export const PosCartItemRow = ({
           {item.product.name}
         </div>
         <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-          {item.product.salePrice.toLocaleString('ar-EG')} ج.م / قطعة
+          {item.product.customerPrice.toLocaleString('ar-EG')} ج.م / قطعة
         </div>
       </div>
 

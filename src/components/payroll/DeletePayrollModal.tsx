@@ -23,7 +23,7 @@ export const DeletePayrollModal = ({ record, employees, onClose }: DeletePayroll
   const deleteMutation = useMutation({
     mutationFn: (id: number) => payrollsApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: payrollKeys.all });
       showToast.success('تم حذف مسيرة الراتب بنجاح');
       onClose();
     },

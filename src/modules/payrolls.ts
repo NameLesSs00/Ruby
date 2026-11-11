@@ -111,8 +111,10 @@ export const payrollKeys = {
   all: ['payrolls'] as const,
   lists: () => [...payrollKeys.all, 'list'] as const,
   detail: (id: number) => [...payrollKeys.all, 'detail', id] as const,
-  bonuses: (params?: BonusFilterParams) => ['bonuses', params] as const,
-  deductions: (params?: DeductionFilterParams) => ['deductions', params] as const,
+  allBonuses: ['bonuses'] as const,
+  bonuses: (params?: BonusFilterParams) => (params ? (['bonuses', params] as const) : (['bonuses'] as const)),
+  allDeductions: ['deductions'] as const,
+  deductions: (params?: DeductionFilterParams) => (params ? (['deductions', params] as const) : (['deductions'] as const)),
   payments: () => ['payroll-payments'] as const,
   paymentsByPayroll: (payrollId: number) => ['payroll-payments', 'payroll', payrollId] as const,
 };

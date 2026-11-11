@@ -50,7 +50,7 @@ export const AdminFormModal = ({
   const createMutation = useMutation({
     mutationFn: (payload: CreateAdminPayload) => adminsApi.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.all });
       showToast.success('تمت إضافة المسؤول بنجاح');
       onSuccess();
     },
@@ -63,7 +63,7 @@ export const AdminFormModal = ({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateAdminPayload }) =>
       adminsApi.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.all });
       showToast.success('تم تحديث بيانات المسؤول بنجاح');
       onSuccess();
     },

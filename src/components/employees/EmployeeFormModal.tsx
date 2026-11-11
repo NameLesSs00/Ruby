@@ -12,6 +12,7 @@ import {
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface EmployeeFormModalProps {
   isOpen: boolean;
@@ -55,7 +56,7 @@ export const EmployeeFormModal = ({
   const createMutation = useMutation({
     mutationFn: (payload: CreateEmployeePayload) => employeesApi.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       showToast.success('تمت إضافة الموظف بنجاح');
       onSuccess();
     },
@@ -68,7 +69,7 @@ export const EmployeeFormModal = ({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateEmployeePayload }) =>
       employeesApi.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       showToast.success('تم تحديث بيانات الموظف بنجاح');
       onSuccess();
     },
@@ -195,11 +196,12 @@ export const EmployeeFormModal = ({
                   id="employee-salary"
                   type="number"
                   min="0"
-                  step="100"
+                  step="any"
                   className="form-input"
                   placeholder="مثال: 8000"
                   value={monthlySalary}
                   onChange={(e) => setMonthlySalary(e.target.value)}
+                  onKeyDown={blockInvalidNumberKeys}
                   required
                   disabled={isSaving}
                 />

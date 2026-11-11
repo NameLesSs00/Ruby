@@ -15,6 +15,7 @@ import {
   type PurchaseInvoicePayment,
 } from '../../modules/purchases';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { DeleteModal } from '../ui/DeleteModal';
 import { PaginationBar } from '../ui/PaginationBar';
@@ -54,6 +55,7 @@ export const PurchasePaymentsTab = () => {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: purchasePaymentKeys.all });
       queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم حذف دفعة السداد بنجاح');
       setDeletingPayment(null);
     },

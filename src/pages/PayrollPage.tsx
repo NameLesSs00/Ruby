@@ -16,7 +16,6 @@ export const PayrollPage = () => {
   const { data: employeesData } = useQuery({
     queryKey: ['employees', 'list', { page: 1, pageSize: 100 }],
     queryFn: () => employeesApi.getAll({ page: 1, pageSize: 100 }),
-    staleTime: 5 * 60 * 1000,
   });
 
   const employees: Employee[] = employeesData?.items || [];

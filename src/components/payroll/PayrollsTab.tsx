@@ -46,7 +46,7 @@ export const PayrollsTab = ({ employees }: { employees: Employee[] }) => {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdatePayrollPayload }) => payrollsApi.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: payrollKeys.all });
       showToast.success('تم تحديث ملاحظات المسيرة بنجاح');
       setEditingRecord(null);
     },

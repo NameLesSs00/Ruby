@@ -12,6 +12,7 @@ import {
   type Expense,
 } from '../../modules/expenses';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { ExpenseFormModal } from './ExpenseFormModal';
 import { DeleteModal } from '../ui/DeleteModal';
@@ -55,6 +56,7 @@ export const ExpensesTab = () => {
     onSuccess: () => {
       showToast.success('تم حذف قيد المصروف بنجاح');
       queryClient.invalidateQueries({ queryKey: expenseKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       setDeletingExpense(null);
     },
     onError: (err: unknown) => {

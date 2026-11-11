@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { X, AlertTriangle } from 'lucide-react';
-import { subscriptionsApi, subscriptionKeys } from '../../modules/subscriptions';
+import { subscriptionsApi, subscriptionKeys, subscriptionDuePaymentKeys } from '../../modules/subscriptions';
 import type { Subscription } from '../../modules/subscriptions';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
@@ -22,7 +22,8 @@ export const SubscriptionDeleteModal = ({
   const deleteMutation = useMutation({
     mutationFn: (id: number) => subscriptionsApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+      queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all });
       showToast.success('تم حذف الاشتراك بنجاح');
       onSuccess();
     },

@@ -10,8 +10,10 @@ import {
   type CreatePurchasePaymentPayload,
 } from '../../modules/purchases';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface RecordPurchasePaymentModalProps {
   invoice: PurchaseInvoice | null;
@@ -48,6 +50,7 @@ export const RecordPurchasePaymentModal = ({
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
       queryClient.invalidateQueries({ queryKey: purchasePaymentKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل دفعة المشتريات بنجاح');
       onSuccess();
     },
@@ -157,13 +160,14 @@ export const RecordPurchasePaymentModal = ({
               <input
                 id="payment-amount"
                 type="number"
-                step="0.5"
-                min="0.5"
+                step="any"
+                min="0.01"
                 max={invoice.remainingAmount}
                 className="form-input"
                 placeholder="أدخل مبلغ الدفعة"
                 value={amountPaid}
                 onChange={(e) => setAmountPaid(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={mutation.isPending}
                 autoFocus

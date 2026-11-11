@@ -31,7 +31,7 @@ export const AdminsPage = () => {
     mutationFn: ({ id, isDeactivated }: { id: string; isDeactivated: boolean }) =>
       adminsApi.updateStatus(id, { isDeactivated }),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.all });
       showToast.success(
         variables.isDeactivated ? 'تم تعطيل حساب المسؤول بنجاح' : 'تم تفعيل حساب المسؤول بنجاح'
       );

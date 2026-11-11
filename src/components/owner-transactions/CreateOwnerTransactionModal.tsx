@@ -12,6 +12,7 @@ import { cashTransactionKeys, type CashboxType } from '../../modules/cashTransac
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface CreateOwnerTransactionModalProps {
   isOpen: boolean;
@@ -208,12 +209,13 @@ export const CreateOwnerTransactionModal = ({
               </label>
               <input
                 type="number"
-                min="0.5"
-                step="0.5"
+                min="0.01"
+                step="any"
                 className="form-input"
                 placeholder="أدخل المبلغ (مثال: 500)"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 disabled={mutation.isPending}
                 required
               />

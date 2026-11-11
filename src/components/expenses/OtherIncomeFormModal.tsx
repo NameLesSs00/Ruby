@@ -10,8 +10,10 @@ import {
   type UpdateOtherIncomePayload,
 } from '../../modules/expenses';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface OtherIncomeFormModalProps {
   isOpen: boolean;
@@ -52,7 +54,8 @@ export const OtherIncomeFormModal = ({
   const createMutation = useMutation({
     mutationFn: (payload: CreateOtherIncomePayload) => otherIncomesApi.create(payload),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل الإيراد الإضافي بنجاح');
       onSuccess();
     },
@@ -65,7 +68,8 @@ export const OtherIncomeFormModal = ({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateOtherIncomePayload }) =>
       otherIncomesApi.update(id, payload),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تحديث بيانات الإيراد بنجاح');
       onSuccess();
     },
@@ -141,12 +145,13 @@ export const OtherIncomeFormModal = ({
               <input
                 id="income-amount"
                 type="number"
-                step="0.5"
-                min="0.5"
+                step="any"
+                min="0.01"
                 className="form-input"
                 placeholder="مثال: 1000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={isSaving}
                 autoFocus

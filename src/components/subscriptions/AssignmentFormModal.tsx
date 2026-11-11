@@ -4,6 +4,7 @@ import { Award, Briefcase, X } from 'lucide-react';
 import {
   subscriptionCoachAssignmentsApi,
   coachAssignmentKeys,
+  subscriptionKeys,
   type SubscriptionCoachAssignment,
   type CreateCoachAssignmentPayload,
 } from '../../modules/subscriptions';
@@ -87,6 +88,7 @@ export const AssignmentFormModal = ({
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all });
+      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
       showToast.success(res.message || (isEditing ? 'تم تعديل التعيين بنجاح' : 'تم تعيين الكادر بنجاح'));
       onSuccess();
     },

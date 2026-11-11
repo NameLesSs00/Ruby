@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react';
 import type { InventoryItem } from '../../modules/inventory';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 export interface FormItemLine {
   inventoryItemId: number | '';
@@ -109,6 +110,7 @@ export const PurchaseInvoiceLineItems = ({
                   onChange={(e) =>
                     onItemChange(idx, 'quantity', Math.max(1, Number(e.target.value)))
                   }
+                  onKeyDown={blockInvalidNumberKeys}
                   required
                   disabled={isSaving}
                 />
@@ -118,7 +120,7 @@ export const PurchaseInvoiceLineItems = ({
                 <input
                   type="number"
                   min="0"
-                  step="0.5"
+                  step="any"
                   placeholder="سعر الوحدة"
                   className="form-input"
                   style={{ fontSize: '0.8rem', padding: '0.35rem', textAlign: 'center' }}
@@ -126,6 +128,7 @@ export const PurchaseInvoiceLineItems = ({
                   onChange={(e) =>
                     onItemChange(idx, 'unitCost', Math.max(0, Number(e.target.value)))
                   }
+                  onKeyDown={blockInvalidNumberKeys}
                   required
                   disabled={isSaving}
                 />

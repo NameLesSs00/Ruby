@@ -8,8 +8,10 @@ import {
   type RecordPosPaymentPayload,
 } from '../../modules/pos';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface RecordPosPaymentModalProps {
   duePayment: PosDuePayment | null;
@@ -36,6 +38,7 @@ export const RecordPosPaymentModal = ({
     mutationFn: (payload: RecordPosPaymentPayload) => posDuePaymentsApi.recordPayment(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: posKeys.duePayments.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success('تم تسجيل سداد الدفعة بنجاح وتحديث رصيد الدين');
       onClose();
     },
@@ -111,12 +114,13 @@ export const RecordPosPaymentModal = ({
               <input
                 id="pay-amount"
                 type="number"
-                min="0.5"
+                min="0.01"
                 max={duePayment.remainingAmount}
-                step="0.5"
+                step="any"
                 className="form-input"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={recordPaymentMutation.isPending}
               />

@@ -12,8 +12,10 @@ import {
   type CreateDuePaymentTransactionPayload,
 } from '../../modules/duePayments';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface RecordDuePaymentModalProps {
   duePayment: DuePayment | null;
@@ -48,6 +50,7 @@ export const RecordDuePaymentModal = ({
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: duePaymentKeys.all });
       queryClient.invalidateQueries({ queryKey: duePaymentTransactionKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل عملية التحصيل والسداد بنجاح');
       onSuccess();
     },
@@ -159,13 +162,14 @@ export const RecordDuePaymentModal = ({
               <input
                 id="pay-due-amount"
                 type="number"
-                step="0.5"
-                min="0.5"
+                step="any"
+                min="0.01"
                 max={duePayment.remainingAmount}
                 className="form-input"
                 placeholder="أدخل مبلغ السداد"
                 value={amountPaid}
                 onChange={(e) => setAmountPaid(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={mutation.isPending}
                 autoFocus

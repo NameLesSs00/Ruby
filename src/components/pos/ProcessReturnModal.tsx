@@ -10,6 +10,7 @@ import {
   type CreateSaleReturnPayload,
 } from '../../modules/pos';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { ReturnInvoicePicker } from './ReturnInvoicePicker';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -76,6 +77,7 @@ export const ProcessReturnModal = ({
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: posKeys.returns.all });
       queryClient.invalidateQueries({ queryKey: posKeys.sales.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل المرتجع واسترداد المبلغ بنجاح');
       onSuccess?.();
       onClose();

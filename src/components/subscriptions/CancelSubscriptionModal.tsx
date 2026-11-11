@@ -7,9 +7,11 @@ import {
   subscriptionCancellationKeys,
 } from '../../modules/subscriptionCancellations';
 import { subscriptionKeys } from '../../modules/subscriptions';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface CancelSubscriptionModalProps {
   isOpen: boolean;
@@ -43,6 +45,7 @@ export const CancelSubscriptionModal = ({
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: subscriptionCancellationKeys.all });
       queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل إلغاء الاشتراك بنجاح');
       onSuccess();
     },
@@ -176,6 +179,7 @@ export const CancelSubscriptionModal = ({
                 placeholder="0.00"
                 value={refundAmount}
                 onChange={(e) => setRefundAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={mutation.isPending}
               />
@@ -233,7 +237,14 @@ export const CancelSubscriptionModal = ({
               style={{ backgroundColor: '#dc2626', borderColor: '#b91c1c' }}
               disabled={mutation.isPending}
             >
-              {mutation.isPending ? 'جاري الإلغاء...' : 'تأكيد إلغاء الاشتراك'}
+              {mutation.isPending ? (
+                <>
+                  <div className="spinner" />
+                  <span>جاري الإلغاء...</span>
+                </>
+              ) : (
+                <span>تأكيد إلغاء الاشتراك</span>
+              )}
             </button>
           </div>
         </form>

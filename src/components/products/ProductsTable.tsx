@@ -1,4 +1,3 @@
-import { useModalEscape } from '../../lib/useModalEscape';
 import { useState } from 'react';
 import {
   Edit2,
@@ -9,9 +8,9 @@ import {
   Package,
   Tag,
   ZoomIn,
-  X,
 } from 'lucide-react';
 import { getProductImageUrl, type Product } from '../../modules/products';
+import { ProductImagePreviewModal } from './ProductImagePreviewModal';
 
 interface ProductsTableProps {
   products: Product[];
@@ -43,7 +42,6 @@ export const ProductsTable = ({
   onPageChange,
 }: ProductsTableProps) => {
   const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
-  useModalEscape(() => setPreviewProduct(null), Boolean(previewProduct));
   const [imageErrorMap, setImageErrorMap] = useState<Record<number, boolean>>({});
 
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
@@ -61,7 +59,9 @@ export const ProductsTable = ({
               <th style={{ width: 70, textAlign: 'center' }}>الصورة</th>
               <th>المنتج</th>
               <th>التصنيف</th>
-              <th>سعر البيع</th>
+              <th>الباركود</th>
+              <th>سعر العميل</th>
+              <th>سعر الموظف</th>
               <th>الحالة</th>
               <th style={{ textAlign: 'center' }}>الإجراءات</th>
             </tr>
@@ -69,7 +69,7 @@ export const ProductsTable = ({
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="table-loading-row">
+                <td colSpan={8} className="table-loading-row">
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div
                       className="spinner"
@@ -81,7 +81,7 @@ export const ProductsTable = ({
               </tr>
             ) : isError ? (
               <tr>
-                <td colSpan={6} className="table-empty-row" style={{ color: '#ef4444' }}>
+                <td colSpan={8} className="table-empty-row" style={{ color: '#ef4444' }}>
                   <AlertCircle
                     size={24}
                     style={{ marginBottom: '0.5rem', display: 'block', marginInline: 'auto' }}
@@ -91,7 +91,7 @@ export const ProductsTable = ({
               </tr>
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={6} className="table-empty-row">
+                <td colSpan={8} className="table-empty-row">
                   <span>لا توجد منتجات مسجلة حالياً {debouncedSearch ? 'مطابقة للبحث' : ''}</span>
                 </td>
               </tr>
@@ -185,10 +185,36 @@ export const ProductsTable = ({
                       </span>
                     </td>
 
-                    {/* Sale Price */}
+                    {/* Barcode */}
+                    <td>
+                      <span
+                        style={{
+                          fontFamily: 'monospace',
+                          fontSize: '0.85rem',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'var(--color-bg)',
+                          border: '1px solid var(--color-border)',
+                          display: 'inline-block',
+                          direction: 'ltr',
+                        }}
+                      >
+                        {product.barcode || '—'}
+                      </span>
+                    </td>
+
+                    {/* Customer Price */}
                     <td>
                       <span className="salary-text">
-                        {product.salePrice.toLocaleString('ar-EG')}
+                        {(product.customerPrice ?? 0).toLocaleString('ar-EG')}
+                        <span className="currency-unit">ج.م</span>
+                      </span>
+                    </td>
+
+                    {/* Employee Price */}
+                    <td>
+                      <span className="salary-text" style={{ color: 'var(--color-navy)' }}>
+                        {(product.employeePrice ?? 0).toLocaleString('ar-EG')}
                         <span className="currency-unit">ج.م</span>
                       </span>
                     </td>
@@ -267,79 +293,10 @@ export const ProductsTable = ({
       </div>
 
       {/* Image Lightbox Modal */}
-      {previewProduct && previewProduct.imageUrl && (
-        <div
-          className="modal-backdrop"
-          style={{ zIndex: 1100, backgroundColor: 'rgba(13, 21, 39, 0.75)' }}
-        >
-          <div
-            className="modal-card"
-            style={{
-              maxWidth: 500,
-              padding: '1.25rem',
-              backgroundColor: '#ffffff',
-              borderRadius: 'var(--radius-lg)',
-              textAlign: 'center',
-            }}
-            
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1rem',
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-navy)' }}>
-                {previewProduct.name}
-              </h3>
-              <button
-                type="button"
-                className="modal-close-btn"
-                onClick={() => setPreviewProduct(null)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div
-              style={{
-                borderRadius: 'var(--radius-md)',
-                overflow: 'hidden',
-                backgroundColor: 'var(--color-bg)',
-                border: '1px solid var(--color-border)',
-                marginBottom: '1rem',
-                maxHeight: '60vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <img
-                src={getProductImageUrl(previewProduct.imageUrl)!}
-                alt={previewProduct.name}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '60vh',
-                  objectFit: 'contain',
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="job-title-badge">
-                <Tag size={13} style={{ marginInlineEnd: '0.35rem' }} />
-                {previewProduct.productCategoryName || 'غير مصنف'}
-              </span>
-              <span className="salary-text" style={{ fontSize: '1.1rem' }}>
-                {previewProduct.salePrice.toLocaleString('ar-EG')}{' '}
-                <span className="currency-unit">ج.م</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      <ProductImagePreviewModal
+        product={previewProduct}
+        onClose={() => setPreviewProduct(null)}
+      />
     </>
   );
 };

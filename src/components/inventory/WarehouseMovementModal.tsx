@@ -9,7 +9,7 @@ import {
   type CreateWarehouseMovementPayload,
   type UpdateWarehouseMovementPayload,
 } from '../../modules/warehouseTransactions';
-import type { InventoryItem } from '../../modules/inventory';
+import { inventoryKeys, type InventoryItem } from '../../modules/inventory';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { WarehouseMovementItemRows, type MovementItemRow } from './WarehouseMovementItemRows';
@@ -67,6 +67,7 @@ export const WarehouseMovementModal = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all });
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
       showToast.success(
         isEdit ? 'تم تحديث إذن الحركة بنجاح' : 'تم إنشاء إذن الحركة بنجاح'
       );

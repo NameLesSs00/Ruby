@@ -11,6 +11,7 @@ import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { EmployeeNameCell } from './EmployeeNameCell';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 function fmtMonth(iso: string): string {
   return iso ? iso.slice(0, 7) : '—';
@@ -38,7 +39,7 @@ export const BonusesTab = ({ employees }: { employees: Employee[] }) => {
   const createMutation = useMutation({
     mutationFn: (p: CreateBonusPayload) => bonusesApi.create(p),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.bonuses() });
+      queryClient.invalidateQueries({ queryKey: payrollKeys.allBonuses });
       showToast.success('تمت إضافة المكافأة بنجاح');
       setIsAddOpen(false); setAddEmployeeId(''); setAddMonth(''); setAddAmount(''); setAddDescription('');
     },
@@ -140,7 +141,7 @@ export const BonusesTab = ({ employees }: { employees: Employee[] }) => {
                 </div>
                 <div className="form-group">
                   <label className="form-label" htmlFor="bonus-amount">المبلغ (ج.م) <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input id="bonus-amount" type="number" min="1" step="50" className="form-input" placeholder="مثال: 500" value={addAmount} onChange={(e) => setAddAmount(e.target.value)} disabled={createMutation.isPending} />
+                  <input id="bonus-amount" type="number" min="0.01" step="any" className="form-input" placeholder="مثال: 500" value={addAmount} onChange={(e) => setAddAmount(e.target.value)} onKeyDown={blockInvalidNumberKeys} disabled={createMutation.isPending} />
                 </div>
                 <div className="form-group">
                   <label className="form-label" htmlFor="bonus-desc">الوصف / ملاحظات (اختياري)</label>

@@ -44,7 +44,7 @@ export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: Coa
   const createMutation = useMutation({
     mutationFn: (payload: CreateCoachPayload) => coachesApi.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: coachKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: coachKeys.all });
       showToast.success('تمت إضافة المدرب بنجاح');
       onSuccess();
     },
@@ -57,7 +57,7 @@ export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: Coa
     mutationFn: ({ id, payload }: { id: number; payload: UpdateCoachPayload }) =>
       coachesApi.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: coachKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: coachKeys.all });
       showToast.success('تم تحديث بيانات المدرب بنجاح');
       onSuccess();
     },

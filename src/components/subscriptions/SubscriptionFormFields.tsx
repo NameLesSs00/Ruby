@@ -17,6 +17,7 @@ import {
 import { clientsApi } from '../../modules/clients';
 import { coachesApi } from '../../modules/coaches';
 import { SubscriptionPlanSection } from './SubscriptionPlanSection';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface Props {
   editingSubscription: Subscription | null;
@@ -239,6 +240,7 @@ export const SubscriptionFormFields = ({
               placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
+              onKeyDown={blockInvalidNumberKeys}
               required
               disabled={isSaving}
             />
@@ -257,6 +259,7 @@ export const SubscriptionFormFields = ({
               placeholder="0.00"
               value={discountAmount}
               onChange={(e) => setDiscountAmount(e.target.value === '' ? '' : Number(e.target.value))}
+              onKeyDown={blockInvalidNumberKeys}
               disabled={isSaving}
             />
           </div>
@@ -274,6 +277,7 @@ export const SubscriptionFormFields = ({
               placeholder="0.00"
               value={paidAmount}
               onChange={(e) => setPaidAmount(e.target.value === '' ? '' : Number(e.target.value))}
+              onKeyDown={blockInvalidNumberKeys}
               disabled={isSaving}
             />
           </div>

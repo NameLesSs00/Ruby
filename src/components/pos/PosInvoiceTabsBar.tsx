@@ -86,7 +86,7 @@ export const PosInvoiceTabsBar = ({
             const isActive = inv.id === activeInvoiceId;
             const itemCount = inv.cart.reduce((sum, i) => sum + i.quantity, 0);
             const subtotal = inv.cart.reduce(
-              (sum, i) => sum + i.product.salePrice * i.quantity,
+              (sum, i) => sum + i.product.customerPrice * i.quantity,
               0
             );
             const netTotal = Math.max(0, subtotal - (inv.discountAmount || 0));

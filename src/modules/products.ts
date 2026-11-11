@@ -41,12 +41,24 @@ export interface ProductCategoryQueryParams {
 // Products Types
 // ==========================================
 
+export type SaleType = 'Customer' | 'Employee';
+
+export interface BarcodeSearchResult {
+  productId: number;
+  name: string;
+  barcode: string;
+  unitPrice: number;
+  saleType: SaleType;
+}
+
 export interface Product {
   id: number;
   productCategoryId: number;
   productCategoryName: string;
   name: string;
-  salePrice: number;
+  barcode: string;
+  customerPrice: number;
+  employeePrice: number;
   imageUrl?: string | null;
   isActive: boolean;
   createdAt: string;
@@ -62,14 +74,18 @@ export interface ProductListResponse {
 export interface CreateProductPayload {
   productCategoryId: number;
   name: string;
-  salePrice: number;
+  barcode: string;
+  customerPrice: number;
+  employeePrice: number;
   imageFile?: File | null;
 }
 
 export interface UpdateProductPayload {
   productCategoryId: number;
   name: string;
-  salePrice: number;
+  barcode: string;
+  customerPrice: number;
+  employeePrice: number;
   imageFile?: File | null;
   removeImage?: boolean;
 }
@@ -174,7 +190,9 @@ export const productsApi = {
     const formData = new FormData();
     formData.append('ProductCategoryId', String(payload.productCategoryId));
     formData.append('Name', payload.name);
-    formData.append('SalePrice', String(payload.salePrice));
+    formData.append('Barcode', payload.barcode);
+    formData.append('CustomerPrice', String(payload.customerPrice));
+    formData.append('EmployeePrice', String(payload.employeePrice));
     if (payload.imageFile) {
       formData.append('ImageFile', payload.imageFile);
     }
@@ -187,13 +205,25 @@ export const productsApi = {
     const formData = new FormData();
     formData.append('ProductCategoryId', String(payload.productCategoryId));
     formData.append('Name', payload.name);
-    formData.append('SalePrice', String(payload.salePrice));
+    formData.append('Barcode', payload.barcode);
+    formData.append('CustomerPrice', String(payload.customerPrice));
+    formData.append('EmployeePrice', String(payload.employeePrice));
     if (payload.imageFile) {
       formData.append('ImageFile', payload.imageFile);
     }
     formData.append('RemoveImage', String(Boolean(payload.removeImage)));
 
     const response = await apiClient.put<ApiResponse<Product>>(`/api/products/${id}`, formData);
+    return response.data;
+  },
+
+  getByBarcode: async (barcode: string, saleType: SaleType = 'Customer'): Promise<BarcodeSearchResult> => {
+    const response = await apiClient.get<BarcodeSearchResult>(
+      `/api/products/by-barcode/${encodeURIComponent(barcode)}`,
+      {
+        params: { saleType },
+      }
+    );
     return response.data;
   },
 

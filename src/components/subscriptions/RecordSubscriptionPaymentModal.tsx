@@ -11,8 +11,10 @@ import {
   type RecordSubscriptionPaymentPayload,
 } from '../../modules/subscriptions';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface RecordSubscriptionPaymentModalProps {
   isOpen: boolean;
@@ -57,6 +59,7 @@ export const RecordSubscriptionPaymentModal = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all });
       queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success('تم تسجيل سداد الدفعة بنجاح وتحديث رصيد الاشتراك');
       onClose();
       onSuccess?.();
@@ -228,6 +231,7 @@ export const RecordSubscriptionPaymentModal = ({
                   className="form-input"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
+                  onKeyDown={blockInvalidNumberKeys}
                   required
                   disabled={recordPaymentMutation.isPending}
                 />

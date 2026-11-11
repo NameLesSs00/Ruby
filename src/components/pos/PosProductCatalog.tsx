@@ -269,7 +269,7 @@ export const PosProductCatalog = ({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '0.4rem', borderTop: '1px solid #f1f5f9' }}>
                     <div>
                       <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ff6b22' }}>
-                        {product.salePrice.toLocaleString('ar-EG')}{' '}
+                        {(product.customerPrice ?? 0).toLocaleString('ar-EG')}{' '}
                       </span>
                       <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>ج.م</span>
                     </div>

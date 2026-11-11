@@ -40,7 +40,7 @@ export const SuppliersPage = () => {
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       suppliersApi.updateStatus(id, isActive),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: supplierKeys.all });
       showToast.success(
         variables.isActive ? 'تم تفعيل حساب المورد بنجاح' : 'تم تعطيل حساب المورد بنجاح'
       );
@@ -53,7 +53,7 @@ export const SuppliersPage = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => suppliersApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: supplierKeys.all });
       showToast.success('تم حذف المورد بنجاح');
       setDeletingSupplier(null);
     },

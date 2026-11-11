@@ -29,7 +29,7 @@ export const CreatePayrollModal = ({ isOpen, employees, onClose }: CreatePayroll
   const createMutation = useMutation({
     mutationFn: (p: CreatePayrollPayload) => payrollsApi.create(p),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: payrollKeys.all });
       showToast.success('تم إنشاء مسيرة الراتب بنجاح');
       onClose();
       setEmployeeId('');

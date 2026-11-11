@@ -41,7 +41,7 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
   const createMutation = useMutation({
     mutationFn: (payload: CreateClientPayload) => clientsApi.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: clientKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: clientKeys.all });
       showToast.success('تم تسجيل العميل بنجاح');
       onClose();
     },
@@ -54,7 +54,7 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
     mutationFn: ({ id, payload }: { id: number; payload: UpdateClientPayload }) =>
       clientsApi.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: clientKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: clientKeys.all });
       showToast.success('تم تحديث بيانات العميل بنجاح');
       onClose();
     },

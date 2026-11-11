@@ -14,6 +14,7 @@ import {
 } from '../../modules/pos';
 import { usePosStore } from '../../modules/posStore';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { ReceiptModal } from '../../components/pos/ReceiptModal';
 import { PosProductCatalog } from '../../components/pos/PosProductCatalog';
@@ -95,7 +96,7 @@ export const PosRegisterPage = () => {
   const products = (productsData?.items || []).filter((p) => p.isActive);
 
   const subtotal = useMemo(() => {
-    return cart.reduce((sum, item) => sum + item.product.salePrice * item.quantity, 0);
+    return cart.reduce((sum, item) => sum + item.product.customerPrice * item.quantity, 0);
   }, [cart]);
 
   const finalAmount = Math.max(0, subtotal - (discountAmount || 0));
@@ -117,6 +118,7 @@ export const PosRegisterPage = () => {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: posKeys.sales.all });
       queryClient.invalidateQueries({ queryKey: posKeys.duePayments.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success('تم إتمام عملية البيع وإصدار الفاتورة بنجاح');
       setCreatedSale(res.data);
       setIsReceiptOpen(true);

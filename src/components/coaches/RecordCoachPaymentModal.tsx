@@ -15,8 +15,10 @@ import {
   type SelectOption,
 } from '../ui/AsyncSearchableSelect';
 import { queryClient } from '../../lib/query-client';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface RecordCoachPaymentModalProps {
   isOpen: boolean;
@@ -85,6 +87,7 @@ export const RecordCoachPaymentModal = ({
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: coachPaymentKeys.all });
       queryClient.invalidateQueries({ queryKey: coachDueKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success(res.message || 'تم تسجيل عملية الصرف بنجاح');
       onSuccess();
     },
@@ -280,6 +283,7 @@ export const RecordCoachPaymentModal = ({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={mutation.isPending}
               />
@@ -304,7 +308,14 @@ export const RecordCoachPaymentModal = ({
               إلغاء
             </button>
             <button type="submit" className="btn-primary" disabled={mutation.isPending}>
-              {mutation.isPending ? 'جاري تسجيل الصرف...' : 'تأكيد تسجيل الصرف'}
+              {mutation.isPending ? (
+                <>
+                  <div className="spinner" />
+                  <span>جاري تسجيل الصرف...</span>
+                </>
+              ) : (
+                <span>تأكيد تسجيل الصرف</span>
+              )}
             </button>
           </div>
         </form>

@@ -23,7 +23,7 @@ export const CategoryManagerModal = ({ isOpen, categories, onClose }: CategoryMa
   const createCategoryMutation = useMutation({
     mutationFn: (name: string) => productCategoriesApi.create({ name }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
       showToast.success('تمت إضافة التصنيف بنجاح');
       setNewCategoryName('');
     },
@@ -36,7 +36,7 @@ export const CategoryManagerModal = ({ isOpen, categories, onClose }: CategoryMa
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       productCategoriesApi.updateStatus(id, isActive),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
       showToast.success(variables.isActive ? 'تم تفعيل التصنيف بنجاح' : 'تم تعطيل التصنيف بنجاح');
     },
     onError: (err: unknown) => showToast.apiError(err, 'فشل في تعديل حالة التصنيف'),

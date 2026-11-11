@@ -12,6 +12,7 @@ import {
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface CreateCashTransferModalProps {
   isOpen: boolean;
@@ -221,6 +222,7 @@ export const CreateCashTransferModal = ({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={transferMutation.isPending || availableBalance <= 0}
               />
@@ -254,7 +256,14 @@ export const CreateCashTransferModal = ({
               className="btn-primary"
               disabled={transferMutation.isPending || availableBalance <= 0}
             >
-              {transferMutation.isPending ? 'جاري التحويل...' : 'تأكيد إتمام التحويل'}
+              {transferMutation.isPending ? (
+                <>
+                  <div className="spinner" />
+                  <span>جاري التحويل...</span>
+                </>
+              ) : (
+                <span>تأكيد إتمام التحويل</span>
+              )}
             </button>
           </div>
         </form>

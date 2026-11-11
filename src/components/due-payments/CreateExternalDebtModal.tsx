@@ -10,6 +10,7 @@ import {
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface CreateExternalDebtModalProps {
   isOpen: boolean;
@@ -113,12 +114,13 @@ export const CreateExternalDebtModal = ({
               <input
                 id="debt-amount"
                 type="number"
-                step="0.5"
-                min="0.5"
+                step="any"
+                min="0.01"
                 className="form-input"
                 placeholder="مثال: 500"
                 value={totalAmount}
                 onChange={(e) => setTotalAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={mutation.isPending}
               />

@@ -55,7 +55,7 @@ export const EmployeesPage = () => {
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       employeesApi.updateStatus(id, isActive),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       showToast.success(
         variables.isActive ? 'تم تفعيل حساب الموظف بنجاح' : 'تم تعطيل حساب الموظف بنجاح'
       );
@@ -68,7 +68,7 @@ export const EmployeesPage = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => employeesApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       showToast.success('تم حذف الموظف بنجاح');
       setDeletingEmployee(null);
     },

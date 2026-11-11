@@ -46,7 +46,7 @@ export const CoachesPage = () => {
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       coachesApi.updateStatus(id, isActive),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: coachKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: coachKeys.all });
       showToast.success(
         variables.isActive ? 'تم تفعيل حساب المدرب بنجاح' : 'تم تعطيل حساب المدرب بنجاح'
       );

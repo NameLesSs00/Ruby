@@ -5,12 +5,14 @@ import { X, Ticket } from 'lucide-react';
 import {
   subscriptionsApi,
   subscriptionKeys,
+  subscriptionDuePaymentKeys,
   type Subscription,
   type ClientType,
   type SubscriptionType,
   type CreateSubscriptionPayload,
   type UpdateSubscriptionPayload,
 } from '../../modules/subscriptions';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { SubscriptionFormFields } from './SubscriptionFormFields';
@@ -95,7 +97,9 @@ export const SubscriptionFormModal = ({
   const createMutation = useMutation({
     mutationFn: (p: CreateSubscriptionPayload) => subscriptionsApi.create(p),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+      queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success('تم إنشاء الاشتراك بنجاح');
       onSuccess();
     },
@@ -107,7 +111,9 @@ export const SubscriptionFormModal = ({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateSubscriptionPayload }) =>
       subscriptionsApi.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+      queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all });
+      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       showToast.success('تم تحديث بيانات الاشتراك بنجاح');
       onSuccess();
     },

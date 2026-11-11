@@ -13,6 +13,7 @@ import {
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
+import { blockInvalidNumberKeys } from '../../lib/number-input';
 
 interface CreateCoachDueModalProps {
   isOpen: boolean;
@@ -158,6 +159,7 @@ export const CreateCoachDueModal = ({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                onKeyDown={blockInvalidNumberKeys}
                 required
                 disabled={mutation.isPending}
               />
@@ -191,7 +193,14 @@ export const CreateCoachDueModal = ({
               className="btn-primary"
               disabled={mutation.isPending}
             >
-              {mutation.isPending ? 'جاري التسجيل...' : 'تأكيد تسجيل المستحق'}
+              {mutation.isPending ? (
+                <>
+                  <div className="spinner" />
+                  <span>جاري التسجيل...</span>
+                </>
+              ) : (
+                <span>تأكيد تسجيل المستحق</span>
+              )}
             </button>
           </div>
         </form>

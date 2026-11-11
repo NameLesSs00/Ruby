@@ -36,7 +36,7 @@ export const ClientsPage = () => {
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       clientsApi.updateStatus(id, isActive),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: clientKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: clientKeys.all });
       showToast.success(
         variables.isActive ? 'تم تفعيل حساب العميل بنجاح' : 'تم تعطيل حساب العميل بنجاح'
       );
