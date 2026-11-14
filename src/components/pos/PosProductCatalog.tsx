@@ -19,6 +19,7 @@ interface PosProductCatalogProps {
   products: Product[];
   isLoading: boolean;
   cart: PosCartItem[];
+  isEmployeeSale?: boolean;
   onAddToCart: (product: Product) => void;
 }
 
@@ -31,6 +32,7 @@ export const PosProductCatalog = ({
   products,
   isLoading,
   cart,
+  isEmployeeSale = false,
   onAddToCart,
 }: PosProductCatalogProps) => {
   return (
@@ -268,10 +270,28 @@ export const PosProductCatalog = ({
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '0.4rem', borderTop: '1px solid #f1f5f9' }}>
                     <div>
-                      <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ff6b22' }}>
-                        {(product.customerPrice ?? 0).toLocaleString('ar-EG')}{' '}
-                      </span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>ج.م</span>
+                      {(() => {
+                        const displayPrice = isEmployeeSale && product.employeePrice > 0 ? product.employeePrice : (product.customerPrice ?? 0);
+                        const hasEmpDiscount = isEmployeeSale && product.employeePrice > 0 && product.employeePrice < (product.customerPrice ?? 0);
+                        return (
+                          <>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem' }}>
+                              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ff6b22' }}>
+                                {displayPrice.toLocaleString('ar-EG')}{' '}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>ج.م</span>
+                              {hasEmpDiscount && (
+                                <span style={{ fontSize: '0.72rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                                  {product.customerPrice}
+                                </span>
+                              )}
+                            </div>
+                            {hasEmpDiscount && (
+                              <span style={{ fontSize: '0.65rem', color: '#c2410c', fontWeight: 700 }}>سعر موظف</span>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
 
                     <button

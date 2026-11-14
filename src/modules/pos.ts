@@ -1,8 +1,11 @@
 import { apiClient } from '../lib/axios';
+import type { PaymentMethod, PaymentMethodItem } from './duePayments';
+
+export type { PaymentMethod, PaymentMethodItem };
 
 /**
  * Point of Sale (POS), Sales, Returns & Due Payments Domain Models & API Services
- * Based on backendMD/paymentPOS.md
+ * Based on backendMD/paymentPOS.md and backendMD/updatedSale.md
  */
 
 export * from './posReturns';
@@ -12,6 +15,7 @@ export * from './posReturns';
 // ==========================================
 
 export type SaleStatus = 'NotReturned' | 'PartiallyReturned' | 'FullyReturned';
+export type PosSaleType = 'Customer' | 'Employee';
 
 export interface SaleItem {
   id: number;
@@ -26,6 +30,9 @@ export interface SaleRecord {
   id: number;
   invoiceNumber: string;
   saleDate: string;
+  saleType?: PosSaleType;
+  employeeId?: number | null;
+  employeeName?: string | null;
   totalAmount: number;
   discountAmount: number;
   finalAmount: number;
@@ -51,6 +58,7 @@ export interface CreateSalePayload {
   items: CreateSaleItemPayload[];
   discountAmount: number;
   amountPaid: number;
+  payments?: PaymentMethodItem[];
   payerName?: string | null;
   debtDescription?: string | null;
   dueDate?: string | null;
@@ -99,7 +107,17 @@ export interface DuePaymentQueryParams {
 
 export interface RecordPosPaymentPayload {
   duePaymentId: number;
+  payments: PaymentMethodItem[];
+  idempotencyKey?: string;
+}
+
+export interface RecordPosPaymentResponse {
+  id: number;
+  duePaymentId: number;
   amountPaid: number;
+  paymentDate: string;
+  cashboxType?: string;
+  payments: PaymentMethodItem[];
 }
 
 export interface PosPaymentHistoryItem {
@@ -109,8 +127,10 @@ export interface PosPaymentHistoryItem {
   payerName: string;
   amountPaid: number;
   paymentDate: string;
-  cashboxId: number;
+  cashboxType?: string;
+  cashboxId?: number;
   cashboxName?: string;
+  payments?: PaymentMethodItem[];
 }
 
 export interface PosPaymentHistoryResponse {
@@ -206,8 +226,8 @@ export const posDuePaymentsApi = {
     return response.data;
   },
 
-  recordPayment: async (payload: RecordPosPaymentPayload): Promise<ApiResponse<unknown>> => {
-    const response = await apiClient.post<ApiResponse<unknown>>('/api/pos-due-payments/record-payment', payload);
+  recordPayment: async (payload: RecordPosPaymentPayload): Promise<ApiResponse<RecordPosPaymentResponse>> => {
+    const response = await apiClient.post<ApiResponse<RecordPosPaymentResponse>>('/api/pos-due-payments/record-payment', payload);
     return response.data;
   },
 

@@ -4,17 +4,24 @@ import type { PosCartItem } from './PosProductCatalog';
 
 interface PosCartItemRowProps {
   item: PosCartItem;
+  isEmployeeSale?: boolean;
   onUpdateQuantity: (productId: number, delta: number) => void;
   onRemoveFromCart: (productId: number) => void;
 }
 
 export const PosCartItemRow = ({
   item,
+  isEmployeeSale = false,
   onUpdateQuantity,
   onRemoveFromCart,
 }: PosCartItemRowProps) => {
   const imgUrl = getProductImageUrl(item.product.imageUrl);
-  const lineTotal = item.product.customerPrice * item.quantity;
+  const effectiveUnitPrice =
+    isEmployeeSale && item.product.employeePrice > 0
+      ? item.product.employeePrice
+      : item.product.customerPrice;
+  const lineTotal = effectiveUnitPrice * item.quantity;
+  const hasDiscount = isEmployeeSale && item.product.employeePrice > 0 && item.product.employeePrice < item.product.customerPrice;
 
   return (
     <div
@@ -24,8 +31,8 @@ export const PosCartItemRow = ({
         gap: '0.65rem',
         padding: '0.6rem',
         borderRadius: 'var(--radius-sm)',
-        border: '1px solid #e2e8f0',
-        backgroundColor: '#f8fafc',
+        border: `1px solid ${isEmployeeSale ? '#fed7aa' : '#e2e8f0'}`,
+        backgroundColor: isEmployeeSale ? '#fffaf5' : '#f8fafc',
       }}
     >
       <div
@@ -66,8 +73,22 @@ export const PosCartItemRow = ({
         >
           {item.product.name}
         </div>
-        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-          {item.product.customerPrice.toLocaleString('ar-EG')} ج.م / قطعة
+        <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <span>{effectiveUnitPrice.toLocaleString('ar-EG')} ج.م / قطعة</span>
+          {hasDiscount && (
+            <span
+              style={{
+                fontSize: '0.65rem',
+                backgroundColor: '#fed7aa',
+                color: '#c2410c',
+                padding: '0.05rem 0.35rem',
+                borderRadius: '4px',
+                fontWeight: 700,
+              }}
+            >
+              خصم موظف
+            </span>
+          )}
         </div>
       </div>
 
@@ -159,4 +180,3 @@ export const PosCartItemRow = ({
     </div>
   );
 };
-

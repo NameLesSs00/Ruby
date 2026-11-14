@@ -139,7 +139,14 @@ export const PosSalesTable = ({
               return (
                 <tr key={sale.id}>
                   <td>
-                    <span style={{ fontWeight: 800, color: '#0d1527' }}>{sale.invoiceNumber}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontWeight: 800, color: '#0d1527' }}>{sale.invoiceNumber}</span>
+                      {sale.saleType === 'Employee' && (
+                        <span style={{ fontSize: '0.7rem', color: '#c2410c', backgroundColor: '#ffedd5', padding: '1px 6px', borderRadius: '4px', width: 'fit-content', fontWeight: 700 }}>
+                          موظف{sale.employeeName ? `: ${sale.employeeName}` : ''}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ fontSize: '0.85rem', color: '#64748b' }}>{saleDateFormatted}</td>
                   <td>

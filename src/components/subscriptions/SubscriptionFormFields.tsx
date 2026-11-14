@@ -1,15 +1,11 @@
 import type { Dispatch, SetStateAction } from 'react';
-import {
-  User,
-  Coins,
-  CheckCircle2,
-  AlertCircle,
-} from 'lucide-react';
+import { User } from 'lucide-react';
 import type {
   Subscription,
   ClientType,
   SubscriptionType,
 } from '../../modules/subscriptions';
+import type { PaymentMethod, PaymentMethodItem } from '../../modules/duePayments';
 import {
   AsyncSearchableSelect,
   type SelectOption,
@@ -17,7 +13,7 @@ import {
 import { clientsApi } from '../../modules/clients';
 import { coachesApi } from '../../modules/coaches';
 import { SubscriptionPlanSection } from './SubscriptionPlanSection';
-import { blockInvalidNumberKeys } from '../../lib/number-input';
+import { SubscriptionFinancialsSection } from './SubscriptionFinancialsSection';
 
 interface Props {
   editingSubscription: Subscription | null;
@@ -41,6 +37,12 @@ interface Props {
   setDiscountAmount: Dispatch<SetStateAction<number | ''>>;
   paidAmount: number | '';
   setPaidAmount: Dispatch<SetStateAction<number | ''>>;
+  selectedMethod: PaymentMethod;
+  setSelectedMethod: Dispatch<SetStateAction<PaymentMethod>>;
+  isSplit: boolean;
+  setIsSplit: Dispatch<SetStateAction<boolean>>;
+  splitRows: PaymentMethodItem[];
+  setSplitRows: Dispatch<SetStateAction<PaymentMethodItem[]>>;
   notes: string;
   setNotes: Dispatch<SetStateAction<string>>;
   isSaving: boolean;
@@ -68,16 +70,16 @@ export const SubscriptionFormFields = ({
   setDiscountAmount,
   paidAmount,
   setPaidAmount,
+  selectedMethod,
+  setSelectedMethod,
+  isSplit,
+  setIsSplit,
+  splitRows,
+  setSplitRows,
   notes,
   setNotes,
   isSaving,
 }: Props) => {
-  const numAmount = Number(amount) || 0;
-  const numDiscount = Number(discountAmount) || 0;
-  const numPaid = Number(paidAmount) || 0;
-  const finalAmount = Math.max(0, numAmount - numDiscount);
-  const remainingAmount = Math.max(0, finalAmount - numPaid);
-
   const loadClients = async (query: string): Promise<SelectOption[]> => {
     const res = await clientsApi.getAll({
       search: query.trim() || undefined,
@@ -203,128 +205,22 @@ export const SubscriptionFormFields = ({
       />
 
       {/* ── Section 3: Financials & Payments ── */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: 'var(--radius-md)',
-          padding: '1rem',
-          border: '1px solid #e2e8f0',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.45rem',
-            marginBottom: '0.85rem',
-            color: '#0d1527',
-            fontWeight: 800,
-            fontSize: '0.95rem',
-          }}
-        >
-          <Coins size={18} color="#ff6b22" />
-          <span>الحسابات المالية والسداد</span>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.65rem' }}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="sub-amount">
-              قيمة الاشتراك (ج.م) <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input
-              id="sub-amount"
-              type="number"
-              min="0"
-              step="any"
-              className="form-input"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
-              onKeyDown={blockInvalidNumberKeys}
-              required
-              disabled={isSaving}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="sub-discount">
-              الخصم (ج.م)
-            </label>
-            <input
-              id="sub-discount"
-              type="number"
-              min="0"
-              step="any"
-              className="form-input"
-              placeholder="0.00"
-              value={discountAmount}
-              onChange={(e) => setDiscountAmount(e.target.value === '' ? '' : Number(e.target.value))}
-              onKeyDown={blockInvalidNumberKeys}
-              disabled={isSaving}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="sub-paid">
-              المدفوع نقداً (ج.م)
-            </label>
-            <input
-              id="sub-paid"
-              type="number"
-              min="0"
-              step="any"
-              className="form-input"
-              placeholder="0.00"
-              value={paidAmount}
-              onChange={(e) => setPaidAmount(e.target.value === '' ? '' : Number(e.target.value))}
-              onKeyDown={blockInvalidNumberKeys}
-              disabled={isSaving}
-            />
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '0.75rem',
-            backgroundColor: '#f8fafc',
-            padding: '0.85rem',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid #e2e8f0',
-            marginTop: '0.5rem',
-          }}
-        >
-          <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block' }}>
-              صافي قيمة الاشتراك المستحقة
-            </span>
-            <strong style={{ fontSize: '1.15rem', color: '#ff6b22' }}>
-              {finalAmount.toLocaleString('ar-EG')}{' '}
-              <span style={{ fontSize: '0.8rem' }}>ج.م</span>
-            </strong>
-          </div>
-
-          <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block' }}>
-              المتبقي بعد السداد
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.15rem' }}>
-              {remainingAmount === 0 ? (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: '#10b981', fontWeight: 800 }}>
-                  <CheckCircle2 size={16} />
-                  <span>خالص بالكامل (0 ج.م)</span>
-                </div>
-              ) : (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: '#ef4444', fontWeight: 800 }}>
-                  <AlertCircle size={16} />
-                  <span>{remainingAmount.toLocaleString('ar-EG')} ج.م (دين مؤجل)</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <SubscriptionFinancialsSection
+        amount={amount}
+        setAmount={setAmount}
+        discountAmount={discountAmount}
+        setDiscountAmount={setDiscountAmount}
+        paidAmount={paidAmount}
+        setPaidAmount={setPaidAmount}
+        selectedMethod={selectedMethod}
+        setSelectedMethod={setSelectedMethod}
+        isSplit={isSplit}
+        setIsSplit={setIsSplit}
+        splitRows={splitRows}
+        setSplitRows={setSplitRows}
+        isSaving={isSaving}
+        isEditing={Boolean(editingSubscription)}
+      />
 
       {/* ── Section 4: Optional Notes ── */}
       <div className="form-group" style={{ margin: 0 }}>

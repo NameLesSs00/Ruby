@@ -1,19 +1,21 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Award, Briefcase, X } from 'lucide-react';
+import { Award, X, Ticket } from 'lucide-react';
 import {
   subscriptionCoachAssignmentsApi,
+  subscriptionsApi,
   coachAssignmentKeys,
   subscriptionKeys,
+  type Subscription,
   type SubscriptionCoachAssignment,
   type CreateCoachAssignmentPayload,
 } from '../../modules/subscriptions';
-import { coachesApi } from '../../modules/coaches';
-import { employeesApi } from '../../modules/employees';
 import {
   AsyncSearchableSelect,
   type SelectOption,
 } from '../ui/AsyncSearchableSelect';
+import { loadSubscriptionOptions } from './assignmentHelpers';
+import { AssignmentStaffSection } from './AssignmentStaffSection';
 import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -22,6 +24,7 @@ interface AssignmentFormModalProps {
   isOpen: boolean;
   editingAssignment?: SubscriptionCoachAssignment | null;
   defaultSubscriptionId?: number;
+  defaultSubscription?: Subscription | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -30,6 +33,7 @@ export const AssignmentFormModal = ({
   isOpen,
   editingAssignment,
   defaultSubscriptionId,
+  defaultSubscription,
   onClose,
   onSuccess,
 }: AssignmentFormModalProps) => {
@@ -37,7 +41,7 @@ export const AssignmentFormModal = ({
 
   const isEditing = Boolean(editingAssignment);
 
-  const [subscriptionIdInput, setSubscriptionIdInput] = useState<string>('');
+  const [selectedSubscription, setSelectedSubscription] = useState<SelectOption | null>(null);
   const [assigneeType, setAssigneeType] = useState<'coach' | 'employee'>('coach');
   const [selectedStaff, setSelectedStaff] = useState<SelectOption | null>(null);
   const [startDate, setStartDate] = useState<string>('');
@@ -45,39 +49,57 @@ export const AssignmentFormModal = ({
   const [notes, setNotes] = useState<string>('');
 
   useEffect(() => {
-    if (isOpen) {
-      if (editingAssignment) {
-        setSubscriptionIdInput(editingAssignment.subscriptionId.toString());
-        setStartDate(editingAssignment.startDate?.slice(0, 10) || '');
-        setEndDate(editingAssignment.endDate?.slice(0, 10) || '');
-        setNotes(editingAssignment.notes || '');
+    if (!isOpen) return;
 
-        if (editingAssignment.coachId) {
-          setAssigneeType('coach');
-          setSelectedStaff({
-            id: editingAssignment.coachId,
-            label: editingAssignment.coachName || `مدرب #${editingAssignment.coachId}`,
-            tag: 'مدرب',
-          });
-        } else if (editingAssignment.employeeId) {
-          setAssigneeType('employee');
-          setSelectedStaff({
-            id: editingAssignment.employeeId,
-            label: editingAssignment.employeeName || `موظف #${editingAssignment.employeeId}`,
-            tag: 'موظف',
-          });
+    const targetSubId = editingAssignment?.subscriptionId || defaultSubscription?.id || defaultSubscriptionId;
+    if (defaultSubscription) {
+      setSelectedSubscription({
+        id: defaultSubscription.id,
+        label: `${defaultSubscription.clientName} (اشتراك #${defaultSubscription.id})`,
+        subLabel: `من ${defaultSubscription.startDate?.slice(0, 10)} إلى ${defaultSubscription.endDate?.slice(0, 10)}`,
+        tag: defaultSubscription.status === 'Active' ? 'نشط' : defaultSubscription.status,
+      });
+      setStartDate(defaultSubscription.startDate?.slice(0, 10) || new Date().toISOString().slice(0, 10));
+      setEndDate(defaultSubscription.endDate?.slice(0, 10) || new Date().toISOString().slice(0, 10));
+    } else if (targetSubId) {
+      setSelectedSubscription({ id: targetSubId, label: `اشتراك #${targetSubId}` });
+      subscriptionsApi.getById(targetSubId).then((sub) => {
+        if (!sub) return;
+        setSelectedSubscription({
+          id: sub.id,
+          label: `${sub.clientName} (اشتراك #${sub.id})`,
+          subLabel: `من ${sub.startDate?.slice(0, 10)} إلى ${sub.endDate?.slice(0, 10)}`,
+          tag: sub.status === 'Active' ? 'نشط' : sub.status,
+        });
+        if (!editingAssignment) {
+          if (sub.startDate) setStartDate(sub.startDate.slice(0, 10));
+          if (sub.endDate) setEndDate(sub.endDate.slice(0, 10));
         }
-      } else {
-        setSubscriptionIdInput(defaultSubscriptionId ? defaultSubscriptionId.toString() : '');
-        setAssigneeType('coach');
-        setSelectedStaff(null);
-        const today = new Date().toISOString().slice(0, 10);
-        setStartDate(today);
-        setEndDate(today);
-        setNotes('');
-      }
+      }).catch(() => {});
+    } else {
+      setSelectedSubscription(null);
+      const today = new Date().toISOString().slice(0, 10);
+      setStartDate(today);
+      setEndDate(today);
     }
-  }, [isOpen, editingAssignment, defaultSubscriptionId]);
+
+    if (editingAssignment) {
+      setStartDate(editingAssignment.startDate?.slice(0, 10) || '');
+      setEndDate(editingAssignment.endDate?.slice(0, 10) || '');
+      setNotes(editingAssignment.notes || '');
+      if (editingAssignment.coachId) {
+        setAssigneeType('coach');
+        setSelectedStaff({ id: editingAssignment.coachId, label: editingAssignment.coachName || `مدرب #${editingAssignment.coachId}`, tag: 'مدرب' });
+      } else if (editingAssignment.employeeId) {
+        setAssigneeType('employee');
+        setSelectedStaff({ id: editingAssignment.employeeId, label: editingAssignment.employeeName || `موظف #${editingAssignment.employeeId}`, tag: 'موظف' });
+      }
+    } else {
+      setAssigneeType('coach');
+      setSelectedStaff(null);
+      setNotes('');
+    }
+  }, [isOpen, editingAssignment, defaultSubscriptionId, defaultSubscription]);
 
   const mutation = useMutation({
     mutationFn: (payload: CreateCoachAssignmentPayload) => {
@@ -99,39 +121,26 @@ export const AssignmentFormModal = ({
 
   if (!isOpen) return null;
 
-  const loadCoaches = async (query: string): Promise<SelectOption[]> => {
-    const res = await coachesApi.getAll({
-      search: query.trim() || undefined,
-      page: 1,
-      pageSize: 20,
-    });
-    return (res.items || []).map((c) => ({
-      id: c.id,
-      label: c.fullName,
-      subLabel: `هاتف: ${c.phoneNumber}`,
-      tag: 'مدرب',
-    }));
-  };
-
-  const loadEmployees = async (query: string): Promise<SelectOption[]> => {
-    const res = await employeesApi.getAll({
-      searchTerm: query.trim() || undefined,
-      page: 1,
-      pageSize: 20,
-    });
-    return (res.items || []).map((e) => ({
-      id: e.id,
-      label: e.fullName,
-      subLabel: `المسمى: ${e.jobTitle} — هاتف: ${e.phoneNumber}`,
-      tag: 'موظف',
-    }));
+  const handleSubscriptionSelect = (opt: SelectOption | null) => {
+    setSelectedSubscription(opt);
+    if (opt) {
+      subscriptionsApi
+        .getById(opt.id)
+        .then((sub) => {
+          if (sub) {
+            if (sub.startDate) setStartDate(sub.startDate.slice(0, 10));
+            if (sub.endDate) setEndDate(sub.endDate.slice(0, 10));
+          }
+        })
+        .catch(() => {});
+    }
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const subId = parseInt(subscriptionIdInput, 10);
-    if (isNaN(subId) || subId <= 0) {
-      showToast.warning('يرجى إدخال رقم اشتراك صحيح');
+
+    if (!selectedSubscription) {
+      showToast.warning('يرجى اختيار الاشتراك أولاً');
       return;
     }
 
@@ -151,7 +160,7 @@ export const AssignmentFormModal = ({
     }
 
     mutation.mutate({
-      subscriptionId: subId,
+      subscriptionId: selectedSubscription.id,
       coachId: assigneeType === 'coach' ? selectedStaff.id : null,
       employeeId: assigneeType === 'employee' ? selectedStaff.id : null,
       startDate,
@@ -159,6 +168,8 @@ export const AssignmentFormModal = ({
       notes: notes.trim() || null,
     });
   };
+
+  const hasFixedSubscription = isEditing || Boolean(defaultSubscriptionId) || Boolean(defaultSubscription);
 
   return (
     <div className="modal-backdrop">
@@ -182,7 +193,7 @@ export const AssignmentFormModal = ({
             <div>
               <h3 className="modal-title">{isEditing ? 'تعديل تعيين الكادر' : 'إضافة تعيين كادر للاشتراك'}</h3>
               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>
-                {isEditing ? `تعيين قيد #${editingAssignment?.id}` : 'ربط مدرب أو موظف باشتراك'}
+                {isEditing ? `تعديل التعيين #${editingAssignment?.id}` : 'اختيار الاشتراك وربطه بمدرب أو موظف'}
               </p>
             </div>
           </div>
@@ -193,90 +204,74 @@ export const AssignmentFormModal = ({
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
-            {/* Subscription ID Input (read only if editing or fixed) */}
-            <div className="form-group">
-              <label className="form-label required">رقم الاشتراك المرجعي</label>
-              <input
-                type="number"
-                min="1"
-                className="form-input"
-                placeholder="أدخل رقم الاشتراك..."
-                value={subscriptionIdInput}
-                onChange={(e) => setSubscriptionIdInput(e.target.value)}
-                required
-                disabled={isEditing || Boolean(defaultSubscriptionId) || mutation.isPending}
-              />
-            </div>
-
-            {/* Assignee Type Switcher */}
-            <div className="form-group">
-              <label className="form-label required">نوع الكادر المعين</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAssigneeType('coach');
-                    setSelectedStaff(null);
-                  }}
-                  disabled={mutation.isPending}
+            {/* Subscription Selection (No Raw ID Input!) */}
+            {hasFixedSubscription ? (
+              <div className="form-group">
+                <label className="form-label">الاشتراك المرتبط</label>
+                <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.45rem',
-                    padding: '0.65rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: `2px solid ${assigneeType === 'coach' ? '#F37023' : '#e2e8f0'}`,
-                    backgroundColor: assigneeType === 'coach' ? '#fff7ed' : '#ffffff',
-                    color: assigneeType === 'coach' ? '#c2410c' : '#64748b',
-                    fontWeight: 700,
-                    cursor: 'pointer',
+                    gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
                   }}
                 >
-                  <Award size={16} />
-                  <span>مدرب أكاديمية</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAssigneeType('employee');
-                    setSelectedStaff(null);
-                  }}
-                  disabled={mutation.isPending}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.45rem',
-                    padding: '0.65rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: `2px solid ${assigneeType === 'employee' ? '#0284c7' : '#e2e8f0'}`,
-                    backgroundColor: assigneeType === 'employee' ? '#f0f9ff' : '#ffffff',
-                    color: assigneeType === 'employee' ? '#0369a1' : '#64748b',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <Briefcase size={16} />
-                  <span>موظف إشرافي</span>
-                </button>
+                  <div
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: '6px',
+                      backgroundColor: '#eff6ff',
+                      color: '#0284c7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Ticket size={18} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0d1527' }}>
+                      {selectedSubscription?.label || `اشتراك #${editingAssignment?.subscriptionId || defaultSubscriptionId}`}
+                    </div>
+                    {selectedSubscription?.subLabel && (
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.15rem' }}>
+                        {selectedSubscription.subLabel}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="form-group">
+                <label className="form-label required">اختيار الاشتراك</label>
+                <AsyncSearchableSelect
+                  selectedItem={selectedSubscription}
+                  onChange={handleSubscriptionSelect}
+                  loadOptions={loadSubscriptionOptions}
+                  placeholder="ابحث باسم العميل أو رقم الاشتراك..."
+                />
+                <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem', display: 'block' }}>
+                  ابحث عن اشتراك العميل النشط لاختياره مباشرة بدون إدخال أرقام
+                </span>
+              </div>
+            )}
 
-            {/* Staff Search Selector */}
-            <div className="form-group">
-              <label className="form-label required">
-                {assigneeType === 'coach' ? 'اختر المدرب' : 'اختر الموظف'}
-              </label>
-              <AsyncSearchableSelect
-                key={assigneeType}
-                selectedItem={selectedStaff}
-                onChange={setSelectedStaff}
-                loadOptions={assigneeType === 'coach' ? loadCoaches : loadEmployees}
-                placeholder={assigneeType === 'coach' ? 'ابحث بالاسم أو الهاتف...' : 'ابحث باسم الموظف أو المسمى...'}
-              />
-            </div>
+            {/* Staff Section */}
+            <AssignmentStaffSection
+              assigneeType={assigneeType}
+              onAssigneeTypeChange={(type) => {
+                setAssigneeType(type);
+                setSelectedStaff(null);
+              }}
+              selectedStaff={selectedStaff}
+              onSelectedStaffChange={setSelectedStaff}
+              disabled={mutation.isPending}
+            />
 
             {/* Dates Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
@@ -330,7 +325,7 @@ export const AssignmentFormModal = ({
             <button
               type="submit"
               className="btn-primary"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || !selectedSubscription || !selectedStaff}
             >
               {mutation.isPending ? 'جاري الحفظ...' : isEditing ? 'حفظ التعديلات' : 'تأكيد التعيين'}
             </button>

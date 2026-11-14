@@ -1,4 +1,9 @@
 import type { PosPaymentHistoryItem } from '../../modules/pos';
+import {
+  paymentMethodLabel,
+  paymentMethodBadgeStyle,
+  cashboxNameLabel,
+} from '../../modules/duePayments';
 
 interface PosPaymentHistoryTabProps {
   items: PosPaymentHistoryItem[];
@@ -14,6 +19,7 @@ export const PosPaymentHistoryTab = ({ items, isLoading }: PosPaymentHistoryTabP
             <th>تاريخ وساعة السداد</th>
             <th>اسم العميل</th>
             <th>الفاتورة المرتبطة</th>
+            <th>طرق السداد والتوزيع</th>
             <th>المبلغ المحصل</th>
             <th>الخزينة المستلمة</th>
           </tr>
@@ -21,7 +27,7 @@ export const PosPaymentHistoryTab = ({ items, isLoading }: PosPaymentHistoryTabP
         <tbody>
           {isLoading ? (
             <tr>
-              <td colSpan={5} className="table-loading-row">
+              <td colSpan={6} className="table-loading-row">
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
                   <div className="spinner" style={{ borderTopColor: '#ff6b22', borderColor: 'rgba(255,107,34,0.2)' }} />
                   <span>جاري تحميل سجل السداد...</span>
@@ -30,7 +36,7 @@ export const PosPaymentHistoryTab = ({ items, isLoading }: PosPaymentHistoryTabP
             </tr>
           ) : items.length === 0 ? (
             <tr>
-              <td colSpan={5} className="table-empty-row">
+              <td colSpan={6} className="table-empty-row">
                 <span>لا توجد عمليات سداد مسجلة في السجل</span>
               </td>
             </tr>
@@ -63,6 +69,33 @@ export const PosPaymentHistoryTab = ({ items, isLoading }: PosPaymentHistoryTabP
                     </span>
                   </td>
                   <td>
+                    {h.payments && h.payments.length > 0 ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                        {h.payments.map((p, idx) => {
+                          const badge = paymentMethodBadgeStyle(p.paymentMethod);
+                          return (
+                            <span
+                              key={idx}
+                              style={{
+                                fontSize: '0.75rem',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: '4px',
+                                backgroundColor: badge.bg,
+                                color: badge.color,
+                                border: `1px solid ${badge.border}`,
+                                fontWeight: 700,
+                              }}
+                            >
+                              {paymentMethodLabel(p.paymentMethod)}: {p.amount.toLocaleString('ar-EG')} ج.م
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>نقداً</span>
+                    )}
+                  </td>
+                  <td>
                     <span style={{ fontWeight: 800, color: '#16a34a', fontSize: '0.95rem' }}>
                       + {h.amountPaid.toLocaleString('ar-EG')} ج.م
                     </span>
@@ -70,8 +103,8 @@ export const PosPaymentHistoryTab = ({ items, isLoading }: PosPaymentHistoryTabP
                   <td>
                     <span
                       style={{
-                        fontSize: '0.8rem',
-                        padding: '0.2rem 0.6rem',
+                        fontSize: '0.78rem',
+                        padding: '0.2rem 0.55rem',
                         borderRadius: '6px',
                         backgroundColor: '#f8fafc',
                         color: '#334155',
@@ -79,7 +112,7 @@ export const PosPaymentHistoryTab = ({ items, isLoading }: PosPaymentHistoryTabP
                         border: '1px solid #e2e8f0',
                       }}
                     >
-                      {h.cashboxName || `خزينة #${h.cashboxId}`}
+                      {cashboxNameLabel(h.cashboxType || h.cashboxName || undefined)}
                     </span>
                   </td>
                 </tr>
@@ -91,4 +124,3 @@ export const PosPaymentHistoryTab = ({ items, isLoading }: PosPaymentHistoryTabP
     </div>
   );
 };
-

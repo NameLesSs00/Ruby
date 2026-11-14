@@ -18,6 +18,7 @@ import { showToast } from '../../lib/sonner';
 import { SubscriptionFormFields } from './SubscriptionFormFields';
 import type { SelectOption } from '../ui/AsyncSearchableSelect';
 import { useModalEscape } from '../../lib/useModalEscape';
+import type { PaymentMethod, PaymentMethodItem } from '../../modules/duePayments';
 
 interface SubscriptionFormModalProps {
   isOpen: boolean;
@@ -54,6 +55,12 @@ export const SubscriptionFormModal = ({
   const [amount, setAmount] = useState<number | ''>('');
   const [discountAmount, setDiscountAmount] = useState<number | ''>(0);
   const [paidAmount, setPaidAmount] = useState<number | ''>(0);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('Cash');
+  const [isSplit, setIsSplit] = useState(false);
+  const [splitRows, setSplitRows] = useState<PaymentMethodItem[]>([
+    { paymentMethod: 'Cash', amount: 0 },
+    { paymentMethod: 'InstaPay', amount: 0 },
+  ]);
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -78,6 +85,8 @@ export const SubscriptionFormModal = ({
       setAmount(editingSubscription.amount);
       setDiscountAmount(editingSubscription.discountAmount);
       setPaidAmount(editingSubscription.paidAmount);
+      setSelectedMethod('Cash');
+      setIsSplit(false);
       setNotes(editingSubscription.notes || '');
     } else {
       setSelectedClient(null);
@@ -90,6 +99,12 @@ export const SubscriptionFormModal = ({
       setAmount('');
       setDiscountAmount(0);
       setPaidAmount(0);
+      setSelectedMethod('Cash');
+      setIsSplit(false);
+      setSplitRows([
+        { paymentMethod: 'Cash', amount: 0 },
+        { paymentMethod: 'InstaPay', amount: 0 },
+      ]);
       setNotes('');
     }
   }, [editingSubscription, isOpen]);
@@ -152,6 +167,22 @@ export const SubscriptionFormModal = ({
       return;
     }
 
+    let finalPayments: PaymentMethodItem[] = [];
+    if (!editingSubscription && numPaid > 0) {
+      if (isSplit) {
+        finalPayments = splitRows
+          .map((r) => ({ paymentMethod: r.paymentMethod, amount: parseFloat(r.amount.toString()) || 0 }))
+          .filter((r) => r.amount > 0);
+        const splitTotal = finalPayments.reduce((s, r) => s + r.amount, 0);
+        if (splitTotal !== numPaid) {
+          showToast.warning(`إجمالي مبالغ طرق الدفع (${splitTotal} ج.م) يجب أن يساوي المبلغ المدفوع مقدماً (${numPaid} ج.م)`);
+          return;
+        }
+      } else {
+        finalPayments = [{ paymentMethod: selectedMethod, amount: numPaid }];
+      }
+    }
+
     const payload = {
       clientType,
       subscriptionType,
@@ -162,6 +193,7 @@ export const SubscriptionFormModal = ({
       amount: numAmount,
       discountAmount: numDiscount,
       paidAmount: numPaid,
+      payments: finalPayments,
       notes: notes.trim() || null,
     };
 
@@ -232,6 +264,12 @@ export const SubscriptionFormModal = ({
               setDiscountAmount={setDiscountAmount}
               paidAmount={paidAmount}
               setPaidAmount={setPaidAmount}
+              selectedMethod={selectedMethod}
+              setSelectedMethod={setSelectedMethod}
+              isSplit={isSplit}
+              setIsSplit={setIsSplit}
+              splitRows={splitRows}
+              setSplitRows={setSplitRows}
               notes={notes}
               setNotes={setNotes}
               isSaving={isSaving}

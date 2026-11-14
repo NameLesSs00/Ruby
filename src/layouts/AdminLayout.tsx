@@ -21,6 +21,8 @@ import {
   ShoppingCart,
   UserCheck,
   Landmark,
+  QrCode,
+  BarChart3,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import {
@@ -69,6 +71,12 @@ const NAV_ITEMS: NavItem[] = [
     path: '/clients',
     label: 'العملاء',
     icon: <Users size={20} className="nav-icon" />,
+    allowedRoles: RECEPTION_ROLES,
+  },
+  {
+    path: '/barcodes',
+    label: 'الباركودات',
+    icon: <QrCode size={20} className="nav-icon" />,
     allowedRoles: RECEPTION_ROLES,
   },
   {
@@ -135,6 +143,12 @@ const NAV_ITEMS: NavItem[] = [
     path: '/due-payments',
     label: 'الديون والمستحقات',
     icon: <ReceiptText size={20} className="nav-icon" />,
+    allowedRoles: ADMIN_ROLES,
+  },
+  {
+    path: '/reports',
+    label: 'التقارير',
+    icon: <BarChart3 size={20} className="nav-icon" />,
     allowedRoles: ADMIN_ROLES,
   },
 ];

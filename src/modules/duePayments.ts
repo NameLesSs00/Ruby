@@ -55,6 +55,13 @@ export interface DuePaymentQueryParams {
 // Due Payment Transactions Types
 // ==========================================
 
+export type PaymentMethod = 'Cash' | 'VodafoneCash' | 'InstaPay' | 'Visa';
+
+export interface PaymentMethodItem {
+  paymentMethod: PaymentMethod;
+  amount: number;
+}
+
 export interface DuePaymentTransaction {
   id: number;
   duePaymentId: number;
@@ -62,6 +69,7 @@ export interface DuePaymentTransaction {
   amountPaid: number;
   paymentDate: string;
   cashboxType?: string;
+  payments?: PaymentMethodItem[];
 }
 
 export interface DuePaymentTransactionListResponse {
@@ -74,7 +82,7 @@ export interface DuePaymentTransactionListResponse {
 
 export interface CreateDuePaymentTransactionPayload {
   duePaymentId: number;
-  amountPaid: number;
+  payments: PaymentMethodItem[];
   idempotencyKey: string;
 }
 
@@ -206,6 +214,51 @@ export function dueStatusLabel(status: DuePaymentStatus): string {
       return 'مدفوع جزئياً';
     case 'Unpaid':
       return 'غير مدفوع';
+  }
+}
+
+export const PAYMENT_METHODS: PaymentMethod[] = ['Cash', 'VodafoneCash', 'InstaPay', 'Visa'];
+
+export function paymentMethodLabel(method: PaymentMethod | string): string {
+  switch (method) {
+    case 'Cash':
+      return 'نقداً';
+    case 'VodafoneCash':
+      return 'فودافون كاش';
+    case 'InstaPay':
+      return 'إنستاباي';
+    case 'Visa':
+      return 'فيزا';
+    default:
+      return method;
+  }
+}
+
+export function paymentMethodBadgeStyle(method: PaymentMethod | string): { bg: string; color: string; border: string } {
+  switch (method) {
+    case 'Cash':
+      return { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' };
+    case 'VodafoneCash':
+      return { bg: '#fef2f2', color: '#b91c1c', border: '#fecaca' };
+    case 'InstaPay':
+      return { bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe' };
+    case 'Visa':
+      return { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
+    default:
+      return { bg: '#f8fafc', color: '#475569', border: '#e2e8f0' };
+  }
+}
+
+export function cashboxNameLabel(type?: string): string {
+  switch (type) {
+    case 'Main':
+      return 'الخزينة الرئيسية';
+    case 'POS':
+      return 'خزينة المتجر (POS)';
+    case 'Subscriptions':
+      return 'خزينة الاشتراكات';
+    default:
+      return type || '—';
   }
 }
 

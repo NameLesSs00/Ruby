@@ -1,0 +1,61 @@
+== Ruby Data Importer ==
+Backend : https://swimming1academy.runasp.net
+Folder  : New folder
+Mode    : COMMIT
+Source  : ستار.xlsx (sheet "Sheet1", header row 4)
+Parsed  : 19 unique names
+Login   : OK (token expires 2026-11-14T19:04:00.9413877Z)
+Backend clients (existing): 5
+
+--- PLAN ---
+Found: 19  |  To CREATE: 19  |  Already EXISTS: 0
+
+TO CREATE:
+   1. + ماريا امجد حلمى
+   2. + ريتاج تامر احمد
+   3. + ادم احمد محمد
+   4. + محمد طه العربى
+   5. + بريسكلا عبدالمسيح
+   6. + اياد وائل محمد
+   7. + مؤيد محمد حمدته
+   8. + ابراهيم ناصر فايز
+   9. + مانويل امجد حلمى
+  10. + فريده اسامه محمد
+  11. + احمد خالد احمد
+  12. + ذياد خالد احمد
+  13. + يحي احمد مصطفى
+  14. + عمار محمد سيد
+  15. + لارا حمدى ابوالحسن
+  16. + ادم احمد حراس
+  17. + كرم وليد جمال
+  18. + محمد شاذلى ابو الحسن
+  19. + معاذ محمد حسن
+
+--- COMMIT ---
+  created #6 undefined  ماريا امجد حلمى
+  created #7 undefined  ريتاج تامر احمد
+  created #8 undefined  ادم احمد محمد
+  created #9 undefined  محمد طه العربى
+  created #10 undefined  بريسكلا عبدالمسيح
+  created #11 undefined  اياد وائل محمد
+  created #12 undefined  مؤيد محمد حمدته
+  created #13 undefined  ابراهيم ناصر فايز
+  created #14 undefined  مانويل امجد حلمى
+  created #15 undefined  فريده اسامه محمد
+  created #16 undefined  احمد خالد احمد
+  created #17 undefined  ذياد خالد احمد
+  created #18 undefined  يحي احمد مصطفى
+  created #19 undefined  عمار محمد سيد
+  created #20 undefined  لارا حمدى ابوالحسن
+  created #21 undefined  ادم احمد حراس
+  created #22 undefined  كرم وليد جمال
+  created #23 undefined  محمد شاذلى ابو الحسن
+  created #24 undefined  معاذ محمد حسن
+Payload shape used: { fullName }
+
+--- VERIFY ---
+Created: 19  Verified present: 19  Failed: 0  Backend clients now: 24
+Log     : C:\work\Ruby\dataEntery\added\_import-log.xlsx
+Moved   : C:\work\Ruby\dataEntery\اكاديمية الروبى   n\New folder  ->  C:\work\Ruby\dataEntery\added\New folder
+
+Done. Pilot complete.

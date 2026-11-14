@@ -11,8 +11,11 @@ import {
   coachAssignmentKeys,
   type SubscriptionCoachAssignment,
 } from '../../modules/subscriptions';
-import { coachesApi } from '../../modules/coaches';
-import { employeesApi } from '../../modules/employees';
+import {
+  loadSubscriptionOptions,
+  loadCoachOptions,
+  loadEmployeeOptions,
+} from './assignmentHelpers';
 import {
   AsyncSearchableSelect,
   type SelectOption,
@@ -28,7 +31,7 @@ export const SubscriptionAssignmentsTab = () => {
   const pageSize = 15;
   const [filterCoach, setFilterCoach] = useState<SelectOption | null>(null);
   const [filterEmployee, setFilterEmployee] = useState<SelectOption | null>(null);
-  const [filterSubId, setFilterSubId] = useState<string>('');
+  const [filterSubscription, setFilterSubscription] = useState<SelectOption | null>(null);
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] =
@@ -36,15 +39,13 @@ export const SubscriptionAssignmentsTab = () => {
   const [deletingAssignment, setDeletingAssignment] =
     useState<SubscriptionCoachAssignment | null>(null);
 
-  const subIdNum = filterSubId ? parseInt(filterSubId, 10) : undefined;
-
   const { data, isLoading, isError } = useQuery({
     queryKey: coachAssignmentKeys.list({
       page,
       pageSize,
       coachId: filterCoach ? filterCoach.id : undefined,
       employeeId: filterEmployee ? filterEmployee.id : undefined,
-      subscriptionId: !isNaN(subIdNum as number) ? subIdNum : undefined,
+      subscriptionId: filterSubscription ? filterSubscription.id : undefined,
     }),
     queryFn: () =>
       subscriptionCoachAssignmentsApi.getAll({
@@ -52,7 +53,7 @@ export const SubscriptionAssignmentsTab = () => {
         pageSize,
         coachId: filterCoach ? filterCoach.id : undefined,
         employeeId: filterEmployee ? filterEmployee.id : undefined,
-        subscriptionId: !isNaN(subIdNum as number) ? subIdNum : undefined,
+        subscriptionId: filterSubscription ? filterSubscription.id : undefined,
       }),
   });
 
@@ -82,34 +83,6 @@ export const SubscriptionAssignmentsTab = () => {
     },
   });
 
-  const loadCoaches = async (query: string): Promise<SelectOption[]> => {
-    const res = await coachesApi.getAll({
-      search: query.trim() || undefined,
-      page: 1,
-      pageSize: 20,
-    });
-    return (res.items || []).map((c) => ({
-      id: c.id,
-      label: c.fullName,
-      subLabel: `هاتف: ${c.phoneNumber}`,
-      tag: 'مدرب',
-    }));
-  };
-
-  const loadEmployees = async (query: string): Promise<SelectOption[]> => {
-    const res = await employeesApi.getAll({
-      searchTerm: query.trim() || undefined,
-      page: 1,
-      pageSize: 20,
-    });
-    return (res.items || []).map((e) => ({
-      id: e.id,
-      label: e.fullName,
-      subLabel: `المسمى: ${e.jobTitle}`,
-      tag: 'موظف',
-    }));
-  };
-
   const handleOpenCreateModal = () => {
     setEditingAssignment(null);
     setIsFormModalOpen(true);
@@ -120,12 +93,12 @@ export const SubscriptionAssignmentsTab = () => {
     setIsFormModalOpen(true);
   };
 
-  const hasActiveFilters = Boolean(filterCoach || filterEmployee || filterSubId);
+  const hasActiveFilters = Boolean(filterCoach || filterEmployee || filterSubscription);
 
   const resetFilters = () => {
     setFilterCoach(null);
     setFilterEmployee(null);
-    setFilterSubId('');
+    setFilterSubscription(null);
     setPage(1);
   };
 
@@ -206,7 +179,7 @@ export const SubscriptionAssignmentsTab = () => {
                 setFilterCoach(val);
                 setPage(1);
               }}
-              loadOptions={loadCoaches}
+              loadOptions={loadCoachOptions}
               placeholder="فلترة بالمدرب..."
             />
           </div>
@@ -218,22 +191,20 @@ export const SubscriptionAssignmentsTab = () => {
                 setFilterEmployee(val);
                 setPage(1);
               }}
-              loadOptions={loadEmployees}
+              loadOptions={loadEmployeeOptions}
               placeholder="فلترة بالموظف..."
             />
           </div>
 
-          <div style={{ minWidth: 160 }}>
-            <input
-              type="number"
-              min="1"
-              className="form-input"
-              placeholder="رقم الاشتراك..."
-              value={filterSubId}
-              onChange={(e) => {
-                setFilterSubId(e.target.value);
+          <div style={{ minWidth: 220, flex: 1 }}>
+            <AsyncSearchableSelect
+              selectedItem={filterSubscription}
+              onChange={(val) => {
+                setFilterSubscription(val);
                 setPage(1);
               }}
+              loadOptions={loadSubscriptionOptions}
+              placeholder="فلترة باشتراك العميل..."
             />
           </div>
 

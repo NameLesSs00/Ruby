@@ -91,6 +91,12 @@ export const ReceiptModal = ({ sale, isOpen, onClose }: ReceiptModalProps) => {
               <span style={{ color: '#64748b' }}>رقم الفاتورة:</span>
               <span style={{ fontWeight: 700 }}>{sale.invoiceNumber}</span>
             </div>
+            {Boolean(sale.employeeName) && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem', color: '#c2410c' }}>
+                <span>المشتري:</span>
+                <span style={{ fontWeight: 800 }}>{sale.employeeName} (موظف)</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
               <span style={{ color: '#64748b' }}>التاريخ والوقت:</span>
               <span>{saleDateFormatted}</span>

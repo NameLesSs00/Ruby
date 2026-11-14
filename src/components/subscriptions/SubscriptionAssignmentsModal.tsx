@@ -273,6 +273,7 @@ export const SubscriptionAssignmentsModal = ({
         isOpen={Boolean(editingAssignment)}
         editingAssignment={editingAssignment}
         defaultSubscriptionId={subscription?.id}
+        defaultSubscription={subscription}
         onClose={() => setEditingAssignment(null)}
         onSuccess={() => {
           setEditingAssignment(null);

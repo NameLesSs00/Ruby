@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Data importer tooling (dataEntery/_tools) - secrets & local env
+.env
+dataEntery/_tools/.env

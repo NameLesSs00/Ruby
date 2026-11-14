@@ -1,4 +1,7 @@
 import { apiClient } from '../lib/axios';
+import type { PaymentMethod, PaymentMethodItem } from './duePayments';
+
+export type { PaymentMethod, PaymentMethodItem };
 
 export interface ApiResponse<T> {
   message?: string;
@@ -52,6 +55,7 @@ export interface CreateSubscriptionPayload {
   amount: number;
   discountAmount: number;
   paidAmount: number;
+  payments?: PaymentMethodItem[];
   notes?: string | null;
 }
 
@@ -137,7 +141,7 @@ export function generateTimeIdempotencyKey(prefix = 'sub_pay'): string {
 
 export interface RecordSubscriptionPaymentPayload {
   duePaymentId: number;
-  amountPaid: number;
+  payments: PaymentMethodItem[];
   idempotencyKey: string;
 }
 
@@ -146,7 +150,8 @@ export interface RecordSubscriptionPaymentResponse {
   duePaymentId: number;
   amountPaid: number;
   paymentDate: string;
-  cashboxId: number;
+  cashboxType?: string;
+  payments: PaymentMethodItem[];
 }
 
 export interface SubscriptionPaymentHistoryItem {
@@ -156,8 +161,10 @@ export interface SubscriptionPaymentHistoryItem {
   payerName: string;
   amountPaid: number;
   paymentDate: string;
-  cashboxId: number;
+  cashboxType?: string;
+  cashboxId?: number;
   cashboxName?: string | null;
+  payments?: PaymentMethodItem[];
 }
 
 export interface PaymentHistoryListResponse {
