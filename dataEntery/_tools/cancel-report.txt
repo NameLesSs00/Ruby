@@ -1,0 +1,9 @@
+GET due-payments?subscriptionId=16 -> 200  {"items":[{"id":28,"subscriptionId":16,"payerName":"مالك السعيد","description":"Outstanding subscription balance","totalAmount":877.5,"paidAmount":0,"remainingAmount":877.5,"dueDate":null,"status":"Unpaid","createdAt":"2026-11-14T18:40:02.6487039"}],"page":1,"pageSize":20,"totalCount":1,"totalPages":1}
+
+GET due-payments/16 -> 404  {"message":"Subscription due payment with ID 16 not found."}
+
+POST /cancel -> 404  null
+PATCH /cancel -> 404  null
+PATCH /status {status:Cancelled} -> 404  null
+POST /status {status:Cancelled} -> 404  null
+PUT {status:Cancelled} -> 405  null

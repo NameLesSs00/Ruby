@@ -1,0 +1,17 @@
+===== subscription #14 =====
+  due-payment records: 26
+  DELETE due-payment #26 -> 405 null
+  DELETE subscription #14 -> 400 {"error":"Cannot delete subscription because it has related due payment records."}
+  PUT relabel -> 200 {"message":"Subscription updated successfully.","data":{"id":14,"clientId":25,"clientName":"مالك السعيد","commissionCoachId":null,"commissionCoachName":null,"clientType":"Academy","subscriptionType":"
+
+===== subscription #15 =====
+  due-payment records: 27
+  DELETE due-payment #27 -> 405 null
+  DELETE subscription #15 -> 400 {"error":"Cannot delete subscription because it has related due payment records."}
+  PUT relabel -> 200 {"message":"Subscription updated successfully.","data":{"id":15,"clientId":25,"clientName":"مالك السعيد","commissionCoachId":null,"commissionCoachName":null,"clientType":"Academy","subscriptionType":"
+
+===== subscription #16 =====
+  due-payment records: 28
+  DELETE due-payment #28 -> 405 null
+  DELETE subscription #16 -> 400 {"error":"Cannot delete subscription because it has related due payment records."}
+  PUT relabel -> 200 {"message":"Subscription updated successfully.","data":{"id":16,"clientId":25,"clientName":"مالك السعيد","commissionCoachId":null,"commissionCoachName":null,"clientType":"Academy","subscriptionType":"

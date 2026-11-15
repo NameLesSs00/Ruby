@@ -1,0 +1,22 @@
+probe clientId=25
+
+today=2026-11-14 tomorrow=2026-11-15 past=2026-07-02
+
+### PAST date + Cash payment
+  status=400
+  body={"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"StartDate":["Start date must not be in the past."]},"traceId":"00-3219ab001964c502546b9f74a6f1e819-d96eb9772c7ae627-00"}
+
+### TODAY date + Cash payment
+  status=201
+  body={"message":"Subscription created successfully.","data":{"id":14,"clientId":25,"clientName":"مالك السعيد","commissionCoachId":null,"commissionCoachName":null,"clientType":"Academy","subscriptionType":"Sessions","startDate":"2026-11-14","endDate":null,"totalSessions":null,"usedSessions":0,"amount":877.5,"discountAmount":0,"finalAmount":877.5,"paidAmount":650,"remainingAmount":227.5,"paymentStatus":"PartiallyPaid","status":"Active","createdAt":"2026-11-14T18:40:01.7454351Z","notes":"PROBE2"}}
+  >> ACCEPTED created #14; DELETE status=400
+
+### TOMORROW date + Cash payment
+  status=201
+  body={"message":"Subscription created successfully.","data":{"id":15,"clientId":25,"clientName":"مالك السعيد","commissionCoachId":null,"commissionCoachName":null,"clientType":"Academy","subscriptionType":"Sessions","startDate":"2026-11-15","endDate":null,"totalSessions":null,"usedSessions":0,"amount":877.5,"discountAmount":0,"finalAmount":877.5,"paidAmount":650,"remainingAmount":227.5,"paymentStatus":"PartiallyPaid","status":"Active","createdAt":"2026-11-14T18:40:02.3351539Z","notes":"PROBE2"}}
+  >> ACCEPTED created #15; DELETE status=400
+
+### TOMORROW + paidAmount=0 (no payments)
+  status=201
+  body={"message":"Subscription created successfully.","data":{"id":16,"clientId":25,"clientName":"مالك السعيد","commissionCoachId":null,"commissionCoachName":null,"clientType":"Academy","subscriptionType":"Sessions","startDate":"2026-11-15","endDate":null,"totalSessions":null,"usedSessions":0,"amount":877.5,"discountAmount":0,"finalAmount":877.5,"paidAmount":0,"remainingAmount":877.5,"paymentStatus":"Unpaid","status":"Active","createdAt":"2026-11-14T18:40:02.6486977Z","notes":"PROBE2"}}
+  >> ACCEPTED created #16; DELETE status=400

@@ -195,7 +195,7 @@ export const SubscriptionAssignmentsModal = ({
                           >
                             <Calendar size={13} />
                             <span>
-                              من {item.startDate.slice(0, 10)} إلى {item.endDate.slice(0, 10)}
+                              من {item.startDate ? item.startDate.slice(0, 10) : '—'} إلى {item.endDate ? item.endDate.slice(0, 10) : '—'}
                             </span>
                             {item.notes && <span>— {item.notes}</span>}
                           </div>

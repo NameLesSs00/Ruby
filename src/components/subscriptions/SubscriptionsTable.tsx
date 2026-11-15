@@ -133,8 +133,8 @@ export const SubscriptionsTable = ({
                   </td>
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.78rem', color: '#64748B' }}>
-                      <span>من: {sub.startDate.slice(0, 10)}</span>
-                      <span>إلى: {sub.endDate.slice(0, 10)}</span>
+                      <span>من: {sub.startDate ? sub.startDate.slice(0, 10) : '—'}</span>
+                      <span>إلى: {sub.endDate ? sub.endDate.slice(0, 10) : '—'}</span>
                     </div>
                   </td>
                   <td>

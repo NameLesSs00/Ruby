@@ -1,0 +1,31 @@
+login ok
+
+probe clientId=25 (مالك السعيد)
+
+### base (no payments)
+  status=400
+  body={"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"":["Payment portions must equal PaidAmount."],"Payments":["'Payments' must not be empty."],"StartDate":["Start date must not be in the past."]},"traceId":"00-196931335c4c0ee188cf033bf33a13da-5a4fe52a3c5acac3-00"}
+
+### payments:[{amount}]
+  status=400
+  body={"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"StartDate":["Start date must not be in the past."],"Payments[0].PaymentMethod":["'Payment Method' has a range of values which does not include '0'."]},"traceId":"00-6a54fc1adc633a51502dc7ed56f8357b-79448246fb62a9d7-00"}
+
+### payments:[{amount,paymentDate}]
+  status=400
+  body={"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"StartDate":["Start date must not be in the past."],"Payments[0].PaymentMethod":["'Payment Method' has a range of values which does not include '0'."]},"traceId":"00-a4ae1e7a17eca25ec797de0a42154833-92a38ba82a2f75ca-00"}
+
+### payments:[{amount,paymentDate,method:Cash}]
+  status=400
+  body={"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"StartDate":["Start date must not be in the past."]},"traceId":"00-db9b126a57f48b1d6bf377f3355de10b-7a63b833bf558c08-00"}
+
+### payments:[{amount,method:Cash}]
+  status=400
+  body={"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"StartDate":["Start date must not be in the past."],"Payments[0].PaymentMethod":["'Payment Method' has a range of values which does not include '0'."]},"traceId":"00-674d981f56ff4515fbb12950608ee444-408e853a19f3542b-00"}
+
+### Payments(capital):[{amount,paymentDate}]
+  status=400
+  body={"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"StartDate":["Start date must not be in the past."],"Payments[0].PaymentMethod":["'Payment Method' has a range of values which does not include '0'."]},"traceId":"00-166b3c1baf089df69b901ad781e8513b-9b0dfbe44d379f73-00"}
+
+### paidAmount=0,no payments
+  status=400
+  body={"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"StartDate":["Start date must not be in the past."]},"traceId":"00-e0a68f1bdb5416f3b81d2bd2cf4d12d4-47b537cf3d7660f7-00"}

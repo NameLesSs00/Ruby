@@ -79,8 +79,8 @@ export const SubscriptionFormModal = ({
         setSelectedCoach(null);
       }
       setSubscriptionType(editingSubscription.subscriptionType);
-      setStartDate(editingSubscription.startDate.slice(0, 10));
-      setEndDate(editingSubscription.endDate.slice(0, 10));
+      setStartDate(editingSubscription.startDate ? editingSubscription.startDate.slice(0, 10) : getTodayString());
+      setEndDate(editingSubscription.endDate ? editingSubscription.endDate.slice(0, 10) : getOneMonthLaterString());
       setTotalSessions(editingSubscription.totalSessions || 0);
       setAmount(editingSubscription.amount);
       setDiscountAmount(editingSubscription.discountAmount);

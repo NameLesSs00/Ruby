@@ -1,0 +1,44 @@
+== Coach-File Sub-Pilot ==
+Backend : https://swimming1academy.runasp.net
+Folder  : ايرادات المدربين
+File    : قدرى.xlsx
+Mode    : COMMIT
+Year    : 2026 (default for D-Mon dates)
+
+--- PARSE ---
+Sheets kept(rows): يناير:0, فبراير:0, مارس:0, ابريل:0, مايو:0, يونيه:0, يوليو:3, اغسطس:0, اكتوبر:0, نوفمبر:0, ديسمبر:0
+Importable subscription rows: 3
+Skipped rows: 12  {"empty-name":12,"total-row":0,"no-amount":0,"non-positive":0,"non-subscription-activity":0,"no-date":0}
+
+Login   : OK (token expires 2026-11-14T19:37:06.3252809Z)
+Backend coaches(existing): 1 | clients(existing): 24
+
+--- COACH ---
+Coach: "قدرى" -> TO CREATE
+
+--- CLIENTS ---
+Distinct clients in file: 3  |  existing: 0  |  to create: 3
+    1. + مالك السعيد
+    2. + وعد محمد محمود
+    3. + محمود محمد محمود
+
+--- SUBSCRIPTIONS (plan) ---
+To create: 3  byType: {"Sessions":3}
+Sample (up to 12):
+  2026-07-02 | مالك السعيد | تعليم | Sessions | amount=877.5 paid=650 rem=227.5 com=0 | يوليو#r3
+  2026-07-26 | وعد محمد محمود | - | Sessions | amount=843.75 paid=625 rem=218.75 com=0 | يوليو#r4
+  2026-07-26 | محمود محمد محمود | - | Sessions | amount=843.75 paid=625 rem=218.75 com=0 | يوليو#r5
+
+--- COACHDUES (plan) ---
+Rows with commission>0: 0 (none in this file)
+
+--- COMMIT ---
+  coach created #2 (قدرى)
+  client #25  مالك السعيد
+  client #26  وعد محمد محمود
+  client #27  محمود محمد محمود
+  probe rejected extra={}: (400) {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"":["Payment portions must equal PaidAmount."],"Payments":["'Payme
+  probe rejected extra={"endDate":"2026-07-02"}: (400) {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"":["Payment portions must equal PaidAmount."],"Payments":["'Payme
+  probe rejected extra={"endDate":"2026-07-02","totalSessions":0}: (400) {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"":["Payment portions must equal PaidAmount."],"Payments":["'Payme
+  probe rejected extra={"totalSessions":0}: (400) {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"":["Payment portions must equal PaidAmount."],"Payments":["'Payme
+  SUBSCRIPTION SHAPE UNKNOWN -- aborting before mass-create. Last error: (400) {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"":["Payment portions must equal PaidAmount."],"Payments":["'Payme
