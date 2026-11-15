@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import {
   adminsApi,
@@ -10,7 +10,6 @@ import {
   type CreateAdminPayload,
   type UpdateAdminPayload,
 } from '../../modules/admins';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -28,6 +27,7 @@ export const AdminFormModal = ({
   onSuccess,
 }: AdminFormModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
@@ -49,9 +49,10 @@ export const AdminFormModal = ({
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateAdminPayload) => adminsApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    meta: { invalidate: adminKeys.all },
+    onSuccess: async () => {
       showToast.success('تمت إضافة المسؤول بنجاح');
+      await queryClient.invalidateQueries({ queryKey: adminKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {
@@ -62,9 +63,10 @@ export const AdminFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateAdminPayload }) =>
       adminsApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    meta: { invalidate: adminKeys.all },
+    onSuccess: async () => {
       showToast.success('تم تحديث بيانات المسؤول بنجاح');
+      await queryClient.invalidateQueries({ queryKey: adminKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {

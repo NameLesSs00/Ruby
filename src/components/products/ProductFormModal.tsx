@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import {
   productsApi,
@@ -11,7 +11,6 @@ import {
   type CreateProductPayload,
   type UpdateProductPayload,
 } from '../../modules/products';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 import { blockInvalidNumberKeys } from '../../lib/number-input';
@@ -34,6 +33,7 @@ export const ProductFormModal = ({
 }: ProductFormModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [productName, setProductName] = useState('');
   const [productCategoryId, setProductCategoryId] = useState<number | ''>('');
   const [barcode, setBarcode] = useState('');
@@ -111,9 +111,10 @@ export const ProductFormModal = ({
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateProductPayload) => productsApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    meta: { invalidate: productKeys.all },
+    onSuccess: async () => {
       showToast.success('تمت إضافة المنتج بنجاح');
+      await queryClient.invalidateQueries({ queryKey: productKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {
@@ -124,9 +125,10 @@ export const ProductFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateProductPayload }) =>
       productsApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    meta: { invalidate: productKeys.all },
+    onSuccess: async () => {
       showToast.success('تم تحديث بيانات المنتج بنجاح');
+      await queryClient.invalidateQueries({ queryKey: productKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {

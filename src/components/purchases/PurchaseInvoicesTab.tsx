@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search,
   Plus,
@@ -13,7 +13,11 @@ import {
   purchaseInvoiceKeys,
   type PurchaseInvoice,
 } from '../../modules/purchases';
-import { queryClient } from '../../lib/query-client';
+import { supplierKeys } from '../../modules/suppliers';
+import { inventoryKeys } from '../../modules/inventory';
+import { productKeys } from '../../modules/products';
+import { warehouseTransactionKeys } from '../../modules/warehouseTransactions';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { PurchaseInvoiceFormModal } from './PurchaseInvoiceFormModal';
 import { PurchaseInvoiceDetailsModal } from './PurchaseInvoiceDetailsModal';
@@ -22,6 +26,7 @@ import { PurchaseInvoicesTable } from './PurchaseInvoicesTable';
 import { DeleteModal } from '../ui/DeleteModal';
 
 export const PurchaseInvoicesTab = () => {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const pageSize = 15;
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,8 +80,25 @@ export const PurchaseInvoicesTab = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => purchaseInvoicesApi.delete(id),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
+    meta: {
+      invalidate: [
+        purchaseInvoiceKeys.all,
+        supplierKeys.all,
+        inventoryKeys.items(),
+        productKeys.all,
+        warehouseTransactionKeys.all,
+        cashTransactionKeys.all,
+      ],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all }),
+        queryClient.invalidateQueries({ queryKey: supplierKeys.all }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم حذف فاتورة المشتريات بنجاح');
       setDeletingInvoice(null);
     },

@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { payrollsApi, payrollKeys, monthInputToApiDate, type CreatePayrollPayload } from '../../modules/payrolls';
 import type { Employee } from '../../modules/employees';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -21,6 +20,7 @@ function extractErr(err: unknown): string | undefined {
 
 export const CreatePayrollModal = ({ isOpen, employees, onClose }: CreatePayrollModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [employeeId, setEmployeeId] = useState('');
   const [month, setMonth] = useState('');
@@ -28,8 +28,11 @@ export const CreatePayrollModal = ({ isOpen, employees, onClose }: CreatePayroll
 
   const createMutation = useMutation({
     mutationFn: (p: CreatePayrollPayload) => payrollsApi.create(p),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.all });
+    meta: {
+      invalidate: payrollKeys.all,
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: payrollKeys.all });
       showToast.success('تم إنشاء مسيرة الراتب بنجاح');
       onClose();
       setEmployeeId('');

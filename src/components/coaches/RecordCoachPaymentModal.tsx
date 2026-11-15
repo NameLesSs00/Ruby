@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, type FormEvent, type CSSProperties } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, AlertCircle, Receipt, Wallet, Info, CheckCircle2, DollarSign } from 'lucide-react';
 import {
   coachPaymentsApi, coachPaymentKeys, coachDuesApi, coachDueKeys,
@@ -7,7 +7,6 @@ import {
 } from '../../modules/coachDues';
 import { coachesApi } from '../../modules/coaches';
 import { AsyncSearchableSelect, type SelectOption } from '../ui/AsyncSearchableSelect';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -28,6 +27,7 @@ export const RecordCoachPaymentModal = ({
   initialPaymentType = 'DuePayment', onClose, onSuccess,
 }: RecordCoachPaymentModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [paymentType, setPaymentType] = useState<CoachPaymentType>(initialPaymentType);
   const [selectedCoach, setSelectedCoach] = useState<SelectOption | null>(null);
@@ -63,11 +63,14 @@ export const RecordCoachPaymentModal = ({
 
   const mutation = useMutation({
     mutationFn: coachPaymentsApi.create,
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: coachPaymentKeys.all });
-      queryClient.invalidateQueries({ queryKey: coachDueKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: { invalidate: [coachPaymentKeys.all, coachDueKeys.all, cashTransactionKeys.all] },
+    onSuccess: async (res) => {
       showToast.success(res.message || 'تم تسجيل عملية الصرف بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: coachPaymentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: coachDueKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       onSuccess();
     },
     onError: (err: unknown) => showToast.apiError(err, 'فشل في تسجيل عملية الصرف للمدرب'),

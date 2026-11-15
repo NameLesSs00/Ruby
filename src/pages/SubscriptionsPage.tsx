@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Ticket, Plus, Clock, History, Ban, Award } from 'lucide-react';
 import {
   subscriptionKeys,
   type Subscription,
   type SubscriptionDuePayment,
 } from '../modules/subscriptions';
-import { queryClient } from '../lib/query-client';
 import { SubscriptionsListTab } from '../components/subscriptions/SubscriptionsListTab';
 import { SubscriptionAssignmentsTab } from '../components/subscriptions/SubscriptionAssignmentsTab';
 import { SubscriptionDebtsTab } from '../components/subscriptions/SubscriptionDebtsTab';
@@ -20,6 +20,7 @@ import { SubscriptionAssignmentsModal } from '../components/subscriptions/Subscr
 type SubTab = 'subscriptions' | 'assignments' | 'debts' | 'history' | 'cancellations';
 
 export const SubscriptionsPage = () => {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<SubTab>('subscriptions');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);

@@ -5,40 +5,23 @@ import type { PaymentMethod, PaymentMethodItem } from '../../modules/duePayments
 import type { PosSaleType } from '../../modules/posStore';
 
 interface PosPaymentSectionProps {
-  subtotal: number;
-  discountAmount: number;
-  setDiscountAmount: (val: number) => void;
-  finalAmount: number;
-  remainingDebt: number;
-  isPayLater: boolean;
-  setIsPayLater: (val: boolean) => void;
-  payerName: string;
-  setPayerName: (val: string) => void;
-  debtDescription: string;
-  setDebtDescription: (val: string) => void;
-  dueDate: string;
-  setDueDate: (val: string) => void;
-  partialAmountPaid: number;
-  setPartialAmountPaid: (val: number) => void;
-  saleNotes: string;
-  setSaleNotes: (val: string) => void;
-  isCartEmpty: boolean;
-  isSubmitting: boolean;
-  saleType?: PosSaleType;
-  paymentMethod?: PaymentMethod;
-  onPaymentMethodChange?: (method: PaymentMethod) => void;
-  customerPayments?: PaymentMethodItem[];
-  onCustomerPaymentsChange?: (payments: PaymentMethodItem[]) => void;
-  employeePayments?: PaymentMethodItem[];
-  onEmployeePaymentsChange?: (payments: PaymentMethodItem[]) => void;
+  subtotal: number; discountAmount: number; setDiscountAmount: (val: number) => void;
+  finalAmount: number; remainingDebt: number; isPayLater: boolean; setIsPayLater: (val: boolean) => void;
+  payerName: string; setPayerName: (val: string) => void;
+  debtDescription: string; setDebtDescription: (val: string) => void;
+  dueDate: string; setDueDate: (val: string) => void;
+  partialAmountPaid: number; setPartialAmountPaid: (val: number) => void;
+  saleNotes: string; setSaleNotes: (val: string) => void;
+  isCartEmpty: boolean; isSubmitting: boolean; saleType?: PosSaleType;
+  paymentMethod?: PaymentMethod; onPaymentMethodChange?: (method: PaymentMethod) => void;
+  customerPayments?: PaymentMethodItem[]; onCustomerPaymentsChange?: (payments: PaymentMethodItem[]) => void;
+  employeePayments?: PaymentMethodItem[]; onEmployeePaymentsChange?: (payments: PaymentMethodItem[]) => void;
   onCheckout: () => void;
 }
 
 const PAYMENT_METHODS: { method: PaymentMethod; label: string }[] = [
-  { method: 'Cash', label: 'نقداً (Cash)' },
-  { method: 'Visa', label: 'فيزا (Visa)' },
-  { method: 'InstaPay', label: 'إنستاباي' },
-  { method: 'VodafoneCash', label: 'فودافون كاش' },
+  { method: 'Cash', label: 'نقداً (Cash)' }, { method: 'Visa', label: 'فيزا (Visa)' },
+  { method: 'InstaPay', label: 'إنستاباي' }, { method: 'VodafoneCash', label: 'فودافون كاش' },
 ];
 
 export const PosPaymentSection = ({
@@ -335,10 +318,7 @@ export const PosPaymentSection = ({
 
       {/* Sale Notes */}
       <div style={{ marginBottom: '0.65rem' }}>
-        <input
-          type="text" placeholder="ملاحظات اختيارية على الفاتورة..." value={saleNotes} onChange={(e) => setSaleNotes(e.target.value)}
-          style={{ width: '100%', padding: '0.35rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #e2e8f0' }}
-        />
+        <input type="text" placeholder="ملاحظات اختيارية على الفاتورة..." value={saleNotes} onChange={(e) => setSaleNotes(e.target.value)} style={{ width: '100%', padding: '0.35rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #e2e8f0' }} />
       </div>
 
       {/* Final Amount */}

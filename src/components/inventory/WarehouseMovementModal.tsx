@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, ArrowDownRight, ArrowUpLeft } from 'lucide-react';
 import {
   warehouseTransactionsApi,
@@ -10,7 +10,7 @@ import {
   type UpdateWarehouseMovementPayload,
 } from '../../modules/warehouseTransactions';
 import { inventoryKeys, type InventoryItem } from '../../modules/inventory';
-import { queryClient } from '../../lib/query-client';
+import { productKeys } from '../../modules/products';
 import { showToast } from '../../lib/sonner';
 import { WarehouseMovementItemRows, type MovementItemRow } from './WarehouseMovementItemRows';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -29,6 +29,7 @@ export const WarehouseMovementModal = ({
   onClose,
 }: WarehouseMovementModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const isEdit = !!initialData;
   const [movementType, setMovementType] = useState<MovementType>('In');
@@ -65,12 +66,16 @@ export const WarehouseMovementModal = ({
       }
       return warehouseTransactionsApi.create(payload as CreateWarehouseMovementPayload);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all });
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
+    meta: { invalidate: [warehouseTransactionKeys.all, inventoryKeys.items(), productKeys.all] },
+    onSuccess: async () => {
       showToast.success(
         isEdit ? 'تم تحديث إذن الحركة بنجاح' : 'تم إنشاء إذن الحركة بنجاح'
       );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+      ]);
       onClose();
     },
     onError: (err) => {

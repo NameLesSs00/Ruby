@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { Search, Plus, Award, Clock, DollarSign } from 'lucide-react';
 import { coachesApi, coachKeys, type Coach } from '../modules/coaches';
 import { decodeJwt, isSuperAdminRole } from '../modules/auth';
 import { getStoredTokens } from '../lib/axios';
-import { queryClient } from '../lib/query-client';
 import { showToast } from '../lib/sonner';
 import { CoachesTable } from '../components/coaches/CoachesTable';
 import { CoachFormModal } from '../components/coaches/CoachFormModal';
@@ -14,6 +13,7 @@ import { CoachPaymentsTab } from '../components/coaches/CoachPaymentsTab';
 type CoachTab = 'coaches' | 'dues' | 'payments';
 
 export const CoachesPage = () => {
+  const queryClient = useQueryClient();
   const tokens = getStoredTokens();
   const decodedUser = tokens?.accessToken ? decodeJwt(tokens.accessToken) : null;
   const canManageCoachFinances = isSuperAdminRole(decodedUser?.role || 'SuperAdmin');
@@ -45,11 +45,12 @@ export const CoachesPage = () => {
   const statusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       coachesApi.updateStatus(id, isActive),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: coachKeys.all });
+    meta: { invalidate: coachKeys.all },
+    onSuccess: async (_, variables) => {
       showToast.success(
         variables.isActive ? 'تم تفعيل حساب المدرب بنجاح' : 'تم تعطيل حساب المدرب بنجاح'
       );
+      await queryClient.invalidateQueries({ queryKey: coachKeys.all });
     },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في تعديل حالة المدرب');

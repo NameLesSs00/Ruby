@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { Search, Plus } from 'lucide-react';
 import {
   inventoryItemsApi,
@@ -11,7 +11,7 @@ import {
   warehouseTransactionsApi,
   warehouseTransactionKeys,
 } from '../../modules/warehouseTransactions';
-import { queryClient } from '../../lib/query-client';
+import { productKeys } from '../../modules/products';
 import { showToast } from '../../lib/sonner';
 import { InventoryItemFormModal } from './InventoryItemFormModal';
 import { InventoryItemsTable } from './InventoryItemsTable';
@@ -23,6 +23,7 @@ interface InventoryItemsTabProps {
 }
 
 export const InventoryItemsTab = ({ categories }: InventoryItemsTabProps) => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | ''>('');
@@ -82,18 +83,28 @@ export const InventoryItemsTab = ({ categories }: InventoryItemsTabProps) => {
   const statusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       inventoryItemsApi.updateStatus(id, isActive),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
+    meta: { invalidate: [inventoryKeys.items(), warehouseTransactionKeys.all, productKeys.all] },
+    onSuccess: async (_, variables) => {
       showToast.success(variables.isActive ? 'تم تفعيل الصنف المخزني' : 'تم تعطيل الصنف المخزني');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+      ]);
     },
     onError: (err: unknown) => showToast.apiError(err, 'فشل في تعديل حالة الصنف المخزني'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => inventoryItemsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
+    meta: { invalidate: [inventoryKeys.items(), warehouseTransactionKeys.all, productKeys.all] },
+    onSuccess: async () => {
       showToast.success('تم حذف الصنف المخزني بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+      ]);
       setDeletingItem(null);
     },
     onError: (err: unknown) => {

@@ -1,8 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, AlertTriangle } from 'lucide-react';
 import { subscriptionsApi, subscriptionKeys, subscriptionDuePaymentKeys } from '../../modules/subscriptions';
 import type { Subscription } from '../../modules/subscriptions';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -19,12 +18,16 @@ export const SubscriptionDeleteModal = ({
 }: SubscriptionDeleteModalProps) => {
   useModalEscape(onClose);
 
+  const queryClient = useQueryClient();
   const deleteMutation = useMutation({
     mutationFn: (id: number) => subscriptionsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-      queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all });
+    meta: { invalidate: [subscriptionKeys.all, subscriptionDuePaymentKeys.all] },
+    onSuccess: async () => {
       showToast.success('تم حذف الاشتراك بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all }),
+      ]);
       onSuccess();
     },
     onError: (err: unknown) => {

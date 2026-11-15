@@ -1,12 +1,11 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, CreditCard, Banknote, Smartphone, Phone, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import {
   duePaymentTransactionsApi, duePaymentTransactionKeys, duePaymentKeys,
   generateIdempotencyKey, dueTypeLabel, type DuePayment, type PaymentMethod,
   type PaymentMethodItem, type CreateDuePaymentTransactionPayload,
 } from '../../modules/duePayments';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -30,6 +29,7 @@ export const RecordDuePaymentModal = ({
   duePayment, isOpen, onClose, onSuccess,
 }: RecordDuePaymentModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('Cash');
   const [amountPaid, setAmountPaid] = useState('');
@@ -55,10 +55,15 @@ export const RecordDuePaymentModal = ({
 
   const mutation = useMutation({
     mutationFn: (p: CreateDuePaymentTransactionPayload) => duePaymentTransactionsApi.recordTransaction(p),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: duePaymentKeys.all });
-      queryClient.invalidateQueries({ queryKey: duePaymentTransactionKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [duePaymentKeys.all, duePaymentTransactionKeys.all, cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: duePaymentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: duePaymentTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تسجيل عملية التحصيل والسداد بنجاح');
       onSuccess();
     },

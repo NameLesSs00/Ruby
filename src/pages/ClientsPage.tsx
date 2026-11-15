@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { Search, Plus } from 'lucide-react';
 import { clientsApi, clientKeys, type Client } from '../modules/clients';
-import { queryClient } from '../lib/query-client';
 import { showToast } from '../lib/sonner';
 import { ClientsTable } from '../components/clients/ClientsTable';
 import { ClientFormModal } from '../components/clients/ClientFormModal';
 import { ClientBarcodeModal } from '../components/clients/ClientBarcodeModal';
 
 export const ClientsPage = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -35,11 +35,12 @@ export const ClientsPage = () => {
   const statusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       clientsApi.updateStatus(id, isActive),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: clientKeys.all });
+    meta: { invalidate: clientKeys.all },
+    onSuccess: async (_, variables) => {
       showToast.success(
         variables.isActive ? 'تم تفعيل حساب العميل بنجاح' : 'تم تعطيل حساب العميل بنجاح'
       );
+      await queryClient.invalidateQueries({ queryKey: clientKeys.all });
     },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في تعديل حالة العميل');

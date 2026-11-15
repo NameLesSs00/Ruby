@@ -40,13 +40,19 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         amountPaid: amount,
       });
     },
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.all });
+    meta: {
+      invalidate: [payrollKeys.all, payrollKeys.payments(), cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      const promises = [
+        queryClient.invalidateQueries({ queryKey: payrollKeys.all }),
+        queryClient.invalidateQueries({ queryKey: payrollKeys.payments() }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ];
       if (payroll) {
-        queryClient.invalidateQueries({ queryKey: payrollKeys.paymentsByPayroll(payroll.id) });
+        promises.push(queryClient.invalidateQueries({ queryKey: payrollKeys.paymentsByPayroll(payroll.id) }));
       }
-      queryClient.invalidateQueries({ queryKey: payrollKeys.payments() });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+      await Promise.all(promises);
       showToast.success(res.message || 'تم تسجيل صرف الراتب بنجاح');
       onClose();
     },

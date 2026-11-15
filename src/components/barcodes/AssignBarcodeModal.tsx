@@ -22,10 +22,15 @@ export const AssignBarcodeModal = ({ barcode, onClose, onSuccess }: AssignBarcod
     mutationFn: async ({ barcodeId, clientId }: { barcodeId: number; clientId: number }) => {
       return await barcodesApi.assignClient(barcodeId, { clientId });
     },
-    onSuccess: (res) => {
+    meta: {
+      invalidate: [barcodeKeys.all, clientKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: barcodeKeys.all }),
+        queryClient.invalidateQueries({ queryKey: clientKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تعيين الباركود للعميل بنجاح');
-      queryClient.invalidateQueries({ queryKey: barcodeKeys.all });
-      queryClient.invalidateQueries({ queryKey: clientKeys.all });
       if (onSuccess) onSuccess();
       onClose();
     },

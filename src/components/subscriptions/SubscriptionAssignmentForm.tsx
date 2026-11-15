@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Award, Briefcase, Plus } from 'lucide-react';
 import {
   subscriptionCoachAssignmentsApi,
@@ -14,7 +14,6 @@ import {
   AsyncSearchableSelect,
   type SelectOption,
 } from '../ui/AsyncSearchableSelect';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 
 interface SubscriptionAssignmentFormProps {
@@ -24,6 +23,7 @@ interface SubscriptionAssignmentFormProps {
 export const SubscriptionAssignmentForm = ({
   subscription,
 }: SubscriptionAssignmentFormProps) => {
+  const queryClient = useQueryClient();
   const [assigneeType, setAssigneeType] = useState<'coach' | 'employee'>('coach');
   const [selectedStaff, setSelectedStaff] = useState<SelectOption | null>(null);
   const [startDate, setStartDate] = useState(
@@ -37,9 +37,14 @@ export const SubscriptionAssignmentForm = ({
   const createMutation = useMutation({
     mutationFn: (payload: CreateCoachAssignmentPayload) =>
       subscriptionCoachAssignmentsApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all });
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+    meta: {
+      invalidate: [coachAssignmentKeys.all, subscriptionKeys.all],
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+      ]);
       showToast.success('تم تعيين الكادر للاشتراك بنجاح');
       setSelectedStaff(null);
       setNotes('');

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Award,
   Briefcase,
@@ -16,7 +16,6 @@ import {
   type Subscription,
   type SubscriptionCoachAssignment,
 } from '../../modules/subscriptions';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { SubscriptionAssignmentForm } from './SubscriptionAssignmentForm';
 import { AssignmentFormModal } from './AssignmentFormModal';
@@ -35,6 +34,7 @@ export const SubscriptionAssignmentsModal = ({
 }: SubscriptionAssignmentsModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [editingAssignment, setEditingAssignment] =
     useState<SubscriptionCoachAssignment | null>(null);
 
@@ -53,9 +53,14 @@ export const SubscriptionAssignmentsModal = ({
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => subscriptionCoachAssignmentsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all });
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+    meta: {
+      invalidate: [coachAssignmentKeys.all, subscriptionKeys.all],
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+      ]);
       showToast.success('تم إزالة التعيين بنجاح');
     },
     onError: (err: unknown) => {

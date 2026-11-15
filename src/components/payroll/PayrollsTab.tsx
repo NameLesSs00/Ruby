@@ -1,13 +1,12 @@
 import { useState, useMemo } from 'react';
 import type { FormEvent } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit2, Trash2, X, AlertCircle, Calendar, CreditCard, Receipt } from 'lucide-react';
 import {
   payrollsApi, payrollKeys, paymentStatusLabel, paymentStatusClass,
   type PayrollRecord, type UpdatePayrollPayload,
 } from '../../modules/payrolls';
 import type { Employee } from '../../modules/employees';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 import { EmployeeNameCell } from './EmployeeNameCell';
@@ -20,6 +19,7 @@ function fmt(val: number) { return val.toLocaleString('ar-EG'); }
 function fmtMonth(iso: string) { return iso ? iso.slice(0, 7) : '—'; }
 
 export const PayrollsTab = ({ employees }: { employees: Employee[] }) => {
+  const queryClient = useQueryClient();
   const [filterEmployeeId, setFilterEmployeeId] = useState('');
   const [filterMonth, setFilterMonth] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -45,8 +45,11 @@ export const PayrollsTab = ({ employees }: { employees: Employee[] }) => {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdatePayrollPayload }) => payrollsApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.all });
+    meta: {
+      invalidate: payrollKeys.all,
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: payrollKeys.all });
       showToast.success('تم تحديث ملاحظات المسيرة بنجاح');
       setEditingRecord(null);
     },

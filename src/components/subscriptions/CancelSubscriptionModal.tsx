@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ban, X, AlertCircle } from 'lucide-react';
 import type { Subscription } from '../../modules/subscriptions';
 import {
@@ -8,7 +8,6 @@ import {
 } from '../../modules/subscriptionCancellations';
 import { subscriptionKeys } from '../../modules/subscriptions';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 import { blockInvalidNumberKeys } from '../../lib/number-input';
@@ -28,6 +27,7 @@ export const CancelSubscriptionModal = ({
 }: CancelSubscriptionModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [reason, setReason] = useState('');
   const [refundAmount, setRefundAmount] = useState('');
   const [notes, setNotes] = useState('');
@@ -42,11 +42,14 @@ export const CancelSubscriptionModal = ({
 
   const mutation = useMutation({
     mutationFn: subscriptionCancellationsApi.create,
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: subscriptionCancellationKeys.all });
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: { invalidate: [subscriptionCancellationKeys.all, subscriptionKeys.all, cashTransactionKeys.all] },
+    onSuccess: async (res) => {
       showToast.success(res.message || 'تم تسجيل إلغاء الاشتراك بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionCancellationKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       onSuccess();
     },
     onError: (err: unknown) => {

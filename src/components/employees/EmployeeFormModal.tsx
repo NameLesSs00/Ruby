@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import {
   employeesApi,
@@ -9,7 +9,6 @@ import {
   type CreateEmployeePayload,
   type UpdateEmployeePayload,
 } from '../../modules/employees';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 import { blockInvalidNumberKeys } from '../../lib/number-input';
@@ -28,6 +27,7 @@ export const EmployeeFormModal = ({
   onSuccess,
 }: EmployeeFormModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -55,9 +55,10 @@ export const EmployeeFormModal = ({
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateEmployeePayload) => employeesApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
+    meta: { invalidate: employeeKeys.all },
+    onSuccess: async () => {
       showToast.success('تمت إضافة الموظف بنجاح');
+      await queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {
@@ -68,9 +69,10 @@ export const EmployeeFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateEmployeePayload }) =>
       employeesApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
+    meta: { invalidate: employeeKeys.all },
+    onSuccess: async () => {
       showToast.success('تم تحديث بيانات الموظف بنجاح');
+      await queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {

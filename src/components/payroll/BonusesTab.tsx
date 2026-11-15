@@ -1,13 +1,12 @@
 import { useState, useMemo } from 'react';
 import type { FormEvent } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, X, AlertCircle, Calendar } from 'lucide-react';
 import {
   bonusesApi, payrollKeys, monthInputToApiDate,
   type Bonus, type CreateBonusPayload, type BonusFilterParams,
 } from '../../modules/payrolls';
 import type { Employee } from '../../modules/employees';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { EmployeeNameCell } from './EmployeeNameCell';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -18,6 +17,7 @@ function fmtMonth(iso: string): string {
 }
 
 export const BonusesTab = ({ employees }: { employees: Employee[] }) => {
+  const queryClient = useQueryClient();
   const [filterEmployeeId, setFilterEmployeeId] = useState('');
   const [filterMonth, setFilterMonth] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -38,8 +38,14 @@ export const BonusesTab = ({ employees }: { employees: Employee[] }) => {
 
   const createMutation = useMutation({
     mutationFn: (p: CreateBonusPayload) => bonusesApi.create(p),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.allBonuses });
+    meta: {
+      invalidate: [payrollKeys.allBonuses, payrollKeys.all],
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: payrollKeys.allBonuses }),
+        queryClient.invalidateQueries({ queryKey: payrollKeys.all }),
+      ]);
       showToast.success('تمت إضافة المكافأة بنجاح');
       setIsAddOpen(false); setAddEmployeeId(''); setAddMonth(''); setAddAmount(''); setAddDescription('');
     },

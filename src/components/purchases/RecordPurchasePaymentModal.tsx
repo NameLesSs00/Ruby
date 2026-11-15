@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, CreditCard } from 'lucide-react';
 import {
   purchasePaymentsApi,
@@ -9,7 +9,7 @@ import {
   type PurchaseInvoice,
   type CreatePurchasePaymentPayload,
 } from '../../modules/purchases';
-import { queryClient } from '../../lib/query-client';
+import { supplierKeys } from '../../modules/suppliers';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -30,6 +30,7 @@ export const RecordPurchasePaymentModal = ({
 }: RecordPurchasePaymentModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [amountPaid, setAmountPaid] = useState('');
   const [paymentDate, setPaymentDate] = useState('');
 
@@ -47,10 +48,21 @@ export const RecordPurchasePaymentModal = ({
 
   const mutation = useMutation({
     mutationFn: (payload: CreatePurchasePaymentPayload) => purchasePaymentsApi.create(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
-      queryClient.invalidateQueries({ queryKey: purchasePaymentKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [
+        purchaseInvoiceKeys.all,
+        purchasePaymentKeys.all,
+        cashTransactionKeys.all,
+        supplierKeys.all,
+      ],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all }),
+        queryClient.invalidateQueries({ queryKey: purchasePaymentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: supplierKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تسجيل دفعة المشتريات بنجاح');
       onSuccess();
     },

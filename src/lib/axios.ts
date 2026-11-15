@@ -56,6 +56,13 @@ apiClient.interceptors.request.use(
       delete config.headers['Content-Type'];
     }
 
+    // Defeat any browser/proxy caching of GET (list/detail) responses so tables
+    // always receive fresh server data after a mutation triggers a refetch.
+    if (config.method?.toLowerCase() === 'get' && config.headers) {
+      config.headers['Cache-Control'] = 'no-cache';
+      config.headers['Pragma'] = 'no-cache';
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

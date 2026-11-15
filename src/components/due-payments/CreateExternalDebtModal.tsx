@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, UserPlus } from 'lucide-react';
 import {
   duePaymentsApi,
   duePaymentKeys,
   type CreateExternalDebtPayload,
 } from '../../modules/duePayments';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 import { blockInvalidNumberKeys } from '../../lib/number-input';
@@ -24,6 +23,7 @@ export const CreateExternalDebtModal = ({
   onSuccess,
 }: CreateExternalDebtModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [payerName, setPayerName] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
@@ -41,8 +41,11 @@ export const CreateExternalDebtModal = ({
 
   const mutation = useMutation({
     mutationFn: (payload: CreateExternalDebtPayload) => duePaymentsApi.createExternalDebt(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: duePaymentKeys.all });
+    meta: {
+      invalidate: duePaymentKeys.all,
+    },
+    onSuccess: async (res) => {
+      await queryClient.invalidateQueries({ queryKey: duePaymentKeys.all });
       showToast.success(res.message || 'تم تسجيل الدين الخارجي بنجاح');
       onSuccess();
     },

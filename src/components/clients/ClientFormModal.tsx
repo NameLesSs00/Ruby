@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import {
   clientsApi,
@@ -9,7 +9,6 @@ import {
   type CreateClientPayload,
   type UpdateClientPayload,
 } from '../../modules/clients';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -21,6 +20,7 @@ interface ClientFormModalProps {
 
 export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -40,9 +40,10 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateClientPayload) => clientsApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: clientKeys.all });
+    meta: { invalidate: clientKeys.all },
+    onSuccess: async () => {
       showToast.success('تم تسجيل العميل بنجاح');
+      await queryClient.invalidateQueries({ queryKey: clientKeys.all });
       onClose();
     },
     onError: (err: unknown) => {
@@ -53,9 +54,10 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateClientPayload }) =>
       clientsApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: clientKeys.all });
+    meta: { invalidate: clientKeys.all },
+    onSuccess: async () => {
       showToast.success('تم تحديث بيانات العميل بنجاح');
+      await queryClient.invalidateQueries({ queryKey: clientKeys.all });
       onClose();
     },
     onError: (err: unknown) => {

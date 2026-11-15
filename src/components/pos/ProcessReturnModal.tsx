@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RotateCcw, X, Check } from 'lucide-react';
-import {
-  posReturnsApi,
-  posSalesApi,
-  posKeys,
-  getSaleReturnStats,
-  type SaleRecord,
-  type CreateSaleReturnPayload,
-} from '../../modules/pos';
-import { queryClient } from '../../lib/query-client';
+import { posReturnsApi, posSalesApi, posKeys, getSaleReturnStats, type SaleRecord, type CreateSaleReturnPayload } from '../../modules/pos';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
+import { productKeys } from '../../modules/products';
+import { warehouseTransactionKeys } from '../../modules/warehouseTransactions';
+import { inventoryKeys } from '../../modules/inventory';
 import { showToast } from '../../lib/sonner';
 import { ReturnInvoicePicker } from './ReturnInvoicePicker';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -30,6 +25,7 @@ export const ProcessReturnModal = ({
 }: ProcessReturnModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [selectedSale, setSelectedSale] = useState<SaleRecord | null>(null);
   const [invoiceSearchTerm, setInvoiceSearchTerm] = useState('');
   const [returnItemsMap, setReturnItemsMap] = useState<Record<number, number>>({});
@@ -74,10 +70,25 @@ export const ProcessReturnModal = ({
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateSaleReturnPayload) => posReturnsApi.create(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: posKeys.returns.all });
-      queryClient.invalidateQueries({ queryKey: posKeys.sales.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [
+        posKeys.returns.all,
+        posKeys.sales.all,
+        cashTransactionKeys.all,
+        productKeys.all,
+        warehouseTransactionKeys.all,
+        inventoryKeys.items(),
+      ],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: posKeys.returns.all }),
+        queryClient.invalidateQueries({ queryKey: posKeys.sales.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+      ]);
       showToast.success(res.message || 'تم تسجيل المرتجع واسترداد المبلغ بنجاح');
       onSuccess?.();
       onClose();
@@ -201,24 +212,10 @@ export const ProcessReturnModal = ({
                       border: '1px solid #e0f2fe',
                     }}
                   >
-                    <div>
-                      <span style={{ color: '#64748b' }}>إجمالي الفاتورة:</span>
-                      <div style={{ fontWeight: 700, color: '#0f172a' }}>{selectedSale.finalAmount.toLocaleString('ar-EG')} ج.م</div>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748b' }}>المسترد سابقاً:</span>
-                      <div style={{ fontWeight: 700, color: '#ef4444' }}>{selectedSaleStats?.totalPreviouslyRefunded.toLocaleString('ar-EG')} ج.م</div>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748b' }}>المتبقي للاسترداد:</span>
-                      <div style={{ fontWeight: 800, color: '#059669' }}>{selectedSaleStats?.remainingRefundableAmount.toLocaleString('ar-EG')} ج.م</div>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748b' }}>القطع المتبقية:</span>
-                      <div style={{ fontWeight: 800, color: '#0284c7' }}>
-                        {selectedSaleStats?.totalRemainingPieces} من أصل {selectedSaleStats?.totalSoldPieces} قطعة
-                      </div>
-                    </div>
+                    <div><span style={{ color: '#64748b' }}>إجمالي الفاتورة:</span><div style={{ fontWeight: 700, color: '#0f172a' }}>{selectedSale.finalAmount.toLocaleString('ar-EG')} ج.م</div></div>
+                    <div><span style={{ color: '#64748b' }}>المسترد سابقاً:</span><div style={{ fontWeight: 700, color: '#ef4444' }}>{selectedSaleStats?.totalPreviouslyRefunded.toLocaleString('ar-EG')} ج.م</div></div>
+                    <div><span style={{ color: '#64748b' }}>المتبقي للاسترداد:</span><div style={{ fontWeight: 800, color: '#059669' }}>{selectedSaleStats?.remainingRefundableAmount.toLocaleString('ar-EG')} ج.م</div></div>
+                    <div><span style={{ color: '#64748b' }}>القطع المتبقية:</span><div style={{ fontWeight: 800, color: '#0284c7' }}>{selectedSaleStats?.totalRemainingPieces} من أصل {selectedSaleStats?.totalSoldPieces} قطعة</div></div>
                   </div>
                 </div>
 
@@ -249,7 +246,6 @@ export const ProcessReturnModal = ({
                             <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isLocked ? '#64748b' : '#0d1527' }}>{item.productName}</div>
                             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>سعر الوحدة: {item.unitPrice.toLocaleString('ar-EG')} ج.م</div>
                           </div>
-
                           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                             <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
                               المباع: {item.soldQuantity}

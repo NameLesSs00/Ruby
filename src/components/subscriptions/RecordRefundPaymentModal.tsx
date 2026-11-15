@@ -1,12 +1,11 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { DollarSign, X } from 'lucide-react';
 import type { SubscriptionCancellation } from '../../modules/subscriptionCancellations';
 import {
   subscriptionCancellationsApi,
   subscriptionCancellationKeys,
 } from '../../modules/subscriptionCancellations';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -27,6 +26,7 @@ export const RecordRefundPaymentModal = ({
 }: RecordRefundPaymentModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [paymentAmount, setPaymentAmount] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -50,10 +50,13 @@ export const RecordRefundPaymentModal = ({
         notes: notes.trim() || undefined,
       });
     },
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: subscriptionCancellationKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: { invalidate: [subscriptionCancellationKeys.all, cashTransactionKeys.all] },
+    onSuccess: async (res) => {
       showToast.success(res.message || 'تم تسجيل صرف الاسترداد بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionCancellationKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       onSuccess();
     },
     onError: (err: unknown) => {

@@ -1,21 +1,7 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  AlertCircle,
-  Calendar,
-  Coins,
-  Layers,
-} from 'lucide-react';
-import {
-  otherIncomesApi,
-  otherIncomeKeys,
-  type OtherIncome,
-} from '../../modules/expenses';
-import { queryClient } from '../../lib/query-client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Search, Plus, Edit2, Trash2, AlertCircle, Calendar, Coins, Layers } from 'lucide-react';
+import { otherIncomesApi, otherIncomeKeys, type OtherIncome } from '../../modules/expenses';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { OtherIncomeFormModal } from './OtherIncomeFormModal';
@@ -23,6 +9,7 @@ import { DeleteModal } from '../ui/DeleteModal';
 import { PaginationBar } from '../ui/PaginationBar';
 
 export const OtherIncomesTab = () => {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const pageSize = 15;
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,9 +42,14 @@ export const OtherIncomesTab = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => otherIncomesApi.delete(id),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [otherIncomeKeys.all, cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم حذف الإيراد الإضافي بنجاح');
       setDeletingIncome(null);
     },

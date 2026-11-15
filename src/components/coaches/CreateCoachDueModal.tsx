@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Clock, X } from 'lucide-react';
 import {
   coachDuesApi,
@@ -10,7 +10,6 @@ import {
   AsyncSearchableSelect,
   type SelectOption,
 } from '../ui/AsyncSearchableSelect';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 import { blockInvalidNumberKeys } from '../../lib/number-input';
@@ -29,6 +28,7 @@ export const CreateCoachDueModal = ({
   onSuccess,
 }: CreateCoachDueModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [selectedCoach, setSelectedCoach] = useState<SelectOption | null>(null);
   const [amount, setAmount] = useState('');
@@ -57,9 +57,10 @@ export const CreateCoachDueModal = ({
 
   const mutation = useMutation({
     mutationFn: coachDuesApi.create,
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: coachDueKeys.all });
+    meta: { invalidate: coachDueKeys.all },
+    onSuccess: async (res) => {
       showToast.success(res.message || 'تم تسجيل مستحق المدرب بنجاح');
+      await queryClient.invalidateQueries({ queryKey: coachDueKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {

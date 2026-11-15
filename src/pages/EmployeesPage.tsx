@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { Search, Plus } from 'lucide-react';
 import {
   employeesApi,
   employeeKeys,
   type Employee,
 } from '../modules/employees';
-import { queryClient } from '../lib/query-client';
 import { showToast } from '../lib/sonner';
 import { EmployeesTable } from '../components/employees/EmployeesTable';
 import { EmployeeFormModal } from '../components/employees/EmployeeFormModal';
 import { DeleteModal } from '../components/ui/DeleteModal';
 
 export const EmployeesPage = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -54,11 +54,12 @@ export const EmployeesPage = () => {
   const statusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       employeesApi.updateStatus(id, isActive),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
+    meta: { invalidate: employeeKeys.all },
+    onSuccess: async (_, variables) => {
       showToast.success(
         variables.isActive ? 'تم تفعيل حساب الموظف بنجاح' : 'تم تعطيل حساب الموظف بنجاح'
       );
+      await queryClient.invalidateQueries({ queryKey: employeeKeys.all });
     },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في تعديل حالة الموظف');
@@ -67,9 +68,10 @@ export const EmployeesPage = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => employeesApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
+    meta: { invalidate: employeeKeys.all },
+    onSuccess: async () => {
       showToast.success('تم حذف الموظف بنجاح');
+      await queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       setDeletingEmployee(null);
     },
     onError: (err: unknown) => {

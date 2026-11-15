@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, RotateCw } from 'lucide-react';
+import { Search } from 'lucide-react';
 import {
   warehouseTransactionsApi,
   warehouseTransactionKeys,
@@ -12,7 +12,7 @@ export const WarehouseStockTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
 
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: warehouseTransactionKeys.stockBalances(),
     queryFn: () => warehouseTransactionsApi.getItemStockBalances(),
   });
@@ -101,30 +101,6 @@ export const WarehouseStockTab = () => {
             )}
           </div>
         </div>
-
-        <button
-          type="button"
-          className="btn-refresh"
-          onClick={() => refetch()}
-          disabled={isFetching}
-          title="تحديث أرصدة المخزن"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.5rem 0.85rem',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid #cbd5e1',
-            backgroundColor: '#ffffff',
-            color: '#334155',
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            cursor: 'pointer',
-          }}
-        >
-          <RotateCw size={15} className={isFetching ? 'spin' : ''} />
-          <span>تحديث الأرصدة</span>
-        </button>
       </div>
 
       {/* Stock Table */}

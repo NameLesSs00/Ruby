@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { Search, Plus } from 'lucide-react';
 import {
   suppliersApi,
   supplierKeys,
   type Supplier,
 } from '../modules/suppliers';
-import { queryClient } from '../lib/query-client';
 import { showToast } from '../lib/sonner';
 import { SuppliersTable } from '../components/suppliers/SuppliersTable';
 import { SupplierFormModal } from '../components/suppliers/SupplierFormModal';
 import { DeleteModal } from '../components/ui/DeleteModal';
 
 export const SuppliersPage = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -39,11 +39,12 @@ export const SuppliersPage = () => {
   const statusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       suppliersApi.updateStatus(id, isActive),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.all });
+    meta: { invalidate: supplierKeys.all },
+    onSuccess: async (_, variables) => {
       showToast.success(
         variables.isActive ? 'تم تفعيل حساب المورد بنجاح' : 'تم تعطيل حساب المورد بنجاح'
       );
+      await queryClient.invalidateQueries({ queryKey: supplierKeys.all });
     },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في تعديل حالة المورد');
@@ -52,9 +53,10 @@ export const SuppliersPage = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => suppliersApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.all });
+    meta: { invalidate: supplierKeys.all },
+    onSuccess: async () => {
       showToast.success('تم حذف المورد بنجاح');
+      await queryClient.invalidateQueries({ queryKey: supplierKeys.all });
       setDeletingSupplier(null);
     },
     onError: (err: unknown) => {

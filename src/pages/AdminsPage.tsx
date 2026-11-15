@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Plus, ShieldCheck } from 'lucide-react';
 import {
   adminsApi,
@@ -7,13 +7,13 @@ import {
   type AdminUser,
   type AdminRole,
 } from '../modules/admins';
-import { queryClient } from '../lib/query-client';
 import { showToast } from '../lib/sonner';
 import { AdminsTable } from '../components/admins/AdminsTable';
 import { AdminFormModal } from '../components/admins/AdminFormModal';
 import { AdminPasswordModal } from '../components/admins/AdminPasswordModal';
 
 export const AdminsPage = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<AdminRole | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'deactivated'>('all');
@@ -30,11 +30,12 @@ export const AdminsPage = () => {
   const statusMutation = useMutation({
     mutationFn: ({ id, isDeactivated }: { id: string; isDeactivated: boolean }) =>
       adminsApi.updateStatus(id, { isDeactivated }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    meta: { invalidate: adminKeys.all },
+    onSuccess: async (_, variables) => {
       showToast.success(
         variables.isDeactivated ? 'تم تعطيل حساب المسؤول بنجاح' : 'تم تفعيل حساب المسؤول بنجاح'
       );
+      await queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في تعديل حالة المسؤول');

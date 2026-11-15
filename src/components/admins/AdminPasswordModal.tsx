@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, KeyRound } from 'lucide-react';
-import { adminsApi, type AdminUser, type ResetAdminPasswordPayload } from '../../modules/admins';
+import { adminsApi, adminKeys, type AdminUser, type ResetAdminPasswordPayload } from '../../modules/admins';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -18,6 +18,7 @@ export const AdminPasswordModal = ({
   onSuccess,
 }: AdminPasswordModalProps) => {
   useModalEscape(onClose);
+  const queryClient = useQueryClient();
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,7 +33,11 @@ export const AdminPasswordModal = ({
       if (!admin) throw new Error('No admin selected');
       return adminsApi.resetPassword(admin.id, payload);
     },
-    onSuccess: () => {
+    meta: {
+      invalidate: adminKeys.all,
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: adminKeys.all });
       showToast.success('تم تغيير كلمة المرور بنجاح');
       onSuccess();
     },

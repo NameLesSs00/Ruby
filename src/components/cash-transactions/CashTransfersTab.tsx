@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, RefreshCw, RotateCcw } from 'lucide-react';
+import { Plus, RotateCcw } from 'lucide-react';
 import {
   cashTransfersApi,
   cashTransferKeys,
@@ -33,7 +33,7 @@ export const CashTransfersTab = () => {
     [fromCashbox, toCashbox, fromDate, toDate, page, pageSize]
   );
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: cashTransferKeys.list(queryParams),
     queryFn: () => cashTransfersApi.getAll(queryParams),
   });
@@ -142,17 +142,6 @@ export const CashTransfersTab = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button
-              type="button"
-              className="btn-secondary"
-              style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-              onClick={() => refetch()}
-              title="تحديث البيانات"
-            >
-              <RefreshCw size={14} />
-              <span>تحديث</span>
-            </button>
-
             <button
               type="button"
               className="btn-primary"

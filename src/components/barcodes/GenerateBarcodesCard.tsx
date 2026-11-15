@@ -21,10 +21,13 @@ export const GenerateBarcodesCard = ({
     mutationFn: async (num: number) => {
       return await barcodesApi.generate({ count: num });
     },
-    onSuccess: (res) => {
+    meta: {
+      invalidate: barcodeKeys.all,
+    },
+    onSuccess: async (res) => {
+      await queryClient.invalidateQueries({ queryKey: barcodeKeys.all });
       showToast.success(res.message || `تم توليد ${count} باركود بنجاح`);
       setGeneratedList(res.data || []);
-      queryClient.invalidateQueries({ queryKey: barcodeKeys.all });
       if (onBarcodeGenerated) onBarcodeGenerated();
     },
     onError: (err: any) => {

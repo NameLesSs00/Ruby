@@ -1,14 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Copy,
-  Eye,
-  UserCheck,
-  Unlink,
-  ToggleLeft,
-  ToggleRight,
-  Filter,
-} from 'lucide-react';
+import { Copy, Eye, UserCheck, Unlink, ToggleLeft, ToggleRight, Filter } from 'lucide-react';
 import {
   barcodesApi,
   barcodeKeys,
@@ -44,13 +36,14 @@ export const BarcodesTable = ({
 
   // Detach Mutation
   const detachMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return await barcodesApi.detach(id);
-    },
-    onSuccess: (res) => {
+    mutationFn: (id: number) => barcodesApi.detach(id),
+    meta: { invalidate: [barcodeKeys.all, clientKeys.all] },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: barcodeKeys.all }),
+        queryClient.invalidateQueries({ queryKey: clientKeys.all }),
+      ]);
       showToast.success(res.message || 'تم فك ارتباط الباركود بنجاح');
-      queryClient.invalidateQueries({ queryKey: barcodeKeys.all });
-      queryClient.invalidateQueries({ queryKey: clientKeys.all });
       setConfirmDetachBarcode(null);
     },
     onError: (err: any) => {
@@ -61,12 +54,12 @@ export const BarcodesTable = ({
 
   // Toggle Status Mutation
   const statusMutation = useMutation({
-    mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
-      return await barcodesApi.updateStatus(id, { isActive });
-    },
-    onSuccess: (res) => {
+    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
+      barcodesApi.updateStatus(id, { isActive }),
+    meta: { invalidate: barcodeKeys.all },
+    onSuccess: async (res) => {
+      await queryClient.invalidateQueries({ queryKey: barcodeKeys.all });
       showToast.success(res.message || 'تم تحديث حالة الباركود بنجاح');
-      queryClient.invalidateQueries({ queryKey: barcodeKeys.all });
     },
     onError: (err: any) => {
       const msg = err.response?.data?.error || err.response?.data?.message || 'تعذر تغيير حالة الباركود';

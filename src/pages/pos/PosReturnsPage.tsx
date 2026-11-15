@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   RotateCcw,
   Plus,
@@ -13,12 +13,16 @@ import {
   posKeys,
   type SaleReturnGroup,
 } from '../../modules/pos';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
+import { productKeys } from '../../modules/products';
+import { warehouseTransactionKeys } from '../../modules/warehouseTransactions';
+import { inventoryKeys } from '../../modules/inventory';
 import { ProcessReturnModal } from '../../components/pos/ProcessReturnModal';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
 export const PosReturnsPage = () => {
+  const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReturnGroup, setSelectedReturnGroup] = useState<SaleReturnGroup | null>(null);
   useModalEscape(() => setSelectedReturnGroup(null), Boolean(selectedReturnGroup));
@@ -32,9 +36,25 @@ export const PosReturnsPage = () => {
   // Delete Return Mutation
   const deleteMutation = useMutation({
     mutationFn: (id: number) => posReturnsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: posKeys.returns.all });
-      queryClient.invalidateQueries({ queryKey: posKeys.sales.all });
+    meta: {
+      invalidate: [
+        posKeys.returns.all,
+        posKeys.sales.all,
+        cashTransactionKeys.all,
+        productKeys.all,
+        warehouseTransactionKeys.all,
+        inventoryKeys.items(),
+      ],
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: posKeys.returns.all }),
+        queryClient.invalidateQueries({ queryKey: posKeys.sales.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+      ]);
       showToast.success('تم حذف سجل المرتجع بنجاح');
     },
     onError: (err: unknown) => {

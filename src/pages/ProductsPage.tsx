@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { Search, Plus, Layers } from 'lucide-react';
 import {
   productsApi,
@@ -8,7 +8,6 @@ import {
   categoryKeys,
   type Product,
 } from '../modules/products';
-import { queryClient } from '../lib/query-client';
 import { showToast } from '../lib/sonner';
 import { ProductsTable } from '../components/products/ProductsTable';
 import { ProductFormModal } from '../components/products/ProductFormModal';
@@ -16,6 +15,7 @@ import { CategoryManagerModal } from '../components/products/CategoryManagerModa
 import { DeleteModal } from '../components/ui/DeleteModal';
 
 export const ProductsPage = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>(undefined);
@@ -62,11 +62,12 @@ export const ProductsPage = () => {
   const statusProductMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       productsApi.updateStatus(id, isActive),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    meta: { invalidate: productKeys.all },
+    onSuccess: async (_, variables) => {
       showToast.success(
         variables.isActive ? 'تم تفعيل المنتج بنجاح' : 'تم تعطيل المنتج بنجاح'
       );
+      await queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في تعديل حالة المنتج');
@@ -75,9 +76,10 @@ export const ProductsPage = () => {
 
   const deleteProductMutation = useMutation({
     mutationFn: (id: number) => productsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    meta: { invalidate: productKeys.all },
+    onSuccess: async () => {
       showToast.success('تم حذف المنتج بنجاح');
+      await queryClient.invalidateQueries({ queryKey: productKeys.all });
       setDeletingProduct(null);
     },
     onError: (err: unknown) => {

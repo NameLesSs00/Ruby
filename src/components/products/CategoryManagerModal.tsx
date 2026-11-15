@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Plus, Tag, CheckCircle, XCircle } from 'lucide-react';
 import {
   productCategoriesApi, categoryKeys, type ProductCategory,
 } from '../../modules/products';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -18,14 +17,16 @@ interface CategoryManagerModalProps {
 export const CategoryManagerModal = ({ isOpen, categories, onClose }: CategoryManagerModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [newCategoryName, setNewCategoryName] = useState('');
 
   const createCategoryMutation = useMutation({
     mutationFn: (name: string) => productCategoriesApi.create({ name }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+    meta: { invalidate: categoryKeys.all },
+    onSuccess: async () => {
       showToast.success('تمت إضافة التصنيف بنجاح');
       setNewCategoryName('');
+      await queryClient.invalidateQueries({ queryKey: categoryKeys.all });
     },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في إضافة التصنيف');
@@ -35,9 +36,10 @@ export const CategoryManagerModal = ({ isOpen, categories, onClose }: CategoryMa
   const statusCategoryMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       productCategoriesApi.updateStatus(id, isActive),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+    meta: { invalidate: categoryKeys.all },
+    onSuccess: async (_, variables) => {
       showToast.success(variables.isActive ? 'تم تفعيل التصنيف بنجاح' : 'تم تعطيل التصنيف بنجاح');
+      await queryClient.invalidateQueries({ queryKey: categoryKeys.all });
     },
     onError: (err: unknown) => showToast.apiError(err, 'فشل في تعديل حالة التصنيف'),
   });

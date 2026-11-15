@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Receipt } from 'lucide-react';
 import {
   expensesApi,
@@ -9,7 +9,6 @@ import {
   type CreateExpensePayload,
   type UpdateExpensePayload,
 } from '../../modules/expenses';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -29,6 +28,7 @@ export const ExpenseFormModal = ({
   onSuccess,
 }: ExpenseFormModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [amount, setAmount] = useState('');
   const [expenseDate, setExpenseDate] = useState('');
@@ -53,9 +53,14 @@ export const ExpenseFormModal = ({
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateExpensePayload) => expensesApi.create(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: expenseKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [expenseKeys.all, cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: expenseKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تسجيل المصروف بنجاح');
       onSuccess();
     },
@@ -67,9 +72,14 @@ export const ExpenseFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateExpensePayload }) =>
       expensesApi.update(id, payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: expenseKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [expenseKeys.all, cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: expenseKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تحديث بيانات المصروف بنجاح');
       onSuccess();
     },

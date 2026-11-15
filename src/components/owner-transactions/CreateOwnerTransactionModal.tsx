@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, ArrowUpLeft, ArrowDownRight, Landmark, DollarSign } from 'lucide-react';
 import {
   ownerTransactionsApi,
@@ -9,7 +9,6 @@ import {
   type CreateOwnerTransactionPayload,
 } from '../../modules/ownerTransactions';
 import { cashTransactionKeys, type CashboxType } from '../../modules/cashTransactions';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 import { blockInvalidNumberKeys } from '../../lib/number-input';
@@ -27,6 +26,7 @@ export const CreateOwnerTransactionModal = ({
   onClose,
   onSuccess,
 }: CreateOwnerTransactionModalProps) => {
+  const queryClient = useQueryClient();
   const [transactionType, setTransactionType] = useState<OwnerTransactionType>('Withdrawal');
   const [cashboxType, setCashboxType] = useState<CashboxType>(defaultCashbox);
   const [amount, setAmount] = useState('');
@@ -44,9 +44,14 @@ export const CreateOwnerTransactionModal = ({
   const mutation = useMutation({
     mutationFn: (payload: CreateOwnerTransactionPayload) =>
       ownerTransactionsApi.create(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ownerTransactionKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [ownerTransactionKeys.all, cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ownerTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تسجيل حركة المالك بنجاح');
       onSuccess?.();
       onClose();

@@ -1,12 +1,12 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit3, X } from 'lucide-react';
 import {
   attendanceApi,
   attendanceKeys,
   type AttendanceRecord,
 } from '../../modules/attendance';
-import { queryClient } from '../../lib/query-client';
+import { subscriptionKeys } from '../../modules/subscriptions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -23,6 +23,7 @@ export const EditAttendanceModal = ({
 }: EditAttendanceModalProps) => {
   useModalEscape(onClose);
 
+  const queryClient = useQueryClient();
   const [notes, setNotes] = useState('');
   const [checkInTime, setCheckInTime] = useState('');
 
@@ -50,8 +51,14 @@ export const EditAttendanceModal = ({
         checkInTime: new Date(payload.checkInTime).toISOString(),
         notes: payload.notes?.trim() || undefined,
       }),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: attendanceKeys.all });
+    meta: {
+      invalidate: [attendanceKeys.all, subscriptionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: attendanceKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تعديل قيد الحضور بنجاح');
       onSuccess?.();
       onClose();

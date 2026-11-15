@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { UserCheck, Layers, RefreshCw } from 'lucide-react';
+import { UserCheck, Layers } from 'lucide-react';
 import {
   attendanceApi,
   attendanceKeys,
@@ -39,7 +39,7 @@ export const AttendanceHistoryTab = () => {
     [selectedClient, subscriptionId, fromDate, toDate, page, pageSize]
   );
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: attendanceKeys.list(queryParams),
     queryFn: () => attendanceApi.getAll(queryParams),
   });
@@ -199,17 +199,6 @@ export const AttendanceHistoryTab = () => {
               الكل
             </button>
           </div>
-
-          <button
-            type="button"
-            className="btn-secondary"
-            style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-            onClick={() => refetch()}
-            title="تحديث البيانات"
-          >
-            <RefreshCw size={14} />
-            <span>تحديث</span>
-          </button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>

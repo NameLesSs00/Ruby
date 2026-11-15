@@ -1,15 +1,16 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Scan, Search } from 'lucide-react';
 import { attendanceApi, attendanceKeys } from '../../modules/attendance';
+import { subscriptionKeys } from '../../modules/subscriptions';
 import { clientsApi, type ClientWithEligibleSubscriptions } from '../../modules/clients';
 import { AsyncSearchableSelect, type SelectOption } from '../ui/AsyncSearchableSelect';
 import { ClientAttendanceCard } from './ClientAttendanceCard';
 import { RecentCheckInsFeed } from './RecentCheckInsFeed';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 
 export const QuickCheckInTab = () => {
+  const queryClient = useQueryClient();
   const [barcodeInput, setBarcodeInput] = useState('');
   const [isSearchingBarcode, setIsSearchingBarcode] = useState(false);
   const [clientData, setClientData] = useState<ClientWithEligibleSubscriptions | null>(null);
@@ -92,8 +93,14 @@ export const QuickCheckInTab = () => {
 
   const checkInMutation = useMutation({
     mutationFn: attendanceApi.create,
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: attendanceKeys.all });
+    meta: {
+      invalidate: [attendanceKeys.all, subscriptionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: attendanceKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تسجيل الحضور بنجاح');
       setBarcodeInput('');
       setNotes('');

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { FormEvent } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, ShoppingCart } from 'lucide-react';
 import {
   purchaseInvoicesApi,
@@ -11,7 +11,9 @@ import {
 } from '../../modules/purchases';
 import { suppliersApi, supplierKeys } from '../../modules/suppliers';
 import { inventoryItemsApi, inventoryKeys } from '../../modules/inventory';
-import { queryClient } from '../../lib/query-client';
+import { productKeys } from '../../modules/products';
+import { warehouseTransactionKeys } from '../../modules/warehouseTransactions';
+import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { PurchaseInvoiceLineItems, type FormItemLine } from './PurchaseInvoiceLineItems';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -31,6 +33,7 @@ export const PurchaseInvoiceFormModal = ({
 }: PurchaseInvoiceFormModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [supplierId, setSupplierId] = useState<number | ''>('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState('');
@@ -88,10 +91,20 @@ export const PurchaseInvoiceFormModal = ({
     return items.reduce((sum, item) => sum + (item.quantity || 0) * (item.unitCost || 0), 0);
   }, [items]);
 
+  const invalidatePurchaseKeys = [
+    purchaseInvoiceKeys.all,
+    supplierKeys.all,
+    inventoryKeys.items(),
+    productKeys.all,
+    warehouseTransactionKeys.all,
+    cashTransactionKeys.all,
+  ];
+
   const createMutation = useMutation({
     mutationFn: (payload: CreatePurchaseInvoicePayload) => purchaseInvoicesApi.create(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
+    meta: { invalidate: invalidatePurchaseKeys },
+    onSuccess: async (res) => {
+      await Promise.all(invalidatePurchaseKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
       showToast.success(res.message || 'تم إنشاء فاتورة المشتريات بنجاح');
       onSuccess();
     },
@@ -103,8 +116,9 @@ export const PurchaseInvoiceFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdatePurchaseInvoicePayload }) =>
       purchaseInvoicesApi.update(id, payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
+    meta: { invalidate: invalidatePurchaseKeys },
+    onSuccess: async (res) => {
+      await Promise.all(invalidatePurchaseKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
       showToast.success(res.message || 'تم تحديث فاتورة المشتريات بنجاح');
       onSuccess();
     },

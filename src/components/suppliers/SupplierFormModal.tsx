@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import {
   suppliersApi, supplierKeys,
   type Supplier, type CreateSupplierPayload, type UpdateSupplierPayload,
 } from '../../modules/suppliers';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -20,6 +19,7 @@ interface SupplierFormModalProps {
 export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess }: SupplierFormModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -40,7 +40,12 @@ export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess 
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateSupplierPayload) => suppliersApi.create(payload),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: supplierKeys.all }); showToast.success('تمت إضافة المورد بنجاح'); onSuccess(); },
+    meta: { invalidate: supplierKeys.all },
+    onSuccess: async () => {
+      showToast.success('تمت إضافة المورد بنجاح');
+      await queryClient.invalidateQueries({ queryKey: supplierKeys.all });
+      onSuccess();
+    },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في إضافة المورد');
     },
@@ -48,7 +53,12 @@ export const SupplierFormModal = ({ isOpen, editingSupplier, onClose, onSuccess 
 
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateSupplierPayload }) => suppliersApi.update(id, payload),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: supplierKeys.all }); showToast.success('تم تحديث بيانات المورد بنجاح'); onSuccess(); },
+    meta: { invalidate: supplierKeys.all },
+    onSuccess: async () => {
+      showToast.success('تم تحديث بيانات المورد بنجاح');
+      await queryClient.invalidateQueries({ queryKey: supplierKeys.all });
+      onSuccess();
+    },
     onError: (err: unknown) => {
       showToast.apiError(err, 'فشل في تحديث بيانات المورد');
     },

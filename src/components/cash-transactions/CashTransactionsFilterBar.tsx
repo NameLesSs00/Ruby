@@ -1,4 +1,4 @@
-import { RotateCcw, RefreshCw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import {
   type CashboxType,
   type CashTransactionType,
@@ -18,7 +18,6 @@ interface CashTransactionsFilterBarProps {
   onFromDateChange: (val: string) => void;
   toDate: string;
   onToDateChange: (val: string) => void;
-  onRefresh: () => void;
   onReset: () => void;
 }
 
@@ -33,7 +32,6 @@ export const CashTransactionsFilterBar = ({
   onFromDateChange,
   toDate,
   onToDateChange,
-  onRefresh,
   onReset,
 }: CashTransactionsFilterBarProps) => {
   const setDatePreset = (preset: 'today' | 'week' | 'month' | 'all') => {
@@ -147,17 +145,6 @@ export const CashTransactionsFilterBar = ({
             </button>
           )}
         </div>
-
-        <button
-          type="button"
-          className="btn-secondary"
-          style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-          onClick={onRefresh}
-          title="تحديث البيانات"
-        >
-          <RefreshCw size={14} />
-          <span>تحديث</span>
-        </button>
       </div>
 
       {/* Main filters grid */}

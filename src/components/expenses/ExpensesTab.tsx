@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search,
   Plus,
@@ -11,7 +11,6 @@ import {
   expenseKeys,
   type Expense,
 } from '../../modules/expenses';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { ExpenseFormModal } from './ExpenseFormModal';
@@ -19,6 +18,7 @@ import { DeleteModal } from '../ui/DeleteModal';
 import { ExpensesTable } from './ExpensesTable';
 
 export const ExpensesTab = () => {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const pageSize = 15;
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,10 +53,15 @@ export const ExpensesTab = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => expensesApi.delete(id),
-    onSuccess: () => {
+    meta: {
+      invalidate: [expenseKeys.all, cashTransactionKeys.all],
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: expenseKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success('تم حذف قيد المصروف بنجاح');
-      queryClient.invalidateQueries({ queryKey: expenseKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
       setDeletingExpense(null);
     },
     onError: (err: unknown) => {

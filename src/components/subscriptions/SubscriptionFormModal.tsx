@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Ticket } from 'lucide-react';
 import {
   subscriptionsApi,
@@ -13,7 +13,6 @@ import {
   type UpdateSubscriptionPayload,
 } from '../../modules/subscriptions';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { SubscriptionFormFields } from './SubscriptionFormFields';
 import type { SelectOption } from '../ui/AsyncSearchableSelect';
@@ -45,6 +44,7 @@ export const SubscriptionFormModal = ({
 }: SubscriptionFormModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [selectedClient, setSelectedClient] = useState<SelectOption | null>(null);
   const [clientType, setClientType] = useState<ClientType>('Academy');
   const [selectedCoach, setSelectedCoach] = useState<SelectOption | null>(null);
@@ -111,11 +111,14 @@ export const SubscriptionFormModal = ({
 
   const createMutation = useMutation({
     mutationFn: (p: CreateSubscriptionPayload) => subscriptionsApi.create(p),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-      queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: { invalidate: [subscriptionKeys.all, subscriptionDuePaymentKeys.all, cashTransactionKeys.all] },
+    onSuccess: async () => {
       showToast.success('تم إنشاء الاشتراك بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       onSuccess();
     },
     onError: (err: unknown) =>
@@ -125,11 +128,14 @@ export const SubscriptionFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateSubscriptionPayload }) =>
       subscriptionsApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-      queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: { invalidate: [subscriptionKeys.all, subscriptionDuePaymentKeys.all, cashTransactionKeys.all] },
+    onSuccess: async () => {
       showToast.success('تم تحديث بيانات الاشتراك بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       onSuccess();
     },
     onError: (err: unknown) =>

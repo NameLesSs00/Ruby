@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import {
   inventoryItemsApi,
@@ -11,7 +11,8 @@ import {
   type CreateInventoryItemPayload,
   type UpdateInventoryItemPayload,
 } from '../../modules/inventory';
-import { queryClient } from '../../lib/query-client';
+import { productKeys } from '../../modules/products';
+import { warehouseTransactionKeys } from '../../modules/warehouseTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -31,6 +32,7 @@ export const InventoryItemFormModal = ({
   onSuccess,
 }: InventoryItemFormModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [name, setName] = useState('');
   const [inventoryCategoryId, setInventoryCategoryId] = useState<number | ''>('');
@@ -50,9 +52,14 @@ export const InventoryItemFormModal = ({
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateInventoryItemPayload) => inventoryItemsApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
+    meta: { invalidate: [inventoryKeys.items(), productKeys.all, warehouseTransactionKeys.all] },
+    onSuccess: async () => {
       showToast.success('تمت إضافة الصنف المخزني بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+      ]);
       onSuccess();
     },
     onError: (err: unknown) => {
@@ -63,9 +70,14 @@ export const InventoryItemFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateInventoryItemPayload }) =>
       inventoryItemsApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
+    meta: { invalidate: [inventoryKeys.items(), productKeys.all, warehouseTransactionKeys.all] },
+    onSuccess: async () => {
       showToast.success('تم تحديث بيانات الصنف المخزني بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+      ]);
       onSuccess();
     },
     onError: (err: unknown) => {

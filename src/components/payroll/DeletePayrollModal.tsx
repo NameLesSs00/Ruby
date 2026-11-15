@@ -1,8 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, AlertTriangle } from 'lucide-react';
 import { payrollsApi, payrollKeys, type PayrollRecord } from '../../modules/payrolls';
 import type { Employee } from '../../modules/employees';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -19,11 +18,15 @@ function extractErr(err: unknown): string | undefined {
 
 export const DeletePayrollModal = ({ record, employees, onClose }: DeletePayrollModalProps) => {
   useModalEscape(onClose);
+  const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => payrollsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: payrollKeys.all });
+    meta: {
+      invalidate: payrollKeys.all,
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: payrollKeys.all });
       showToast.success('تم حذف مسيرة الراتب بنجاح');
       onClose();
     },

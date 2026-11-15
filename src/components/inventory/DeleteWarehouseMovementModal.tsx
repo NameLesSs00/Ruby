@@ -1,8 +1,8 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { DeleteModal } from '../ui/DeleteModal';
 import { warehouseTransactionsApi, warehouseTransactionKeys, type WarehouseMovement } from '../../modules/warehouseTransactions';
 import { inventoryKeys } from '../../modules/inventory';
-import { queryClient } from '../../lib/query-client';
+import { productKeys } from '../../modules/products';
 import { showToast } from '../../lib/sonner';
 
 interface DeleteWarehouseMovementModalProps {
@@ -16,12 +16,17 @@ export const DeleteWarehouseMovementModal = ({
   movement,
   onClose,
 }: DeleteWarehouseMovementModalProps) => {
+  const queryClient = useQueryClient();
   const deleteMutation = useMutation({
     mutationFn: (id: number) => warehouseTransactionsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all });
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
+    meta: { invalidate: [warehouseTransactionKeys.all, inventoryKeys.items(), productKeys.all] },
+    onSuccess: async () => {
       showToast.success('تم حذف إذن الحركة المخزنية بنجاح');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+      ]);
       onClose();
     },
     onError: (err) => {

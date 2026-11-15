@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, X, Plus, Trash2, Split } from 'lucide-react';
 import {
   posDuePaymentsApi,
@@ -14,7 +14,6 @@ import {
   paymentMethodLabel,
   generateIdempotencyKey,
 } from '../../modules/duePayments';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -31,6 +30,7 @@ export const RecordPosPaymentModal = ({
 }: RecordPosPaymentModalProps) => {
   useModalEscape(onClose);
 
+  const queryClient = useQueryClient();
   const [paymentAmount, setPaymentAmount] = useState<string>('');
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('Cash');
   const [isSplit, setIsSplit] = useState(false);
@@ -57,9 +57,15 @@ export const RecordPosPaymentModal = ({
 
   const recordPaymentMutation = useMutation({
     mutationFn: (payload: RecordPosPaymentPayload) => posDuePaymentsApi.recordPayment(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: posKeys.duePayments.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [posKeys.duePayments.all, posKeys.sales.all, cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: posKeys.duePayments.all }),
+        queryClient.invalidateQueries({ queryKey: posKeys.sales.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تسجيل سداد الدفعة بنجاح وتحديث رصيد الدين');
       onClose();
     },

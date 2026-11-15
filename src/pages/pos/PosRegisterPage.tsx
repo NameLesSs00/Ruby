@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi, productCategoriesApi, productKeys, categoryKeys } from '../../modules/products';
 import { posSalesApi, posKeys, type SaleRecord, type CreateSalePayload } from '../../modules/pos';
 import { employeeSalesApi, employeeSaleKeys, type CreateEmployeeSalePayload } from '../../modules/employeeSales';
 import { employeesApi, employeeKeys } from '../../modules/employees';
 import { usePosStore } from '../../modules/posStore';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
+import { warehouseTransactionKeys } from '../../modules/warehouseTransactions';
+import { inventoryKeys } from '../../modules/inventory';
 import { showToast } from '../../lib/sonner';
 import { ReceiptModal } from '../../components/pos/ReceiptModal';
 import { PosProductCatalog } from '../../components/pos/PosProductCatalog';
@@ -14,6 +15,7 @@ import { PosCartDrawer } from '../../components/pos/PosCartDrawer';
 import { PosInvoiceTabsBar } from '../../components/pos/PosInvoiceTabsBar';
 
 export const PosRegisterPage = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | 'all'>('all');
 
@@ -86,10 +88,25 @@ export const PosRegisterPage = () => {
 
   const saleMutation = useMutation({
     mutationFn: (payload: CreateSalePayload) => posSalesApi.create(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: posKeys.sales.all });
-      queryClient.invalidateQueries({ queryKey: posKeys.duePayments.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [
+        posKeys.sales.all,
+        posKeys.duePayments.all,
+        cashTransactionKeys.all,
+        productKeys.all,
+        warehouseTransactionKeys.all,
+        inventoryKeys.items(),
+      ],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: posKeys.sales.all }),
+        queryClient.invalidateQueries({ queryKey: posKeys.duePayments.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+      ]);
       showToast.success('تم إتمام عملية البيع وإصدار الفاتورة بنجاح');
       setCreatedSale(res.data);
       setIsReceiptOpen(true);
@@ -100,10 +117,25 @@ export const PosRegisterPage = () => {
 
   const employeeSaleMutation = useMutation({
     mutationFn: (payload: CreateEmployeeSalePayload) => employeeSalesApi.create(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: employeeSaleKeys.all });
-      queryClient.invalidateQueries({ queryKey: posKeys.sales.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [
+        employeeSaleKeys.all,
+        posKeys.sales.all,
+        cashTransactionKeys.all,
+        productKeys.all,
+        warehouseTransactionKeys.all,
+        inventoryKeys.items(),
+      ],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: employeeSaleKeys.all }),
+        queryClient.invalidateQueries({ queryKey: posKeys.sales.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: productKeys.all }),
+        queryClient.invalidateQueries({ queryKey: warehouseTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() }),
+      ]);
       showToast.success('تم إتمام عملية بيع الموظف بنجاح');
       setCreatedSale(res.data as unknown as SaleRecord);
       setIsReceiptOpen(true);

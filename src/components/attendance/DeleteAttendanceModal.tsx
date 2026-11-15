@@ -1,11 +1,11 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, X } from 'lucide-react';
 import {
   attendanceApi,
   attendanceKeys,
   type AttendanceRecord,
 } from '../../modules/attendance';
-import { queryClient } from '../../lib/query-client';
+import { subscriptionKeys } from '../../modules/subscriptions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -22,10 +22,17 @@ export const DeleteAttendanceModal = ({
 }: DeleteAttendanceModalProps) => {
   useModalEscape(onClose);
 
+  const queryClient = useQueryClient();
   const deleteMutation = useMutation({
     mutationFn: (id: number) => attendanceApi.delete(id),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: attendanceKeys.all });
+    meta: {
+      invalidate: [attendanceKeys.all, subscriptionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: attendanceKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم حذف قيد الحضور بنجاح');
       onSuccess?.();
       onClose();

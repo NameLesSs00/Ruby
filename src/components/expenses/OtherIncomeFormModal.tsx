@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, TrendingUp } from 'lucide-react';
 import {
   otherIncomesApi,
@@ -9,7 +9,6 @@ import {
   type CreateOtherIncomePayload,
   type UpdateOtherIncomePayload,
 } from '../../modules/expenses';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -29,6 +28,7 @@ export const OtherIncomeFormModal = ({
   onSuccess,
 }: OtherIncomeFormModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [amount, setAmount] = useState('');
   const [incomeDate, setIncomeDate] = useState('');
@@ -53,9 +53,14 @@ export const OtherIncomeFormModal = ({
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateOtherIncomePayload) => otherIncomesApi.create(payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [otherIncomeKeys.all, cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تسجيل الإيراد الإضافي بنجاح');
       onSuccess();
     },
@@ -67,9 +72,14 @@ export const OtherIncomeFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateOtherIncomePayload }) =>
       otherIncomesApi.update(id, payload),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [otherIncomeKeys.all, cashTransactionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: otherIncomeKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تحديث بيانات الإيراد بنجاح');
       onSuccess();
     },

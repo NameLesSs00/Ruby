@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { Search, Plus, Edit2, Trash2, CheckCircle, XCircle, AlertCircle, Layers, Calendar } from 'lucide-react';
 import {
   inventoryCategoriesApi,
   inventoryKeys,
   type InventoryCategory,
 } from '../../modules/inventory';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { InventoryCategoryFormModal } from './InventoryCategoryFormModal';
 import { DeleteModal } from '../ui/DeleteModal';
 import { PaginationBar } from '../ui/PaginationBar';
 
 export const InventoryCategoriesTab = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -53,18 +53,20 @@ export const InventoryCategoriesTab = () => {
   const statusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       inventoryCategoriesApi.updateStatus(id, isActive),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
+    meta: { invalidate: inventoryKeys.categories() },
+    onSuccess: async (_, variables) => {
       showToast.success(variables.isActive ? 'تم تفعيل تصنيف المخزون' : 'تم تعطيل تصنيف المخزون');
+      await queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
     },
     onError: (err: unknown) => showToast.apiError(err, 'فشل في تعديل حالة التصنيف'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => inventoryCategoriesApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
+    meta: { invalidate: inventoryKeys.categories() },
+    onSuccess: async () => {
       showToast.success('تم حذف تصنيف المخزون بنجاح');
+      await queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
       setDeletingCategory(null);
     },
     onError: (err: unknown) => {

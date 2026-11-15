@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import {
   coachesApi,
   coachKeys,
 } from '../../modules/coaches';
 import type { Coach, CreateCoachPayload, UpdateCoachPayload } from '../../modules/coaches';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -20,6 +19,7 @@ export interface CoachFormModalProps {
 
 export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: CoachFormModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -43,9 +43,10 @@ export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: Coa
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateCoachPayload) => coachesApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: coachKeys.all });
+    meta: { invalidate: coachKeys.all },
+    onSuccess: async () => {
       showToast.success('تمت إضافة المدرب بنجاح');
+      await queryClient.invalidateQueries({ queryKey: coachKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {
@@ -56,9 +57,10 @@ export const CoachFormModal = ({ isOpen, editingCoach, onClose, onSuccess }: Coa
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateCoachPayload }) =>
       coachesApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: coachKeys.all });
+    meta: { invalidate: coachKeys.all },
+    onSuccess: async () => {
       showToast.success('تم تحديث بيانات المدرب بنجاح');
+      await queryClient.invalidateQueries({ queryKey: coachKeys.all });
       onSuccess();
     },
     onError: (err: unknown) => {

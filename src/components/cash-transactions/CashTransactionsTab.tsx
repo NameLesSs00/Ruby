@@ -44,7 +44,7 @@ export const CashTransactionsTab = ({
     [cashboxFilter, typeFilter, referenceFilter, fromDate, toDate, page, pageSize]
   );
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: cashTransactionKeys.list(queryParams),
     queryFn: () => cashTransactionsApi.getAll(queryParams),
   });
@@ -92,7 +92,6 @@ export const CashTransactionsTab = ({
           setToDate(val);
           setPage(1);
         }}
-        onRefresh={() => refetch()}
         onReset={handleResetFilters}
       />
 

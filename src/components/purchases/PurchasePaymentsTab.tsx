@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search,
   Trash2,
@@ -14,13 +14,14 @@ import {
   purchaseInvoiceKeys,
   type PurchaseInvoicePayment,
 } from '../../modules/purchases';
-import { queryClient } from '../../lib/query-client';
+import { supplierKeys } from '../../modules/suppliers';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { DeleteModal } from '../ui/DeleteModal';
 import { PaginationBar } from '../ui/PaginationBar';
 
 export const PurchasePaymentsTab = () => {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const pageSize = 15;
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,10 +53,21 @@ export const PurchasePaymentsTab = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => purchasePaymentsApi.delete(id),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: purchasePaymentKeys.all });
-      queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: {
+      invalidate: [
+        purchasePaymentKeys.all,
+        purchaseInvoiceKeys.all,
+        cashTransactionKeys.all,
+        supplierKeys.all,
+      ],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: purchasePaymentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: purchaseInvoiceKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: supplierKeys.all }),
+      ]);
       showToast.success(res.message || 'تم حذف دفعة السداد بنجاح');
       setDeletingPayment(null);
     },

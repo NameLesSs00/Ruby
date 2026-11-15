@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftRight, X, AlertCircle } from 'lucide-react';
 import {
   cashTransfersApi,
@@ -9,7 +9,6 @@ import {
   cashboxLabel,
   type CashboxType,
 } from '../../modules/cashTransactions';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 import { blockInvalidNumberKeys } from '../../lib/number-input';
@@ -26,6 +25,7 @@ export const CreateCashTransferModal = ({
   onSuccess,
 }: CreateCashTransferModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [fromCashbox, setFromCashbox] = useState<CashboxType>('Subscriptions');
   const [toCashbox, setToCashbox] = useState<CashboxType>('Main');
@@ -44,9 +44,14 @@ export const CreateCashTransferModal = ({
 
   const transferMutation = useMutation({
     mutationFn: cashTransfersApi.create,
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransferKeys.all });
+    meta: {
+      invalidate: [cashTransactionKeys.all, cashTransferKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransferKeys.all }),
+      ]);
       showToast.success(res.message || 'تم تحويل النقدية بين الخزن بنجاح');
       onSuccess?.();
       onClose();

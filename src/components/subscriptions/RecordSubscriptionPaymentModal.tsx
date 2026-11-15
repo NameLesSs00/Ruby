@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, X, AlertCircle, Plus, Trash2, Split } from 'lucide-react';
 import {
   subscriptionDuePaymentsApi, subscriptionDuePaymentKeys, subscriptionKeys,
@@ -9,7 +9,6 @@ import {
 import {
   type PaymentMethod, type PaymentMethodItem, PAYMENT_METHODS, paymentMethodLabel,
 } from '../../modules/duePayments';
-import { queryClient } from '../../lib/query-client';
 import { cashTransactionKeys } from '../../modules/cashTransactions';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
@@ -28,6 +27,7 @@ export const RecordSubscriptionPaymentModal = ({
 }: RecordSubscriptionPaymentModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const [paymentAmount, setPaymentAmount] = useState('');
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('Cash');
   const [isSplit, setIsSplit] = useState(false);
@@ -62,11 +62,14 @@ export const RecordSubscriptionPaymentModal = ({
   const recordPaymentMutation = useMutation({
     mutationFn: (payload: RecordSubscriptionPaymentPayload) =>
       subscriptionDuePaymentsApi.recordPayment(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all });
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-      queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all });
+    meta: { invalidate: [subscriptionDuePaymentKeys.all, subscriptionKeys.all, cashTransactionKeys.all] },
+    onSuccess: async () => {
       showToast.success('تم تسجيل سداد الدفعة بنجاح وتحديث رصيد الاشتراك');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: subscriptionDuePaymentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cashTransactionKeys.all }),
+      ]);
       onClose();
       onSuccess?.();
     },

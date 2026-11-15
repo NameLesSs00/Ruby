@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import {
   inventoryCategoriesApi,
@@ -9,7 +9,6 @@ import {
   type CreateInventoryCategoryPayload,
   type UpdateInventoryCategoryPayload,
 } from '../../modules/inventory';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -27,6 +26,7 @@ export const InventoryCategoryFormModal = ({
   onSuccess,
 }: InventoryCategoryFormModalProps) => {
   useModalEscape(onClose, isOpen);
+  const queryClient = useQueryClient();
 
   const [name, setName] = useState('');
 
@@ -40,9 +40,10 @@ export const InventoryCategoryFormModal = ({
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateInventoryCategoryPayload) => inventoryCategoriesApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
+    meta: { invalidate: inventoryKeys.categories() },
+    onSuccess: async () => {
       showToast.success('تمت إضافة تصنيف المخزون بنجاح');
+      await queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
       onSuccess();
     },
     onError: (err: unknown) => {
@@ -53,9 +54,10 @@ export const InventoryCategoryFormModal = ({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UpdateInventoryCategoryPayload }) =>
       inventoryCategoriesApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
+    meta: { invalidate: inventoryKeys.categories() },
+    onSuccess: async () => {
       showToast.success('تم تحديث تصنيف المخزون بنجاح');
+      await queryClient.invalidateQueries({ queryKey: inventoryKeys.categories() });
       onSuccess();
     },
     onError: (err: unknown) => {

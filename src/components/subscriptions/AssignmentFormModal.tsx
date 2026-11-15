@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Award, X, Ticket } from 'lucide-react';
 import {
   subscriptionCoachAssignmentsApi,
@@ -16,7 +16,6 @@ import {
 } from '../ui/AsyncSearchableSelect';
 import { loadSubscriptionOptions } from './assignmentHelpers';
 import { AssignmentStaffSection } from './AssignmentStaffSection';
-import { queryClient } from '../../lib/query-client';
 import { showToast } from '../../lib/sonner';
 import { useModalEscape } from '../../lib/useModalEscape';
 
@@ -39,6 +38,7 @@ export const AssignmentFormModal = ({
 }: AssignmentFormModalProps) => {
   useModalEscape(onClose, isOpen);
 
+  const queryClient = useQueryClient();
   const isEditing = Boolean(editingAssignment);
 
   const [selectedSubscription, setSelectedSubscription] = useState<SelectOption | null>(null);
@@ -108,9 +108,14 @@ export const AssignmentFormModal = ({
       }
       return subscriptionCoachAssignmentsApi.create(payload);
     },
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all });
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+    meta: {
+      invalidate: [coachAssignmentKeys.all, subscriptionKeys.all],
+    },
+    onSuccess: async (res) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: coachAssignmentKeys.all }),
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.all }),
+      ]);
       showToast.success(res.message || (isEditing ? 'تم تعديل التعيين بنجاح' : 'تم تعيين الكادر بنجاح'));
       onSuccess();
     },
