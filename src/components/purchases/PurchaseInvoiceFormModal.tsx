@@ -59,7 +59,7 @@ export const PurchaseInvoiceFormModal = ({
 
   useEffect(() => {
     if (editingInvoice && isOpen) {
-      setSupplierId(editingInvoice.supplierId);
+      setSupplierId(editingInvoice.supplierId ?? '');
       setInvoiceNumber(editingInvoice.invoiceNumber);
       const d = editingInvoice.invoiceDate
         ? new Date(editingInvoice.invoiceDate).toISOString().slice(0, 10)
@@ -79,9 +79,14 @@ export const PurchaseInvoiceFormModal = ({
         setItems([{ inventoryItemId: '', quantity: 1, unitCost: 0 }]);
       }
     } else if (isOpen) {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
       setSupplierId('');
-      setInvoiceNumber(`INV-${Date.now().toString().slice(-6)}`);
-      setInvoiceDate(new Date().toISOString().slice(0, 10));
+      setInvoiceNumber(`INV-${dd}-${hh}${mm}${ss}`);
+      setInvoiceDate(now.toISOString().slice(0, 10));
       setNotes('');
       setItems([{ inventoryItemId: '', quantity: 1, unitCost: 0 }]);
     }
@@ -152,11 +157,6 @@ export const PurchaseInvoiceFormModal = ({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    if (!supplierId) {
-      showToast.warning('يرجى اختيار المورد');
-      return;
-    }
-
     if (!invoiceNumber.trim()) {
       showToast.warning('يرجى إدخال رقم الفاتورة');
       return;
@@ -182,11 +182,13 @@ export const PurchaseInvoiceFormModal = ({
       unitCost: Number(item.unitCost),
     }));
 
+    const parsedSupplierId = supplierId !== '' ? Number(supplierId) : null;
+
     if (editingInvoice) {
       updateMutation.mutate({
         id: editingInvoice.id,
         payload: {
-          supplierId: Number(supplierId),
+          supplierId: parsedSupplierId,
           invoiceNumber: invoiceNumber.trim(),
           invoiceDate: new Date(invoiceDate).toISOString(),
           notes: notes.trim() || undefined,
@@ -195,7 +197,7 @@ export const PurchaseInvoiceFormModal = ({
       });
     } else {
       createMutation.mutate({
-        supplierId: Number(supplierId),
+        supplierId: parsedSupplierId,
         invoiceNumber: invoiceNumber.trim(),
         invoiceDate: new Date(invoiceDate).toISOString(),
         notes: notes.trim() || undefined,
@@ -226,17 +228,16 @@ export const PurchaseInvoiceFormModal = ({
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
               <div className="form-group">
                 <label className="form-label" htmlFor="supplier-select">
-                  المورد <span style={{ color: '#ef4444' }}>*</span>
+                  المورد (اختياري)
                 </label>
                 <select
                   id="supplier-select"
                   className="form-input"
                   value={supplierId}
                   onChange={(e) => setSupplierId(e.target.value ? Number(e.target.value) : '')}
-                  required
                   disabled={isSaving}
                 >
-                  <option value="">اختر المورد...</option>
+                  <option value="">بدون مورد (شراء مباشر)</option>
                   {suppliers.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name} ({s.companyName || 'مورد فردي'})

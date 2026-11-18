@@ -145,7 +145,11 @@ export const PurchaseInvoicesTable = ({
                   <span style={{ fontWeight: 800, color: '#0d1527' }}>{inv.invoiceNumber}</span>
                 </td>
                 <td>
-                  <span style={{ fontWeight: 700, color: '#334155' }}>{inv.supplierName}</span>
+                  {inv.supplierName ? (
+                    <span style={{ fontWeight: 700, color: '#334155' }}>{inv.supplierName}</span>
+                  ) : (
+                    <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem' }}>بدون مورد</span>
+                  )}
                 </td>
                 <td>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: '#64748b' }}>

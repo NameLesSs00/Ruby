@@ -132,7 +132,7 @@ export const RecordPurchasePaymentModal = ({
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                 <span style={{ fontSize: '0.85rem', color: '#64748b' }}>اسم المورد:</span>
-                <span style={{ fontWeight: 700, color: '#0d1527' }}>{invoice.supplierName}</span>
+                <span style={{ fontWeight: 700, color: '#0d1527' }}>{invoice.supplierName || 'بدون مورد (شراء مباشر)'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                 <span style={{ fontSize: '0.85rem', color: '#64748b' }}>إجمالي الفاتورة:</span>

@@ -86,7 +86,7 @@ export const PurchaseInvoiceDetailsModal = ({
                   <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block' }}>المورد:</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 800, color: '#0d1527', marginTop: '0.15rem' }}>
                     <User size={14} color="#ff6b22" />
-                    <span>{invoice.supplierName}</span>
+                    <span>{invoice.supplierName || 'بدون مورد (شراء مباشر)'}</span>
                   </div>
                 </div>
 

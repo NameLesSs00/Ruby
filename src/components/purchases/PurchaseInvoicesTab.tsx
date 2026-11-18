@@ -283,7 +283,11 @@ export const PurchaseInvoicesTab = () => {
       <DeleteModal
         isOpen={Boolean(deletingInvoice)}
         title="تأكيد حذف فاتورة المشتريات"
-        message={`هل أنت متأكد من حذف فاتورة المشتريات رقم (${deletingInvoice?.invoiceNumber}) للمورد "${deletingInvoice?.supplierName}"؟`}
+        message={
+          deletingInvoice?.supplierName
+            ? `هل أنت متأكد من حذف فاتورة المشتريات رقم (${deletingInvoice?.invoiceNumber}) للمورد "${deletingInvoice?.supplierName}"؟`
+            : `هل أنت متأكد من حذف فاتورة المشتريات رقم (${deletingInvoice?.invoiceNumber}) (بدون مورد)؟`
+        }
         isPending={deleteMutation.isPending}
         onClose={() => setDeletingInvoice(null)}
         onConfirm={() => {

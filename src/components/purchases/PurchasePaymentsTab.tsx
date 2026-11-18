@@ -213,9 +213,15 @@ export const PurchasePaymentsTab = () => {
                     </span>
                   </td>
                   <td>
-                    <span style={{ fontWeight: 700, color: '#334155' }}>
-                      {payment.supplierName}
-                    </span>
+                    {payment.supplierName ? (
+                      <span style={{ fontWeight: 700, color: '#334155' }}>
+                        {payment.supplierName}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem' }}>
+                        بدون مورد
+                      </span>
+                    )}
                   </td>
                   <td>
                     <span style={{ fontWeight: 900, color: '#047857', fontSize: '0.95rem' }}>

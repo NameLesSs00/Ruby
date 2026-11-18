@@ -20,8 +20,8 @@ export interface PurchaseInvoiceItem {
 
 export interface PurchaseInvoice {
   id: number;
-  supplierId: number;
-  supplierName: string;
+  supplierId: number | null;
+  supplierName: string | null;
   invoiceNumber: string;
   invoiceDate: string;
   totalAmount: number;
@@ -47,7 +47,7 @@ export interface CreatePurchaseInvoiceItemPayload {
 }
 
 export interface CreatePurchaseInvoicePayload {
-  supplierId: number;
+  supplierId: number | null;
   invoiceNumber: string;
   invoiceDate: string;
   notes?: string;
@@ -55,7 +55,7 @@ export interface CreatePurchaseInvoicePayload {
 }
 
 export interface UpdatePurchaseInvoicePayload {
-  supplierId: number;
+  supplierId: number | null;
   invoiceNumber: string;
   invoiceDate: string;
   notes?: string;
@@ -76,7 +76,7 @@ export interface PurchaseInvoicePayment {
   id: number;
   purchaseInvoiceId: number;
   invoiceNumber: string;
-  supplierName: string;
+  supplierName: string | null;
   amountPaid: number;
   paymentDate: string;
   cashboxType?: string;
