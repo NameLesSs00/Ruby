@@ -44,6 +44,16 @@ export const setStoredTokens = (tokens: AuthTokens | null) => {
   }
 };
 
+/**
+ * Force logout and redirect user to login screen when refresh token fails or is missing.
+ */
+export const redirectToLogin = () => {
+  setStoredTokens(null);
+  if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+    window.location.replace('/login');
+  }
+};
+
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const tokens = getStoredTokens();
@@ -91,10 +101,16 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't intercept 401 for login/refresh requests themselves
+      const reqUrl = originalRequest.url || '';
+      if (reqUrl.includes('/api/auth/login') || reqUrl.includes('/api/auth/refresh')) {
+        return Promise.reject(error);
+      }
+
       const tokens = getStoredTokens();
 
       if (!tokens?.refreshToken) {
-        setStoredTokens(null);
+        redirectToLogin();
         return Promise.reject(error);
       }
 
@@ -132,7 +148,7 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        setStoredTokens(null);
+        redirectToLogin();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

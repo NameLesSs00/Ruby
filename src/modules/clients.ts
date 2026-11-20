@@ -1,18 +1,19 @@
 import { apiClient } from '../lib/axios';
+import type { SubscriptionListResponse, SubscriptionStatus } from './subscriptions';
 
 /**
  * Clients (العملاء) Domain Models & API Services
- * Based on backendMD/clinets.md
+ * Based on backendMD/newClinet.md
  */
 
 export interface Client {
   id: number;
-  clientCode: string;
   fullName: string;
-  phoneNumber: string;
-  dateOfBirth: string; // YYYY-MM-DD
+  phoneNumber: string | null;
+  dateOfBirth: string | null; // YYYY-MM-DD
   isActive: boolean;
   createdAt: string;
+  barcode: string | null;
 }
 
 export interface ClientListResponse {
@@ -25,43 +26,28 @@ export interface ClientListResponse {
 export interface CreateClientPayload {
   fullName: string;
   phoneNumber: string;
-  dateOfBirth: string;
+  dateOfBirth?: string | null;
+  barcode: string;
 }
 
 export interface UpdateClientPayload {
   fullName: string;
   phoneNumber: string;
-  dateOfBirth: string;
-}
-
-export interface ClientBarcodeResponse {
-  clientId: number;
-  clientCode: string;
-  barcodeUrl: string;
-}
-
-export interface EligibleSubscription {
-  subscriptionId: number;
-  subscriptionType: string;
-  startDate: string;
-  endDate: string;
-  totalSessions: number;
-  usedSessions: number;
-  remainingSessions: number;
-  status: string;
-}
-
-export interface ClientWithEligibleSubscriptions {
-  clientId: number;
-  clientCode: string;
-  fullName: string;
-  eligibleSubscriptions: EligibleSubscription[];
+  dateOfBirth?: string | null;
+  barcode: string;
 }
 
 export interface ClientQueryParams {
   page?: number;
   pageSize?: number;
   search?: string;
+}
+
+export interface ClientSubscriptionsQueryParams {
+  barcode?: string;
+  subscriptionStatus?: SubscriptionStatus | '';
+  page?: number;
+  pageSize?: number;
 }
 
 export interface ApiResponse<T> {
@@ -75,8 +61,8 @@ export const clientKeys = {
   list: (params: ClientQueryParams) => [...clientKeys.lists(), params] as const,
   details: () => [...clientKeys.all, 'detail'] as const,
   detail: (id: number) => [...clientKeys.details(), id] as const,
-  barcode: (id: number) => [...clientKeys.all, 'barcode', id] as const,
-  byBarcode: (code: string) => [...clientKeys.all, 'by-barcode', code] as const,
+  subscriptions: (params: ClientSubscriptionsQueryParams) =>
+    [...clientKeys.all, 'subscriptions', params] as const,
 };
 
 export const clientsApi = {
@@ -113,14 +99,17 @@ export const clientsApi = {
     return response.data;
   },
 
-  getBarcode: async (id: number): Promise<ClientBarcodeResponse> => {
-    const response = await apiClient.get<ClientBarcodeResponse>(`/api/clients/${id}/barcode`);
-    return response.data;
-  },
-
-  getByBarcode: async (clientCode: string): Promise<ClientWithEligibleSubscriptions> => {
-    const response = await apiClient.get(`/api/clients/by-barcode/${clientCode}`);
+  getSubscriptions: async (
+    params: ClientSubscriptionsQueryParams
+  ): Promise<SubscriptionListResponse> => {
+    const response = await apiClient.get<SubscriptionListResponse>('/api/clients/subscriptions', {
+      params: {
+        barcode: params.barcode || undefined,
+        subscriptionStatus: params.subscriptionStatus || undefined,
+        page: params.page ?? 1,
+        pageSize: params.pageSize ?? 10,
+      },
+    });
     return response.data;
   },
 };
-

@@ -2,10 +2,10 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Scan, Search } from 'lucide-react';
 import { attendanceApi, attendanceKeys } from '../../modules/attendance';
-import { subscriptionKeys } from '../../modules/subscriptions';
-import { clientsApi, type ClientWithEligibleSubscriptions } from '../../modules/clients';
+import { subscriptionsApi, subscriptionKeys } from '../../modules/subscriptions';
+import { clientsApi } from '../../modules/clients';
 import { AsyncSearchableSelect, type SelectOption } from '../ui/AsyncSearchableSelect';
-import { ClientAttendanceCard } from './ClientAttendanceCard';
+import { ClientAttendanceCard, type ClientAttendanceData } from './ClientAttendanceCard';
 import { RecentCheckInsFeed } from './RecentCheckInsFeed';
 import { showToast } from '../../lib/sonner';
 
@@ -13,7 +13,7 @@ export const QuickCheckInTab = () => {
   const queryClient = useQueryClient();
   const [barcodeInput, setBarcodeInput] = useState('');
   const [isSearchingBarcode, setIsSearchingBarcode] = useState(false);
-  const [clientData, setClientData] = useState<ClientWithEligibleSubscriptions | null>(null);
+  const [clientData, setClientData] = useState<ClientAttendanceData | null>(null);
   const [selectedSubId, setSelectedSubId] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
   const [searchMode, setSearchMode] = useState<'barcode' | 'manual'>('barcode');
@@ -34,17 +34,62 @@ export const QuickCheckInTab = () => {
 
   const recentCheckIns = recentData?.items || [];
 
-  const handleLookupBarcode = async (code: string) => {
-    const trimmed = code.trim();
+  const handleLookupBarcode = async (rawCode: string) => {
+    const trimmed = rawCode.trim();
     if (!trimmed) return;
     setIsSearchingBarcode(true);
+
     try {
-      const res = await clientsApi.getByBarcode(trimmed);
-      setClientData(res);
-      const eligible = res.eligibleSubscriptions || [];
-      setSelectedSubId(eligible.length > 0 ? eligible[0].subscriptionId : null);
-    } catch {
-      showToast.error(`لم يتم العثور على مشترك يحمل الكود "${trimmed}"`);
+      // 1. Fetch subscriptions associated with this barcode
+      const subRes = await clientsApi.getSubscriptions({
+        barcode: trimmed,
+        page: 1,
+        pageSize: 50,
+      });
+
+      const subs = subRes.items || [];
+
+      // 2. Resolve client info either from subscriptions or via client search
+      let resolvedClientId = 0;
+      let resolvedClientName = '';
+
+      if (subs.length > 0) {
+        resolvedClientId = subs[0].clientId;
+        resolvedClientName = subs[0].clientName;
+      } else {
+        // Query client by search to see if client exists even with 0 subscriptions
+        const clientSearchRes = await clientsApi.getAll({
+          search: trimmed,
+          page: 1,
+          pageSize: 10,
+        });
+        const matched = (clientSearchRes.items || []).find(
+          (c) => c.barcode?.toLowerCase() === trimmed.toLowerCase()
+        );
+        if (matched) {
+          resolvedClientId = matched.id;
+          resolvedClientName = matched.fullName;
+        }
+      }
+
+      if (!resolvedClientId) {
+        showToast.error(`لم يتم العثور على مشترك يحمل الباركود "${trimmed}"`);
+        setClientData(null);
+        setSelectedSubId(null);
+        return;
+      }
+
+      setClientData({
+        clientId: resolvedClientId,
+        fullName: resolvedClientName,
+        barcode: trimmed,
+        subscriptions: subs,
+      });
+
+      const activeSubs = subs.filter((s) => s.status === 'Active');
+      setSelectedSubId(activeSubs.length > 0 ? activeSubs[0].id : null);
+    } catch (err) {
+      showToast.apiError(err, `لم يتم العثور على مشترك يحمل الباركود "${trimmed}"`);
       setClientData(null);
       setSelectedSubId(null);
     } finally {
@@ -67,13 +112,36 @@ export const QuickCheckInTab = () => {
     }
     try {
       const c = await clientsApi.getById(opt.id);
-      if (c.clientCode) {
-        handleLookupBarcode(c.clientCode);
+
+      let subs: any[] = [];
+      if (c.barcode) {
+        const subRes = await clientsApi.getSubscriptions({
+          barcode: c.barcode,
+          page: 1,
+          pageSize: 50,
+        });
+        subs = subRes.items || [];
       } else {
-        showToast.warning('هذا المشترك لا يمتلك كود مسجل');
+        const subRes = await subscriptionsApi.getAll({
+          clientId: c.id,
+          page: 1,
+          pageSize: 50,
+        });
+        subs = subRes.items || [];
       }
+
+      setClientData({
+        clientId: c.id,
+        fullName: c.fullName,
+        barcode: c.barcode,
+        phoneNumber: c.phoneNumber,
+        subscriptions: subs,
+      });
+
+      const activeSubs = subs.filter((s) => s.status === 'Active');
+      setSelectedSubId(activeSubs.length > 0 ? activeSubs[0].id : null);
     } catch {
-      showToast.error('فشل في جلب بيانات المشترك');
+      showToast.error('فشل في جلب اشتراكات المشترك');
     }
   };
 
@@ -85,8 +153,8 @@ export const QuickCheckInTab = () => {
     });
     return (res.items || []).map((c) => ({
       id: c.id,
-      label: `${c.fullName} (${c.clientCode})`,
-      subLabel: `هاتف: ${c.phoneNumber}`,
+      label: c.barcode ? `${c.fullName} (${c.barcode})` : c.fullName,
+      subLabel: c.phoneNumber ? `هاتف: ${c.phoneNumber}` : undefined,
       tag: 'مشترك',
     }));
   };
@@ -212,10 +280,11 @@ export const QuickCheckInTab = () => {
                     padding: '0.75rem 1rem 0.75rem 5.5rem',
                     borderColor: clientData ? '#10b981' : '#cbd5e1',
                   }}
-                  placeholder="مرر الباركود أو اكتب كود المشترك واضغط Enter..."
+                  placeholder="مرر الباركود أو اكتب كود الباركود واضغط Enter..."
                   value={barcodeInput}
                   onChange={(e) => setBarcodeInput(e.target.value)}
                   disabled={isSearchingBarcode || checkInMutation.isPending}
+                  dir="ltr"
                 />
                 <button
                   type="submit"
@@ -240,7 +309,7 @@ export const QuickCheckInTab = () => {
               selectedItem={null}
               onChange={handleManualSelect}
               loadOptions={loadClientOptions}
-              placeholder="ابحث باسم المشترك أو الهاتف أو الكود..."
+              placeholder="ابحث باسم المشترك أو الهاتف أو الباركود..."
             />
           )}
         </div>

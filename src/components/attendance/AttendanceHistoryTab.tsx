@@ -64,8 +64,8 @@ export const AttendanceHistoryTab = () => {
     });
     return (res.items || []).map((c) => ({
       id: c.id,
-      label: `${c.fullName} (${c.clientCode})`,
-      subLabel: `هاتف: ${c.phoneNumber}`,
+      label: c.barcode ? `${c.fullName} (${c.barcode})` : c.fullName,
+      subLabel: c.phoneNumber ? `هاتف: ${c.phoneNumber}` : undefined,
       tag: 'مشترك',
     }));
   };

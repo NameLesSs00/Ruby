@@ -89,8 +89,8 @@ export const SubscriptionFormFields = ({
     return (res.items || []).map((c) => ({
       id: c.id,
       label: c.fullName,
-      subLabel: `هاتف: ${c.phoneNumber}`,
-      tag: c.clientCode ? `كود: ${c.clientCode}` : undefined,
+      subLabel: c.phoneNumber ? `هاتف: ${c.phoneNumber}` : undefined,
+      tag: c.barcode ? `باركود: ${c.barcode}` : undefined,
     }));
   };
 

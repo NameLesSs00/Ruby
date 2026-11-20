@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { X } from 'lucide-react';
+import { X, QrCode } from 'lucide-react';
 import {
   clientsApi,
   clientKeys,
@@ -24,17 +24,22 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
 
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('2000-01-01');
+  const [barcode, setBarcode] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
 
   useEffect(() => {
     if (editingClient) {
-      setFullName(editingClient.fullName);
-      setPhoneNumber(editingClient.phoneNumber);
-      setDateOfBirth(editingClient.dateOfBirth ? editingClient.dateOfBirth.split('T')[0] : '2000-01-01');
+      setFullName(editingClient.fullName || '');
+      setPhoneNumber(editingClient.phoneNumber || '');
+      setBarcode(editingClient.barcode || '');
+      setDateOfBirth(
+        editingClient.dateOfBirth ? editingClient.dateOfBirth.split('T')[0] : ''
+      );
     } else {
       setFullName('');
       setPhoneNumber('');
-      setDateOfBirth('2000-01-01');
+      setBarcode('');
+      setDateOfBirth('');
     }
   }, [editingClient, isOpen]);
 
@@ -69,10 +74,26 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim()) { showToast.warning('يرجى كتابة اسم العميل بالكامل'); return; }
-    if (!phoneNumber.trim()) { showToast.warning('يرجى إدخال رقم الهاتف'); return; }
-    if (!dateOfBirth) { showToast.warning('يرجى تحديد تاريخ الميلاد'); return; }
-    const payload = { fullName: fullName.trim(), phoneNumber: phoneNumber.trim(), dateOfBirth };
+    if (!fullName.trim()) {
+      showToast.warning('يرجى كتابة اسم العميل بالكامل');
+      return;
+    }
+    if (!phoneNumber.trim()) {
+      showToast.warning('يرجى إدخال رقم الهاتف');
+      return;
+    }
+    if (!barcode.trim()) {
+      showToast.warning('يرجى إدخال كود الباركود الخاص بالعميل');
+      return;
+    }
+
+    const payload = {
+      fullName: fullName.trim(),
+      phoneNumber: phoneNumber.trim(),
+      barcode: barcode.trim(),
+      dateOfBirth: dateOfBirth ? dateOfBirth : null,
+    };
+
     if (editingClient) {
       updateMutation.mutate({ id: editingClient.id, payload });
     } else {
@@ -86,8 +107,12 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
     <div className="modal-backdrop">
       <div className="modal-card">
         <div className="modal-header">
-          <h3 className="modal-title">{editingClient ? 'تعديل بيانات العميل' : 'إضافة عميل جديد'}</h3>
-          <button type="button" className="modal-close-btn" onClick={onClose}><X size={20} /></button>
+          <h3 className="modal-title">
+            {editingClient ? 'تعديل بيانات العميل' : 'إضافة عميل جديد'}
+          </h3>
+          <button type="button" className="modal-close-btn" onClick={onClose}>
+            <X size={20} />
+          </button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
@@ -95,29 +120,97 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
               <label className="form-label" htmlFor="client-name">
                 اسم العميل بالكامل <span style={{ color: '#ef4444' }}>*</span>
               </label>
-              <input id="client-name" type="text" className="form-input" placeholder="مثال: حماده فتوح"
-                value={fullName} onChange={(e) => setFullName(e.target.value)} required disabled={isSaving} />
+              <input
+                id="client-name"
+                type="text"
+                className="form-input"
+                placeholder="مثال: حماده فتوح"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                disabled={isSaving}
+              />
             </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="client-barcode">
+                الباركود (كود العضوية) <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  id="client-barcode"
+                  type="text"
+                  className="form-input"
+                  placeholder="مثال: CL-3456789 أو مرر القارئ"
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  required
+                  disabled={isSaving}
+                  dir="ltr"
+                  style={{ textAlign: 'start', paddingInlineEnd: '2.5rem' }}
+                />
+                <QrCode
+                  size={18}
+                  style={{
+                    position: 'absolute',
+                    insetInlineEnd: '0.75rem',
+                    color: '#94a3b8',
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
+            </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="client-phone">
                 رقم الهاتف <span style={{ color: '#ef4444' }}>*</span>
               </label>
-              <input id="client-phone" type="tel" className="form-input" placeholder="01012345678"
-                value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}
-                required disabled={isSaving} dir="ltr" style={{ textAlign: 'end' }} />
+              <input
+                id="client-phone"
+                type="tel"
+                className="form-input"
+                placeholder="01012345678"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                required
+                disabled={isSaving}
+                dir="ltr"
+                style={{ textAlign: 'end' }}
+              />
             </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="client-dob">
-                تاريخ الميلاد <span style={{ color: '#ef4444' }}>*</span>
+                تاريخ الميلاد (اختياري)
               </label>
-              <input id="client-dob" type="date" className="form-input"
-                value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required disabled={isSaving} />
+              <input
+                id="client-dob"
+                type="date"
+                className="form-input"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+                disabled={isSaving}
+              />
             </div>
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn-secondary" onClick={onClose} disabled={isSaving}>إلغاء</button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={onClose}
+              disabled={isSaving}
+            >
+              إلغاء
+            </button>
             <button type="submit" className="btn-add" disabled={isSaving}>
-              {isSaving ? <><div className="spinner" /><span>جاري الحفظ...</span></> : <span>{editingClient ? 'حفظ التعديلات' : 'إضافة العميل'}</span>}
+              {isSaving ? (
+                <>
+                  <div className="spinner" />
+                  <span>جاري الحفظ...</span>
+                </>
+              ) : (
+                <span>{editingClient ? 'حفظ التعديلات' : 'إضافة العميل'}</span>
+              )}
             </button>
           </div>
         </form>

@@ -24,7 +24,6 @@ import { PurchasesPage } from './pages/PurchasesPage';
 import { PayrollPage } from './pages/PayrollPage';
 import { ExpensesPage } from './pages/ExpensesPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
-import { BarcodesPage } from './pages/BarcodesPage';
 import { DuePaymentsPage } from './pages/DuePaymentsPage';
 import { AttendancePage } from './pages/AttendancePage';
 import { CashTransactionsPage } from './pages/CashTransactionsPage';
@@ -72,7 +71,6 @@ export function App() {
               <Route element={<RoleRoute allowedRoles={RECEPTION_ROLES} />}>
                 <Route path="/subscriptions" element={<SubscriptionsPage />} />
                 <Route path="/clients" element={<ClientsPage />} />
-                <Route path="/barcodes" element={<BarcodesPage />} />
                 <Route path="/attendance" element={<AttendancePage />} />
                 <Route path="/coaches" element={<CoachesPage />} />
               </Route>

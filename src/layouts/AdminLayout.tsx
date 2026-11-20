@@ -21,7 +21,6 @@ import {
   ShoppingCart,
   UserCheck,
   Landmark,
-  QrCode,
   BarChart3,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
@@ -71,12 +70,6 @@ const NAV_ITEMS: NavItem[] = [
     path: '/clients',
     label: 'العملاء',
     icon: <Users size={20} className="nav-icon" />,
-    allowedRoles: RECEPTION_ROLES,
-  },
-  {
-    path: '/barcodes',
-    label: 'الباركودات',
-    icon: <QrCode size={20} className="nav-icon" />,
     allowedRoles: RECEPTION_ROLES,
   },
   {

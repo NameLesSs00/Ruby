@@ -7,10 +7,11 @@ import {
   AlertCircle,
   QrCode,
   User,
+  Ticket,
 } from 'lucide-react';
 import type { Client } from '../../modules/clients';
 
-function calculateAge(dobString: string): number | null {
+function calculateAge(dobString: string | null): number | null {
   if (!dobString) return null;
   const birthDate = new Date(dobString);
   if (isNaN(birthDate.getTime())) return null;
@@ -34,7 +35,7 @@ export interface ClientsTableProps {
   statusMutationPending: boolean;
   onEdit: (client: Client) => void;
   onToggleStatus: (id: number, isActive: boolean) => void;
-  onBarcode: (client: Client) => void;
+  onViewSubscriptions: (client: Client) => void;
   onPageChange: (page: number) => void;
 }
 
@@ -49,7 +50,7 @@ export const ClientsTable = ({
   statusMutationPending,
   onEdit,
   onToggleStatus,
-  onBarcode,
+  onViewSubscriptions,
   onPageChange,
 }: ClientsTableProps) => {
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
@@ -59,7 +60,7 @@ export const ClientsTable = ({
       <table className="data-table">
         <thead>
           <tr>
-            <th>كود العميل</th>
+            <th>الباركود</th>
             <th>العميل</th>
             <th>رقم الهاتف</th>
             <th>تاريخ الميلاد / السن</th>
@@ -104,32 +105,63 @@ export const ClientsTable = ({
               return (
                 <tr key={client.id}>
                   <td>
-                    <span className="client-code-badge">
-                      <QrCode size={13} color="#0284c7" />
-                      {client.clientCode}
-                    </span>
+                    {client.barcode ? (
+                      <span className="client-code-badge">
+                        <QrCode size={13} color="#0284c7" />
+                        {client.barcode}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>—</span>
+                    )}
                   </td>
                   <td>
                     <div className="coach-cell-name">
-                      <div className="coach-avatar" style={{ backgroundColor: '#f0f9ff', color: '#0284c7' }}>
+                      <div
+                        className="coach-avatar"
+                        style={{ backgroundColor: '#f0f9ff', color: '#0284c7' }}
+                      >
                         <User size={18} />
                       </div>
                       <span>{client.fullName}</span>
                     </div>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#64748b' }}>
-                      <Phone size={15} />
-                      <span dir="ltr">{client.phoneNumber}</span>
-                    </div>
+                    {client.phoneNumber ? (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          color: '#64748b',
+                        }}
+                      >
+                        <Phone size={15} />
+                        <span dir="ltr">{client.phoneNumber}</span>
+                      </div>
+                    ) : (
+                      <span style={{ color: '#94a3b8' }}>—</span>
+                    )}
                   </td>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#64748b' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        color: '#64748b',
+                      }}
+                    >
                       <Calendar size={15} />
                       <span>
                         {client.dateOfBirth ? client.dateOfBirth.split('T')[0] : '—'}
                         {age !== null && (
-                          <span style={{ fontSize: '0.8rem', color: '#94a3b8', marginInlineStart: '0.35rem' }}>
+                          <span
+                            style={{
+                              fontSize: '0.8rem',
+                              color: '#94a3b8',
+                              marginInlineStart: '0.35rem',
+                            }}
+                          >
                             ({age} سنة)
                           </span>
                         )}
@@ -145,11 +177,12 @@ export const ClientsTable = ({
                     <div className="table-actions" style={{ justifyContent: 'center' }}>
                       <button
                         type="button"
-                        className="btn-icon-action barcode"
-                        title="عرض وطباعة الباركود"
-                        onClick={() => onBarcode(client)}
+                        className="btn-icon-action"
+                        title="عرض اشتراكات العميل"
+                        onClick={() => onViewSubscriptions(client)}
+                        style={{ color: '#0284c7', backgroundColor: '#f0f9ff' }}
                       >
-                        <QrCode size={16} />
+                        <Ticket size={16} />
                       </button>
 
                       <button
@@ -163,7 +196,9 @@ export const ClientsTable = ({
 
                       <button
                         type="button"
-                        className={`btn-icon-action ${client.isActive ? 'toggle-active' : 'toggle-inactive'}`}
+                        className={`btn-icon-action ${
+                          client.isActive ? 'toggle-active' : 'toggle-inactive'
+                        }`}
                         title={client.isActive ? 'تعطيل الحساب' : 'تفعيل الحساب'}
                         disabled={statusMutationPending}
                         onClick={() => onToggleStatus(client.id, !client.isActive)}

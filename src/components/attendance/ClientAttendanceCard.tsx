@@ -4,14 +4,25 @@ import {
   RotateCcw,
   User,
   Ticket,
+  QrCode,
 } from 'lucide-react';
+import type { Subscription } from '../../modules/subscriptions';
 import {
-  type ClientWithEligibleSubscriptions,
-  type EligibleSubscription,
-} from '../../modules/clients';
+  subscriptionTypeLabel,
+  subscriptionStatusLabel,
+  subscriptionStatusBadgeClass,
+} from '../../modules/subscriptions';
+
+export interface ClientAttendanceData {
+  clientId: number;
+  fullName: string;
+  barcode: string | null;
+  phoneNumber?: string | null;
+  subscriptions: Subscription[];
+}
 
 interface ClientAttendanceCardProps {
-  clientData: ClientWithEligibleSubscriptions;
+  clientData: ClientAttendanceData;
   selectedSubId: number | null;
   onSelectSubId: (id: number) => void;
   notes: string;
@@ -31,7 +42,9 @@ export const ClientAttendanceCard = ({
   isPending,
   onReset,
 }: ClientAttendanceCardProps) => {
-  const eligibleSubs: EligibleSubscription[] = clientData.eligibleSubscriptions || [];
+  const allSubs = clientData.subscriptions || [];
+  const activeSubs = allSubs.filter((s) => s.status === 'Active');
+  const inactiveSubs = allSubs.filter((s) => s.status !== 'Active');
 
   return (
     <div
@@ -47,21 +60,55 @@ export const ClientAttendanceCard = ({
       }}
     >
       {/* Header info */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '1px solid #f1f5f9',
+          paddingBottom: '0.75rem',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <div style={{ width: 42, height: 42, borderRadius: '50%', backgroundColor: '#f0f9ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: '50%',
+              backgroundColor: '#f0f9ff',
+              color: '#0284c7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             <User size={20} />
           </div>
           <div>
             <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d1527' }}>
               {clientData.fullName}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 999, backgroundColor: '#f1f5f9', color: '#475569' }}>
-                {clientData.clientCode}
-              </span>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginTop: '0.2rem',
+                flexWrap: 'wrap',
+              }}
+            >
+              {clientData.barcode ? (
+                <span className="client-code-badge">
+                  <QrCode size={13} color="#0284c7" />
+                  {clientData.barcode}
+                </span>
+              ) : (
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>بدون باركود</span>
+              )}
               <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                معرف المشترك #{clientData.clientId}
+                معرف العميل #{clientData.clientId}
               </span>
             </div>
           </div>
@@ -70,7 +117,13 @@ export const ClientAttendanceCard = ({
         <button
           type="button"
           className="btn-secondary"
-          style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+          style={{
+            padding: '0.35rem 0.65rem',
+            fontSize: '0.78rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.3rem',
+          }}
           onClick={onReset}
         >
           <RotateCcw size={13} />
@@ -78,13 +131,13 @@ export const ClientAttendanceCard = ({
         </button>
       </div>
 
-      {/* Subscriptions section */}
+      {/* Active Subscriptions section (Selectable for Attendance) */}
       <div>
         <label className="form-label required" style={{ marginBottom: '0.4rem' }}>
-          اختر الاشتراك لتسجيل الحصة
+          اختر الاشتراك النشط لتسجيل الحصة
         </label>
 
-        {eligibleSubs.length === 0 ? (
+        {activeSubs.length === 0 ? (
           <div
             style={{
               padding: '0.9rem',
@@ -99,16 +152,18 @@ export const ClientAttendanceCard = ({
             }}
           >
             <AlertCircle size={18} />
-            <span>لا توجد اشتراكات نشطة أو صالحة للحضور مسجلة لهذا المشترك</span>
+            <span>لا توجد اشتراكات نشطة صالحة لتسجيل الحضور لهذا العميل</span>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {eligibleSubs.map((sub) => {
-              const isSelected = selectedSubId === sub.subscriptionId;
+            {activeSubs.map((sub) => {
+              const isSelected = selectedSubId === sub.id;
+              const remainingSessions = Math.max(0, (sub.totalSessions || 0) - (sub.usedSessions || 0));
+
               return (
                 <div
-                  key={sub.subscriptionId}
-                  onClick={() => onSelectSubId(sub.subscriptionId)}
+                  key={sub.id}
+                  onClick={() => onSelectSubId(sub.id)}
                   style={{
                     padding: '0.85rem 1rem',
                     borderRadius: 'var(--radius-sm)',
@@ -125,10 +180,11 @@ export const ClientAttendanceCard = ({
                     <Ticket size={18} color={isSelected ? '#ea580c' : '#64748b'} />
                     <div>
                       <div style={{ fontWeight: 800, color: '#0d1527', fontSize: '0.9rem' }}>
-                        اشتراك #{sub.subscriptionId} — {sub.subscriptionType}
+                        اشتراك #{sub.id} — {subscriptionTypeLabel(sub.subscriptionType)}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.15rem' }}>
-                        الصلاحية: {sub.startDate} إلى {sub.endDate}
+                        الصلاحية: {sub.startDate ? sub.startDate.slice(0, 10) : '—'} إلى{' '}
+                        {sub.endDate ? sub.endDate.slice(0, 10) : '—'}
                       </div>
                     </div>
                   </div>
@@ -138,10 +194,10 @@ export const ClientAttendanceCard = ({
                       style={{
                         fontSize: '0.82rem',
                         fontWeight: 800,
-                        color: sub.remainingSessions > 0 ? '#059669' : '#dc2626',
+                        color: remainingSessions > 0 ? '#059669' : '#dc2626',
                       }}
                     >
-                      {sub.remainingSessions} حصة متبقية
+                      {remainingSessions} حصة متبقية
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
                       المستخدم: {sub.usedSessions} من أصل {sub.totalSessions}
@@ -153,6 +209,37 @@ export const ClientAttendanceCard = ({
           </div>
         )}
       </div>
+
+      {/* Non-active subscriptions summary (informative) */}
+      {inactiveSubs.length > 0 && (
+        <div style={{ marginTop: '0.25rem' }}>
+          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+            اشتراكات سابقة / غير نشطة ({inactiveSubs.length}):
+          </span>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+            {inactiveSubs.map((s) => (
+              <span
+                key={s.id}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '4px',
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}
+              >
+                <span>#{s.id} {subscriptionTypeLabel(s.subscriptionType)}</span>
+                <span className={`status-badge ${subscriptionStatusBadgeClass(s.status)}`} style={{ padding: '0 4px', fontSize: '0.68rem' }}>
+                  {subscriptionStatusLabel(s.status)}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Notes input */}
       <div className="form-group" style={{ margin: 0 }}>
@@ -174,7 +261,7 @@ export const ClientAttendanceCard = ({
         className="btn-primary"
         style={{ padding: '0.75rem', fontSize: '0.95rem', gap: '0.5rem' }}
         onClick={onConfirmCheckIn}
-        disabled={isPending || eligibleSubs.length === 0 || !selectedSubId}
+        disabled={isPending || activeSubs.length === 0 || !selectedSubId}
       >
         <UserCheck size={18} />
         <span>{isPending ? 'جاري تسجيل الحضور...' : 'تأكيد تسجيل الحضور الآن'}</span>
@@ -182,4 +269,3 @@ export const ClientAttendanceCard = ({
     </div>
   );
 };
-

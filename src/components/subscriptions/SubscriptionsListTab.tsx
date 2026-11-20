@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CreditCard, Coins, CheckCircle } from 'lucide-react';
+import { CreditCard, Coins, CheckCircle, QrCode } from 'lucide-react';
 import {
   subscriptionsApi,
   subscriptionKeys,
@@ -8,7 +8,7 @@ import {
   type SubscriptionStatus,
   type PaymentStatus,
 } from '../../modules/subscriptions';
-import { clientsApi } from '../../modules/clients';
+import { clientsApi, clientKeys } from '../../modules/clients';
 import { SubscriptionsTable } from './SubscriptionsTable';
 import { PaginationBar } from '../ui/PaginationBar';
 import {
@@ -38,12 +38,41 @@ export const SubscriptionsListTab = ({
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [filterClient, setFilterClient] = useState<SelectOption | null>(null);
+  const [barcodeQuery, setBarcodeQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<SubscriptionStatus | ''>('');
   const [filterPaymentStatus, setFilterPaymentStatus] = useState<PaymentStatus | ''>('');
 
   const filterClientId = filterClient ? filterClient.id : undefined;
+  const activeBarcode = barcodeQuery.trim();
 
-  const { data, isLoading, isError } = useQuery({
+  // If a barcode is entered, fetch via client subscriptions endpoint
+  const {
+    data: barcodeData,
+    isLoading: isBarcodeLoading,
+    isError: isBarcodeError,
+  } = useQuery({
+    queryKey: clientKeys.subscriptions({
+      barcode: activeBarcode,
+      subscriptionStatus: filterStatus || undefined,
+      page,
+      pageSize,
+    }),
+    queryFn: () =>
+      clientsApi.getSubscriptions({
+        barcode: activeBarcode,
+        subscriptionStatus: filterStatus || undefined,
+        page,
+        pageSize,
+      }),
+    enabled: Boolean(activeBarcode),
+  });
+
+  // Standard subscriptions query when not filtering by barcode
+  const {
+    data: standardData,
+    isLoading: isStandardLoading,
+    isError: isStandardError,
+  } = useQuery({
     queryKey: subscriptionKeys.list({
       page,
       pageSize,
@@ -59,7 +88,12 @@ export const SubscriptionsListTab = ({
         status: filterStatus || undefined,
         paymentStatus: filterPaymentStatus || undefined,
       }),
+    enabled: !activeBarcode,
   });
+
+  const data = activeBarcode ? barcodeData : standardData;
+  const isLoading = activeBarcode ? isBarcodeLoading : isStandardLoading;
+  const isError = activeBarcode ? isBarcodeError : isStandardError;
 
   const subscriptions = data?.items || [];
   const totalCount = data?.totalCount || 0;
@@ -86,15 +120,18 @@ export const SubscriptionsListTab = ({
     return (res.items || []).map((c) => ({
       id: c.id,
       label: c.fullName,
-      subLabel: `هاتف: ${c.phoneNumber}`,
-      tag: c.clientCode ? `كود: ${c.clientCode}` : undefined,
+      subLabel: c.phoneNumber ? `هاتف: ${c.phoneNumber}` : undefined,
+      tag: c.barcode ? `باركود: ${c.barcode}` : undefined,
     }));
   };
 
-  const hasActiveFilters = Boolean(filterClient || filterStatus || filterPaymentStatus);
+  const hasActiveFilters = Boolean(
+    filterClient || barcodeQuery || filterStatus || filterPaymentStatus
+  );
 
   const resetFilters = () => {
     setFilterClient(null);
+    setBarcodeQuery('');
     setFilterStatus('');
     setFilterPaymentStatus('');
     setPage(1);
@@ -218,16 +255,46 @@ export const SubscriptionsListTab = ({
       {/* Filters Toolbar */}
       <div className="view-toolbar" style={{ flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
+          {/* Barcode Search / Scan Input */}
+          <div style={{ position: 'relative', minWidth: 200, maxWidth: 260, flex: 1 }}>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="البحث بالباركود..."
+              value={barcodeQuery}
+              onChange={(e) => {
+                setBarcodeQuery(e.target.value);
+                if (e.target.value) setFilterClient(null);
+                setPage(1);
+              }}
+              dir="ltr"
+              style={{ textAlign: 'start', paddingInlineEnd: '2.4rem' }}
+            />
+            <QrCode
+              size={16}
+              style={{
+                position: 'absolute',
+                insetInlineEnd: '0.75rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#94a3b8',
+                pointerEvents: 'none',
+              }}
+            />
+          </div>
+
           <AsyncSearchableSelect
             placeholder="تصفية حسب العميل (الاسم أو الهاتف)..."
             selectedItem={filterClient}
             onChange={(c) => {
               setFilterClient(c);
+              if (c) setBarcodeQuery('');
               setPage(1);
             }}
             loadOptions={loadFilterClients}
+            disabled={Boolean(activeBarcode)}
             className=""
-            style={{ minWidth: 260, maxWidth: 360, margin: 0, flex: 1 }}
+            style={{ minWidth: 240, maxWidth: 340, margin: 0, flex: 1 }}
           />
 
           <select

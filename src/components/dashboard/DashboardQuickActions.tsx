@@ -87,7 +87,7 @@ const QUICK_ACTIONS: QuickActionItem[] = [
   {
     id: 'clients',
     title: 'تسجيل مشترك جديد',
-    subtitle: 'إضافة سباح جديد وإصدار الباركود الخاص به',
+    subtitle: 'إضافة سباح جديد وإدخال باركود العضوية',
     path: '/clients',
     icon: <Users size={22} />,
     bgLight: '#f0fdfa',
