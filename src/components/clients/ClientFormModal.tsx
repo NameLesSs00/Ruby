@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, QrCode } from 'lucide-react';
+import { X } from 'lucide-react';
 import {
   clientsApi,
   clientKeys,
@@ -136,29 +136,18 @@ export const ClientFormModal = ({ isOpen, editingClient, onClose }: ClientFormMo
               <label className="form-label" htmlFor="client-barcode">
                 الباركود (كود العضوية) <span style={{ color: '#ef4444' }}>*</span>
               </label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <input
-                  id="client-barcode"
-                  type="text"
-                  className="form-input"
-                  placeholder="مثال: CL-3456789 أو مرر القارئ"
-                  value={barcode}
-                  onChange={(e) => setBarcode(e.target.value)}
-                  required
-                  disabled={isSaving}
-                  dir="ltr"
-                  style={{ textAlign: 'start', paddingInlineEnd: '2.5rem' }}
-                />
-                <QrCode
-                  size={18}
-                  style={{
-                    position: 'absolute',
-                    insetInlineEnd: '0.75rem',
-                    color: '#94a3b8',
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
+              <input
+                id="client-barcode"
+                type="text"
+                className="form-input"
+                placeholder="مثال: CL-3456789 أو مرر القارئ"
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
+                required
+                disabled={isSaving}
+                dir="ltr"
+                style={{ textAlign: 'start' }}
+              />
             </div>
 
             <div className="form-group">

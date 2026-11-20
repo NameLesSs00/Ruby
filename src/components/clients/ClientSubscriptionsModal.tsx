@@ -30,7 +30,6 @@ export const ClientSubscriptionsModal = ({
 
   const hasBarcode = Boolean(client?.barcode);
 
-  // If client has barcode, use the new /api/clients/subscriptions endpoint
   const barcodeQuery = useQuery({
     queryKey: clientKeys.subscriptions({
       barcode: client?.barcode || undefined,
@@ -226,7 +225,6 @@ export const ClientSubscriptionsModal = ({
                 ) : subscriptions.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="table-empty-row">
-                      <Ticket size={28} style={{ margin: '0 auto 0.4rem', opacity: 0.3 }} />
                       <span>لا توجد اشتراكات مسجلة لهذا العميل {statusFilter ? 'بهذه الحالة' : ''}</span>
                     </td>
                   </tr>
